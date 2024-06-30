@@ -23,6 +23,7 @@ class Images():
         self.play = CTkImage(Image.open('images/play.png'),  size=(20,20))
         self.restart = CTkImage(Image.open('images/restart.png'),  size=(20,20))
         self.stop = CTkImage(Image.open('images/stop.png'),  size=(20,20))
+        self.arrowDown = CTkImage(Image.open('images/arrow_down.png'),  size=(20,20))
 
 
 class DownloadingIndicatorBox():
