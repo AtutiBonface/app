@@ -10,17 +10,7 @@ from customtkinter import CTkFont
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
-    def change_btn_color(self, event, me):
-        me.configure(text_color='#3d539f', fg_color='#5b74d8')
-        
-       
-    def revert_btn_color(self, event , me, myindex):
-       
-        if self.index_of_page_opened == myindex:
-            me.configure(text_color='#3d539f', fg_color='#edeef0')
-        else:
-            me.configure(text_color='#edeef0', fg_color='#3d539f')
-
+    
     def btns_to_default(self):
         self.home_btn.configure(text_color='#edeef0', fg_color='#3d539f')
         self.downloading_btn.configure(text_color='#edeef0', fg_color='#3d539f')
@@ -87,11 +77,11 @@ class MyApp(ctk.CTk):
         self.btn_bottom = ctk.CTkFrame(self.side_nav_bar, fg_color='#3d539f', height=80, width= 150)
         
 
-        self.home_btn = ctk.CTkButton(self.side_nav_bar, command=self.open_home_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Home', hover_color='#3d539f',fg_color='#3d539f')
-        self.downloading_btn = ctk.CTkButton(self.side_nav_bar, command=self.open_downloading_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Downloading', hover_color='#3d539f',fg_color='#3d539f')
-        self.downloaded_btn = ctk.CTkButton(self.side_nav_bar, command=self.open_downloaded_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Downloaded', hover_color='#3d539f',fg_color='#3d539f')
-        self.about_btn = ctk.CTkButton(self.btn_bottom, command=self.open_about_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='About', hover_color='#3d539f',fg_color='#3d539f')
-        self.settings_btn = ctk.CTkButton(self.btn_bottom, command=self.open_settings_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Settings', hover_color='#3d539f',fg_color='#3d539f')
+        self.home_btn = ctk.CTkButton(self.side_nav_bar, command=self.open_home_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Home', hover=False,fg_color='#3d539f')
+        self.downloading_btn = ctk.CTkButton(self.side_nav_bar, command=self.open_downloading_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Downloading', hover=False,fg_color='#3d539f')
+        self.downloaded_btn = ctk.CTkButton(self.side_nav_bar, command=self.open_downloaded_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Downloaded', hover=False,fg_color='#3d539f')
+        self.about_btn = ctk.CTkButton(self.btn_bottom, command=self.open_about_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='About', hover=False,fg_color='#3d539f')
+        self.settings_btn = ctk.CTkButton(self.btn_bottom, command=self.open_settings_page, corner_radius=20,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Settings', hover=False,fg_color='#3d539f')
 
 
         self.home_btn.place(x=60, y=50)
@@ -138,32 +128,7 @@ class MyApp(ctk.CTk):
         #DownloadingIndicatorBox(self)
 
 
-        self.home_icon_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.home_btn))
-        self.downloaded_icon_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.downloaded_btn))
-        self.downloading_icon_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.downloading_btn))
-        self.about_icon_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.about_btn))
-        self.settings_icon_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.settings_btn))
-
-
-        self.home_icon_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.home_btn, 0))
-        self.downloading_icon_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.downloading_btn, 1))
-        self.downloaded_icon_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.downloaded_btn, 2))
-        self.about_icon_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.about_btn, 3))
-        self.settings_icon_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.settings_btn, 4))
-
-        self.home_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.home_btn, ))
-        self.downloaded_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.downloaded_btn))
-        self.downloading_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.downloading_btn))
-        self.about_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.about_btn))
-        self.settings_btn.bind("<Enter>", command=lambda event:self.change_btn_color(event , self.settings_btn))
-
-
-        self.home_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.home_btn , 0))
-        self.downloading_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.downloading_btn, 1))
-        self.downloaded_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.downloaded_btn, 2))
-        self.about_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.about_btn, 3))
-        self.settings_btn.bind("<Leave>", command=lambda event:self.revert_btn_color(event , self.settings_btn, 4))
-
+        
 
         self.open_home_page()
 

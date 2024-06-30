@@ -2,7 +2,7 @@ import customtkinter as ctk
 from customtkinter import CTkFont
 from customtkinter import filedialog
 from pathlib import Path
-import os, requests, threading , asyncio, aiohttp
+import os, requests, threading , asyncio, aiohttp , ssl, certifi
 from urllib.parse import urlparse
 import app_utils
 
@@ -13,6 +13,11 @@ class Home():
         
         self.selected_filename = None
         self.selected_link = None
+
+        self.timeout = aiohttp.ClientTimeout(total=None)
+        self.ssl_context = ssl.create_default_context(cafile=certifi.where())
+        self.connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
         
         self.enter_link_box = ctk.CTkFrame(parent.content_container, height=200, width=400, fg_color='#3d539f', corner_radius=20, bg_color='#edeef0')
        
@@ -129,19 +134,26 @@ class Home():
 
 
     def main(self):
-        asyncio.run(self.startDownloading())
-
-    def startDownloading(self):
         
-        if self.selected_filename and self.selected_link:
-            print("started")
-           
-            r = requests.get(self.selected_link)                
-            with open(self.selected_filename, 'wb') as f:
+        
+        asyncio.run(self.startDownloading())
+       
+       
+
+    async def startDownloading(self):
+        self.connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+        async with aiohttp.ClientSession(connector=self.connector, headers=self.headers,timeout=self.timeout) as session:
+            if self.selected_filename and self.selected_link:
+                async with session.get(self.selected_link) as resp:
+                    if resp.status == 200:
+                        with open(self.selected_filename, 'wb') as f:
                 
-                for chuck in r.iter_content(8*1042):
-                    print(1)
-                    f.write(chuck)
+                            async for chunk in resp.content.iter_chunked(16*1024):
+                                print(1)
+                                f.write(chunk)
+
+                            print("Finished!")
+            
 
                 
             
