@@ -2,13 +2,17 @@ import customtkinter as ctk
 from customtkinter import CTkFont
 from customtkinter import filedialog
 from pathlib import Path
-import os 
+import os, requests, threading , asyncio, aiohttp
 from urllib.parse import urlparse
 import app_utils
+
 class Home():
     def __init__(self, parent):
         self.xe_images = app_utils.Images()
         self.default_download_path = f"{Path.home()}\\Downloads\\Xengine"
+        
+        self.selected_filename = None
+        self.selected_link = None
         
         self.enter_link_box = ctk.CTkFrame(parent.content_container, height=200, width=400, fg_color='#3d539f', corner_radius=20, bg_color='#edeef0')
        
@@ -37,7 +41,7 @@ class Home():
         self.path_btn.pack(side='left' ,ipadx=0, ipady=0)
         self.path_label = ctk.CTkLabel(self.enter_link_box, text=self.default_download_path,height=15, font=self.font2,fg_color='#3d539f', text_color='#3d539f')
         self.path_label.place(rely=.65, relx=.5, relwidth=1,anchor='center')
-        self.start_download = ctk.CTkButton(self.enter_link_box,hover=False,command=self.startDownload,  cursor='hand2', text='Download',font=CTkFont(weight='bold', family='Helvetica', size=11), width=120, height=40, corner_radius=15, fg_color='#5b74d8')
+        self.start_download = ctk.CTkButton(self.enter_link_box,hover=False,command=self.add_task_to_downloads,  cursor='hand2', text='Download',font=CTkFont(weight='bold', family='Helvetica', size=11), width=120, height=40, corner_radius=15, fg_color='#5b74d8')
         self.start_download.pack(side='bottom' ,pady=10)
         self.enter_link_box.place(relx=.4, rely=.4, anchor='center')
         self.enter_link_box.pack_propagate(False)
@@ -85,7 +89,7 @@ class Home():
         home = Path.home()
         file_location = filedialog.askdirectory(mustexist=True,initialdir=home, title='Select Folder')
 
-    def startDownload(self):
+    def add_task_to_downloads(self):
         link = self.link_text.get()
         filename = self.filename_text.get() 
 
@@ -116,6 +120,29 @@ class Home():
                     
                     filename = os.path.basename(filename_and_path)
 
+                    self.selected_filename = filename
+                    self.selected_link = link
+
+                    my_thread = threading.Thread(target=self.main, daemon=True)
+                    my_thread.start()
+                    self.status_label.configure(text="Download started")
 
 
+    def main(self):
+        asyncio.run(self.startDownloading())
+
+    def startDownloading(self):
+        
+        if self.selected_filename and self.selected_link:
+            print("started")
+           
+            r = requests.get(self.selected_link)                
+            with open(self.selected_filename, 'wb') as f:
+                
+                for chuck in r.iter_content(8*1042):
+                    print(1)
+                    f.write(chuck)
+
+                
+            
 

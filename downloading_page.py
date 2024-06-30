@@ -157,9 +157,10 @@ class DownloadFile():
 class moreOfDownloading():
     def __init__(self, parent):
 
-      
-        self.container = ctk.CTkFrame(parent.content_container, height=80, fg_color='#3d539f',bg_color='#edeef0', corner_radius=15)
-
+        self.font11 = CTkFont(weight='bold', family='Helvetica', size=11)
+        self.container = ctk.CTkFrame(parent.content_container, width=300, height=80, fg_color='#3d539f',bg_color='#edeef0', corner_radius=15)
+        self.actions_label = ctk.CTkLabel(self.container, text="", height=10, font=self.font11, text_color='white')
+        self.actions_label.place(y=10, relx=.5, anchor='center')
         self.actions = ctk.CTkFrame(self.container, fg_color='#3d539f', bg_color='transparent', height=70)
 
         self.xe_images =app_utils.Images()
@@ -175,9 +176,28 @@ class moreOfDownloading():
         self.restart.pack(side='left', padx=10, pady=10)
         
 
-        self.actions.place(y=20, relx=.5, anchor='center')
+        self.actions.place(y=40, relx=.5, anchor='center')
 
-        self.container.place(relx=.5,relwidth=.5, rely=1, anchor='center')
+        self.container.place(relx=.5,   rely=.96, anchor='center')
+        self.container.pack_propagate(False)
+
+        self.pause.bind('<Enter>', lambda event , state='pause':self.on_actions_enter(event, state))
+        self.resume.bind('<Enter>', lambda event , state='resume':self.on_actions_enter(event, state))
+        self.restart.bind('<Enter>', lambda event , state='restart':self.on_actions_enter(event, state))
+        self.stop.bind('<Enter>', lambda event , state='stop':self.on_actions_enter(event, state))
+
+        self.pause.bind('<Leave>', self.on_actions_leave)
+        self.resume.bind('<Leave>', self.on_actions_leave)
+        self.restart.bind('<Leave>', self.on_actions_leave)
+        self.stop.bind('<Leave>', self.on_actions_leave)
+        
         
     def change_download_state(self, state):
         print(state)
+
+    def on_actions_enter(self, event, state):
+        self.actions_label.configure(text=state)
+
+    def on_actions_leave(self,event):
+        self.actions_label.configure(text='')
+        
