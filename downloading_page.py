@@ -23,7 +23,7 @@ class DownloadingPage():
     def update_ui(self, filename, size, complete, speed, file_type): 
         pass
     def propagate_file_btn(self,event):
-        self.file_btn.invoke()
+        pass
 
     def item_clicked(self , me):
        
@@ -60,19 +60,19 @@ class DownloadingPage():
         self.failed.configure(text_color="#edeef0", fg_color='#3d539f')
     def all_downloads(self):
         self.clear_btn_styles()
-        self.all_down.configure(text_color='#3d539f', fg_color='#edeef0')
+        self.all_down.configure(text_color='#3d539f', fg_color='#2C3539')
 
     def downloading_downloads(self):
         self.clear_btn_styles()
-        self.downloading.configure(text_color='#3d539f', fg_color='#edeef0')
+        self.downloading.configure(text_color='#3d539f', fg_color='#2C3539')
     def failed_downloads(self):
         self.clear_btn_styles()
-        self.failed.configure(text_color='#3d539f', fg_color='#edeef0')
+        self.failed.configure(text_color='#3d539f', fg_color='#2C3539')
 
     def __init__(self, parent):
        
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)
-        self.font12 = CTkFont(weight='normal', family='Helvetica', size=12) 
+        self.font12 = CTkFont(weight='bold', family='Helvetica', size=11) 
 
        
         self.top_container = ctk.CTkFrame(parent.content_container, fg_color='#3d539f', height=100)
@@ -90,50 +90,54 @@ class DownloadingPage():
         self.failed.pack(padx=5, pady=5,side='left')
         self.segmented_btns.pack(side='right', padx=10, pady=2)  
         self.top_container.pack(fill='x', padx=5, pady=5)
-        self.downloading_list = ctk.CTkScrollableFrame(parent.content_container, fg_color='black')
+        self.files_labels = ctk.CTkFrame(parent.content_container, fg_color='transparent', height=20)
+        self.name_label = ctk.CTkLabel(self.files_labels,text_color='white',font=self.font12, text='Name', anchor='w')
+        self.name_label.pack(side='left', padx=60)
+        self.status_label = ctk.CTkLabel(self.files_labels,text_color='white',font=self.font12, text='Status',width=70,  anchor='w')
+        self.date_label = ctk.CTkLabel(self.files_labels,text_color='white',font=self.font12, text='Date',width=60, anchor='w')
+        self.size_label = ctk.CTkLabel(self.files_labels,text_color='white',font=self.font12, text='Size', width=60, anchor='w')
+        self.size_label.pack(side='right', padx=5)
+        self.date_label.pack(side='right', padx=5)
+        self.status_label.pack(side='right', padx=5)
+
+        self.files_labels.pack(fill='x')
+        self.files_labels.pack_propagate(False)
+        self.downloading_list = ctk.CTkScrollableFrame(parent.content_container, fg_color='#2C3539')
         self.downloading_list.pack(expand=True, fill='both')
 
         self.previously_clicked_btn = None
+        
         self.all_downloads()
 
+        self.xe_images = app_utils.Images()
     
         
-         
       
-        self.file_btn = ctk.CTkButton(self.downloading_list, fg_color='#ffffff',command= lambda : self.item_clicked(self.file_btn), height=60, cursor='hand2')
-        self.download_item = ctk.CTkFrame(self.file_btn, fg_color='transparent', cursor='hand2')
-        self.canvas_box = ctk.CTkFrame(self.download_item, height=60, width=60, fg_color="#3d539f")
-        self.my_canvas = ctk.CTkCanvas(self.canvas_box, height=60, width=60, bg='#3d539f', highlightbackground='#3d539f', highlightcolor='#3d539f', insertbackground='#3d539f' )
-        self.my_canvas.place(relx=.5, rely=.5, anchor='center')
-        self.canvas_box.pack(side='left', padx=5, pady=5)
-        self.canvas_box.pack_propagate(False)
-        self.my_canvas.create_oval(5, 5 ,55, 55,width=5, outline='#5b74d8')
-        self.my_canvas.create_arc(5,5, 55, 55, start=90, extent=-self.return_arc_extent(50), width=5, outline='#edeef0', style=ctk.ARC)
-        self.my_canvas.create_text(30, 30, text=f'{50}%', fill='black',font=self.font14)
-
-        self.xe_images = app_utils.Images()
-
+        self.download_item = ctk.CTkFrame(self.downloading_list, fg_color='#353839',height=40,corner_radius=5, cursor='hand2')
+        
         self.file_type = ctk.CTkLabel(self.download_item, text='', image=self.return_file_type('Program'), fg_color='transparent')
-        self.file_type.pack(side='left')
+        self.file_type.pack(side='left', padx=10)
 
-        self.file_name = ctk.CTkLabel(self.download_item,text="No name", font=self.font14,fg_color='transparent', anchor='sw')
-        self.file_name.pack(side='top', fill='x', padx=10, pady=1)
+        self.file_name = ctk.CTkLabel(self.download_item, text_color='white',text="19818859/19818859-uhd_2732_1440_25fps.mp4", font=self.font12,fg_color='transparent', anchor='w')
+        self.file_name.pack(side='left', fill='x', expand=True, padx=10, pady=1)
+       
+        self.file_size = ctk.CTkLabel(self.download_item,text=f"10mb",text_color='white',font=self.font12, fg_color='transparent', width=60)
+        self.file_size.pack(side='right',  padx=5, pady=5)
+        self.file_download_date = ctk.CTkLabel(self.download_item,text_color='white',text=f"7/10/2022",font=self.font12, width=60,fg_color='transparent')
+        self.file_download_date.pack(side='right', padx=5, pady=5)
+        self.download_status = ctk.CTkLabel(self.download_item,text_color='white', text="pending", width=70, font=self.font12)
+        self.download_status.pack(side='right')
 
-        self.file_size = ctk.CTkLabel(self.download_item,text=f"Size : {10}",font=self.font12, fg_color='transparent', anchor='sw')
-        self.file_size.pack(side='left', fill='x',expand=True, padx=10, pady=5)
-        self.file_download_speed = ctk.CTkLabel(self.download_item,text=f"Speed : {5}",font=self.font14,fg_color='transparent', anchor='se')
-        self.file_download_speed.pack(side='left', fill='x',expand=True, padx=10, pady=5)
-
-        self.download_item.place(x=5, y=0, relwidth=.97, relheight=1.0)
+        self.download_item.pack(fill='x')
         self.download_item.pack_propagate(False)
-        self.file_btn.pack(fill='x', pady=5, padx=10)
+        
 
         self.download_item.bind('<Button-1>', command=self.propagate_file_btn)
             
         
         self.file_size.bind('<Button-1>', command=self.propagate_file_btn)
         self.file_name.bind('<Button-1>', command=self.propagate_file_btn)
-        self.file_download_speed.bind('<Button-1>', command=self.propagate_file_btn)
+        self.file_download_date.bind('<Button-1>', command=self.propagate_file_btn)
         
 
         

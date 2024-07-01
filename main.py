@@ -9,7 +9,7 @@ from customtkinter import CTkFont
 from xdm import TaskManager
 
 class MyApp(ctk.CTk):
-    ctk.set_appearance_mode('Dark')
+    ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
     
     
@@ -32,7 +32,7 @@ class MyApp(ctk.CTk):
         DownloadingPage(self)
         self.index_of_page_opened = 0
         self.btns_to_default()
-        self.home_btn.configure(text_color='#3d539f', fg_color='black')
+        self.home_btn.configure(text_color='#3d539f', fg_color='#2C3539')
         self.side_nav_bar.update()
     
     def open_downloading_page(self):
@@ -50,13 +50,13 @@ class MyApp(ctk.CTk):
         self.destroy_widgets()
         self.btns_to_default()
         self.index_of_page_opened = 3
-        self.about_btn.configure(text_color='#3d539f', fg_color='black')
+        self.about_btn.configure(text_color='#3d539f', fg_color='#2C3539')
        
     def open_settings_page(self):
         self.destroy_widgets()
         self.btns_to_default()
         self.index_of_page_opened = 4
-        self.settings_btn.configure(text_color='#3d539f', fg_color='black')
+        self.settings_btn.configure(text_color='#3d539f', fg_color='#2C3539')
       
     def __init__(self):
         super().__init__()
@@ -75,7 +75,7 @@ class MyApp(ctk.CTk):
         self.app_container.pack(expand=True, fill='both')
 
         
-        self.side_nav_bar = ctk.CTkFrame(self.app_container, width=200, fg_color='#3d539f', corner_radius=10, bg_color="#edeef0")
+        self.side_nav_bar = ctk.CTkFrame(self.app_container, width=200, fg_color='#3d539f', corner_radius=10, bg_color="#2C3539")
         self.btn_bottom = ctk.CTkFrame(self.side_nav_bar, fg_color='#3d539f', height=80, width= 150)
         
 
@@ -115,7 +115,7 @@ class MyApp(ctk.CTk):
         self.side_nav_bar.pack(fill=ctk.Y, side='left')
         self.side_nav_bar.pack_propagate(False)
 
-        self.content_container = ctk.CTkFrame(self.app_container, fg_color='#edeef0', corner_radius=0)
+        self.content_container = ctk.CTkFrame(self.app_container, fg_color='#2C3539', corner_radius=0)
         
         self.content_container.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True)
         self.search_entry = ctk.CTkEntry(self.app_container, width=200, height=30, placeholder_text="Search", corner_radius=10,border_color='#3d539f', bg_color='#edeef0')

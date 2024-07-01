@@ -13,11 +13,11 @@ class Images():
         self.aboutImg = CTkImage(Image.open('images/about.png'),  size=(25,25))
         self.folderImg = CTkImage(Image.open('images/folder.png'),  size=(25,25))
 
-        self.document_d = CTkImage(Image.open('images/document_d.png'),  size=(30,30))
-        self.program_d = CTkImage(Image.open('images/program_d.png'),  size=(30,30))
-        self.zip_d = CTkImage(Image.open('images/zip_d.png'),  size=(30,30))
-        self.music_d = CTkImage(Image.open('images/music_d.png'),  size=(30,30))
-        self.video_d = CTkImage(Image.open('images/video_d.png'),  size=(30,30))
+        self.document_d = CTkImage(Image.open('images/document_d.png'),  size=(25,25))
+        self.program_d = CTkImage(Image.open('images/program_d.png'),  size=(25,25))
+        self.zip_d = CTkImage(Image.open('images/zip_d.png'),  size=(25,25))
+        self.music_d = CTkImage(Image.open('images/music_d.png'),  size=(25,25))
+        self.video_d = CTkImage(Image.open('images/video_d.png'),  size=(25,25))
 
         self.pause = CTkImage(Image.open('images/pause.png'),  size=(20,20))
         self.play = CTkImage(Image.open('images/play.png'),  size=(20,20))
