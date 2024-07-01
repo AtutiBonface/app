@@ -13,8 +13,10 @@ class Home():
        
         self.default_download_path = f"{Path.home()}\\Downloads\\Xengine"
         self.xdm_instance = xdm_instance
+
+        self.hero_section = ctk.CTkFrame(parent.content_container, fg_color='#edeef0')
         
-        self.enter_link_box = ctk.CTkFrame(parent.content_container, height=200, width=400, fg_color='#3d539f', corner_radius=20, bg_color='#edeef0')
+        self.enter_link_box = ctk.CTkFrame(self.hero_section, height=200, width=400, fg_color='#3d539f', corner_radius=20, bg_color='#edeef0')
        
         self.font2 =CTkFont(weight='bold', family='Helvetica', size=9)
         self.font =CTkFont(weight='bold', family='Helvetica', size=11)
@@ -45,6 +47,7 @@ class Home():
         self.start_download.pack(side='bottom' ,pady=10)
         self.enter_link_box.place(relx=.4, rely=.4, anchor='center')
         self.enter_link_box.pack_propagate(False)
+        self.hero_section.pack(expand=True, fill='both')
         self.link_entry.bind('<KeyRelease>', self.getInputValue)
 
         
