@@ -1,16 +1,19 @@
 import customtkinter as ctk
-import home_page
+from home_page import Home
 import app_utils
-import downloading_page
-import downloaded_page
+from downloading_page import DownloadingPage
+from downloaded_page import Downloadedpage
 import about_page
-import settings_page
+import settings_page, threading, asyncio
 from customtkinter import CTkFont
+from xdm import TaskManager
 
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
     
+    
+       
     def btns_to_default(self):
         self.home_btn.configure(text_color='#edeef0', fg_color='#3d539f')
         self.downloading_btn.configure(text_color='#edeef0', fg_color='#3d539f')
@@ -27,7 +30,7 @@ class MyApp(ctk.CTk):
     ## pages lauching
     def open_home_page(self):
         self.destroy_widgets()
-        home_page.Home(self)
+        Home(self , self.xdm_class)
         self.index_of_page_opened = 0
         self.btns_to_default()
         self.home_btn.configure(text_color='#3d539f', fg_color='#edeef0')
@@ -36,14 +39,14 @@ class MyApp(ctk.CTk):
     def open_downloading_page(self):
         self.destroy_widgets()
         self.btns_to_default()
-        downloading_page.DownloadingPage(self)
+        DownloadingPage(self)
         self.index_of_page_opened = 1      
         self.downloading_btn.configure(text_color='#3d539f', fg_color='#edeef0')
         
     def open_downloaded_page(self):
         self.destroy_widgets()
         self.btns_to_default()
-        downloaded_page.Downloadedpage(self)
+        Downloadedpage(self)
         self.index_of_page_opened = 2
         self.downloaded_btn.configure(text_color='#3d539f', fg_color='#edeef0')
     def open_about_page(self):
@@ -68,6 +71,8 @@ class MyApp(ctk.CTk):
         self.minsize(800,500)
         self.iconbitmap('xe-logos/main.ico')
         self.title('Xengine Downloader')
+        
+        
 
         self.app_container = ctk.CTkFrame(self)
         self.app_container.pack(expand=True, fill='both')
@@ -124,11 +129,9 @@ class MyApp(ctk.CTk):
 
         self.search_entry.place(y=20, relx=.5, anchor='center')
 
-        
+        self.down_page = DownloadingPage(self).update_ui
+        self.xdm_class = TaskManager(self.down_page)
         #DownloadingIndicatorBox(self)
-
-
-        
 
         self.open_home_page()
 

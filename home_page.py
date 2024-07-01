@@ -2,22 +2,17 @@ import customtkinter as ctk
 from customtkinter import CTkFont
 from customtkinter import filedialog
 from pathlib import Path
-import os, requests, threading , asyncio, aiohttp , ssl, certifi
+from asyncio import Queue
+import os, asyncio, threading
 from urllib.parse import urlparse
 import app_utils
 
 class Home():
-    def __init__(self, parent):
+    def __init__(self, parent ,xdm_instance):
         self.xe_images = app_utils.Images()
+       
         self.default_download_path = f"{Path.home()}\\Downloads\\Xengine"
-        
-        self.selected_filename = None
-        self.selected_link = None
-
-        self.timeout = aiohttp.ClientTimeout(total=None)
-        self.ssl_context = ssl.create_default_context(cafile=certifi.where())
-        self.connector = aiohttp.TCPConnector(ssl=self.ssl_context)
-        self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        self.xdm_instance = xdm_instance
         
         self.enter_link_box = ctk.CTkFrame(parent.content_container, height=200, width=400, fg_color='#3d539f', corner_radius=20, bg_color='#edeef0')
        
@@ -128,33 +123,33 @@ class Home():
                     self.selected_filename = filename
                     self.selected_link = link
 
-                    my_thread = threading.Thread(target=self.main, daemon=True)
-                    my_thread.start()
-                    self.status_label.configure(text="Download started")
 
+                    self.xdm_instance.name = 'Bonface Atuti Nyarenchi'
+                    
+                    self.status_label.configure(text="Task added")
 
-    def main(self):
+                    if self.xdm_instance.is_downloading:
+                        self.xdm_instance.addQueue((link , filename))
+
+                    else:                        
+                        self.theThread((link, filename))
+    def theThread(self, file):
+        my_thread = threading.Thread(target=lambda: self.startTask(file), daemon=True)
+        my_thread.start()
+
+    def startTask(self, file):         
         
-        
-        asyncio.run(self.startDownloading())
+        asyncio.run(self.xdm_instance.main(file))
        
-       
+                    
 
-    async def startDownloading(self):
-        self.connector = aiohttp.TCPConnector(ssl=self.ssl_context)
-        async with aiohttp.ClientSession(connector=self.connector, headers=self.headers,timeout=self.timeout) as session:
-            if self.selected_filename and self.selected_link:
-                async with session.get(self.selected_link) as resp:
-                    if resp.status == 200:
-                        with open(self.selected_filename, 'wb') as f:
-                
-                            async for chunk in resp.content.iter_chunked(16*1024):
-                                print(1)
-                                f.write(chunk)
+                    
 
-                            print("Finished!")
+   
+    
             
 
-                
+
+           
             
 

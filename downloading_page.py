@@ -3,6 +3,9 @@ from customtkinter import CTkFont
 import app_utils , downloads_tasks
 
 class DownloadingPage():
+    
+    def update_ui(self, filename, size, complete, speed, file_type):       
+        DownloadFile(self, filename, size, speed,complete,  file_type)
     def clear_btn_styles(self):
         self.all_down.configure(text_color="#edeef0", fg_color='#3d539f')
         self.downloading.configure(text_color="#edeef0", fg_color='#3d539f')
@@ -19,10 +22,11 @@ class DownloadingPage():
         self.failed.configure(text_color='#3d539f', fg_color='#edeef0')
 
     def __init__(self, parent):
+       
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)
         self.font12 = CTkFont(weight='normal', family='Helvetica', size=12) 
-        
 
+       
         self.top_container = ctk.CTkFrame(parent.content_container, fg_color='#edeef0', height=100)
         self.no_of_down_box = ctk.CTkFrame(self.top_container, fg_color='transparent')
         self.no_of_down_label = ctk.CTkLabel(self.no_of_down_box, anchor='se',fg_color='transparent',height=20, text='Maximum Downloads')
@@ -52,12 +56,13 @@ class DownloadingPage():
 
         self.previously_clicked_btn = None
 
-        tasks = downloads_tasks.DownloadingTask()
-        for task in tasks.files:
-            DownloadFile(self ,task['name'], task['size'], task['speed'], task['complete'], task['type'])
-
+    
         moreOfDownloading(parent)
         self.all_downloads()
+
+
+        
+       
        
         
 class DownloadFile():
@@ -118,7 +123,7 @@ class DownloadFile():
         self.file_name.bind('<Button-1>', command=self.propagate_file_btn)
         self.file_download_speed.bind('<Button-1>', command=self.propagate_file_btn)
 
-
+    
         #parent.files_on_list.append(self.file_btn)
 
         
@@ -191,8 +196,11 @@ class moreOfDownloading():
         self.restart.bind('<Leave>', self.on_actions_leave)
         self.stop.bind('<Leave>', self.on_actions_leave)
         
+
+        
         
     def change_download_state(self, state):
+       
         print(state)
 
     def on_actions_enter(self, event, state):
