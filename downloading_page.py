@@ -75,13 +75,13 @@ class DownloadingPage():
         self.font12 = CTkFont(weight='normal', family='Helvetica', size=12) 
 
        
-        self.top_container = ctk.CTkFrame(parent.content_container, fg_color='#edeef0', height=100)
-        self.no_of_down_box = ctk.CTkFrame(self.top_container, fg_color='transparent')
+        self.top_container = ctk.CTkFrame(parent.content_container, fg_color='#3d539f', height=100)
+        self.no_of_down_box = ctk.CTkFrame(self.top_container, fg_color='red')
         self.segmented_btns = ctk.CTkFrame(self.top_container,width=150,  fg_color="#3d539f", corner_radius=10)
         
-        self.all_down = ctk.CTkButton(self.segmented_btns, font=self.font14,corner_radius=20,command=self.all_downloads,text='All',width=50, height=30, hover=False,fg_color='#3d539f')
-        self.downloading = ctk.CTkButton(self.segmented_btns, font=self.font14,corner_radius=20,command=self.downloading_downloads,text='Downloading',width=60, height=30, hover=False,fg_color='#3d539f')
-        self.failed = ctk.CTkButton(self.segmented_btns, font=self.font14,corner_radius=20,command=self.failed_downloads,text='Failed',width=50, height=30, hover=False,fg_color='#3d539f')
+        self.all_down = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.all_downloads,text='All',width=50, height=30, hover=False,fg_color='#3d539f')
+        self.downloading = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.downloading_downloads,text='Complete',width=60, height=30, hover=False,fg_color='#3d539f')
+        self.failed = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.failed_downloads,text='Incomplete',width=50, height=30, hover=False,fg_color='#3d539f')
 
         self.all_down.pack(padx=5, pady=5,side='left')
 
@@ -89,8 +89,8 @@ class DownloadingPage():
 
         self.failed.pack(padx=5, pady=5,side='left')
         self.segmented_btns.pack(side='right', padx=10, pady=2)  
-        self.top_container.pack(fill='x')
-        self.downloading_list = ctk.CTkScrollableFrame(parent.content_container, fg_color='#edeef0')
+        self.top_container.pack(fill='x', padx=5, pady=5)
+        self.downloading_list = ctk.CTkScrollableFrame(parent.content_container, fg_color='black')
         self.downloading_list.pack(expand=True, fill='both')
 
         self.previously_clicked_btn = None
