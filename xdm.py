@@ -3,15 +3,12 @@ from asyncio import Queue
 from downloading_page import DownloadingPage
 
 class TaskManager():
-    def __init__(self, update_ui_callback) -> None:
+    def __init__(self) -> None:
             
            
             self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
             self.name = ''
             self.links_and_filenames = Queue()
-
-            self.update_ui_callback = update_ui_callback
-
             self.ui_files = []
 
             self.is_downloading = False
@@ -90,7 +87,7 @@ class TaskManager():
 
                             speed = self.returnSpeed(new_speed)
                             
-                            self.update_ui_callback(filename, size, complete, speed, file_type)
+                            print(filename, size, complete, speed, file_type)
                     new_speed = 0
                     print("Finished !")
                         

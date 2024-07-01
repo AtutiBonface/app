@@ -39,7 +39,7 @@ class MyApp(ctk.CTk):
     def open_downloading_page(self):
         self.destroy_widgets()
         self.btns_to_default()
-        DownloadingPage(self)
+        #DownloadingPage(self)
         self.index_of_page_opened = 1      
         self.downloading_btn.configure(text_color='#3d539f', fg_color='#edeef0')
         
@@ -129,8 +129,8 @@ class MyApp(ctk.CTk):
 
         self.search_entry.place(y=20, relx=.5, anchor='center')
 
-        self.down_page = DownloadingPage(self).update_ui
-        self.xdm_class = TaskManager(self.down_page)
+        
+        self.xdm_class = TaskManager()
         #DownloadingIndicatorBox(self)
 
         self.open_home_page()
