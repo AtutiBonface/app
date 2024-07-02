@@ -13,17 +13,26 @@ class Images():
         self.aboutImg = CTkImage(Image.open('images/about.png'),  size=(25,25))
         self.folderImg = CTkImage(Image.open('images/folder.png'),  size=(25,25))
 
-        self.document_d = CTkImage(Image.open('images/document_d.png'),  size=(25,25))
-        self.program_d = CTkImage(Image.open('images/program_d.png'),  size=(25,25))
-        self.zip_d = CTkImage(Image.open('images/zip_d.png'),  size=(25,25))
-        self.music_d = CTkImage(Image.open('images/music_d.png'),  size=(25,25))
-        self.video_d = CTkImage(Image.open('images/video_d.png'),  size=(25,25))
+        self.document_d = CTkImage(Image.open('images/document_d.png'),  size=(20,20))
+        self.program_d = CTkImage(Image.open('images/program_d.png'),  size=(20,20))
+        self.zip_d = CTkImage(Image.open('images/zip_d.png'),  size=(20,20))
+        self.music_d = CTkImage(Image.open('images/music_d.png'),  size=(20,20))
+        self.video_d = CTkImage(Image.open('images/video_d.png'),  size=(20,20))
+
+        self.document_d2 = CTkImage(Image.open('images/document_d2.png'),  size=(20,20))
+        self.program_d2 = CTkImage(Image.open('images/program_d2.png'),  size=(20,20))
+        self.zip_d2 = CTkImage(Image.open('images/zip_d2.png'),  size=(20,20))
+        self.music_d2 = CTkImage(Image.open('images/music_d2.png'),  size=(20,20))
+        self.video_d2 = CTkImage(Image.open('images/video_d2.png'),  size=(20,20))
 
         self.pause = CTkImage(Image.open('images/pause.png'),  size=(20,20))
         self.play = CTkImage(Image.open('images/play.png'),  size=(20,20))
         self.restart = CTkImage(Image.open('images/restart.png'),  size=(20,20))
         self.stop = CTkImage(Image.open('images/stop.png'),  size=(20,20))
         self.arrowDown = CTkImage(Image.open('images/arrow_down.png'),  size=(20,20))
+        self.open = CTkImage(Image.open('images/open.png'),  size=(20,20))
+        self.delete = CTkImage(Image.open('images/trash.png'),  size=(20,20))
+        self.link = CTkImage(Image.open('images/link.png'),  size=(15,15))
 
 
 class DownloadingIndicatorBox():
@@ -43,3 +52,10 @@ class DownloadingIndicatorBox():
         self.my_canvas.create_arc(5,5, 55, 55, start=90, extent=-320, width=5, outline='#5b74d8', style=ctk.ARC)
         self.my_canvas.create_text(30, 30, text='90%', fill='white',font=CTkFont(weight='bold', family='Helvetica', size=14))
 
+class Colors():
+    def __init__(self) -> None: 
+        x = "#48D1CC"       
+        self.primary_color = '#1b1c1e'
+        self.secondary_color = "#232428"
+        self.text_color = '#edeef0'
+        self.utils_color = x
