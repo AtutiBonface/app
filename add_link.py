@@ -13,7 +13,8 @@ import app_utils
       
 
 class LinkBox():
-    
+    def self_destruct(self):
+        self.top_level.destroy()
             
     def __init__(self, parent, xdm_instance):
         self.xe_images = app_utils.Images()
@@ -21,9 +22,18 @@ class LinkBox():
         self.default_download_path = f"{Path.home()}\\Downloads\\Xengine"
         self.colors = Colors()        
         
+        self.top_level = ctk.CTkToplevel(parent)
+        self.top_level.overrideredirect(True)
+        self.top_level.attributes('-topmost', True)
+        width = self.top_level.winfo_screenwidth()
+        height = self.top_level.winfo_screenheight()
+        half_w = int((width/2))
+        half_h = int((height/2))
+        self.top_level.geometry(f'+{half_w}+{half_h}')
+      
         
-        self.enter_link_box = ctk.CTkFrame(parent.content_container, height=180, width=360, fg_color=self.colors.utils_color, corner_radius=10, bg_color='transparent')
-       
+        self.enter_link_box = ctk.CTkFrame(self.top_level, height=180, width=360, fg_color=self.colors.utils_color, corner_radius=5, bg_color='transparent')
+
         self.font2 =CTkFont(weight='bold', family='Helvetica', size=9)
         self.font =CTkFont(weight='bold', family='Helvetica', size=11)
         self.address_label = ctk.CTkLabel(self.enter_link_box,text_color=self.colors.text_color,  font=self.font,text='Address').place(y=45, x=20)
@@ -37,12 +47,12 @@ class LinkBox():
         self.pos = .45
         self.pos2 = 0
 
-       
-
+        self.close = ctk.CTkButton(self.enter_link_box,text='',corner_radius=2,command=self.self_destruct, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close )
+        self.close.place(x=350, y=10,anchor='ne' )
         self.link_entry = ctk.CTkEntry(self.enter_link_box, height=30, textvariable=self.link_text,font=CTkFont(weight='bold', family='Helvetica', size=10), border_width=0, corner_radius=5, placeholder_text='insert link')
         self.link_entry.pack(pady=5, fill='x', padx=70)
         self.directory_box = ctk.CTkFrame(self.enter_link_box, fg_color='transparent')
-        self.filename_entry = ctk.CTkEntry(self.directory_box, border_width=0, textvariable=self.filename_text,font=CTkFont(weight='bold', family='Helvetica', size=10), placeholder_text='file name', height=25)
+        self.filename_entry = ctk.CTkEntry(self.directory_box, border_width=0, textvariable=self.filename_text,font=CTkFont(weight='bold', family='Helvetica', size=10), placeholder_text='file name', height=25, corner_radius=5)
         self.filename_entry.pack(side='left', fill='x')
         self.change_folder_btn = ctk.CTkButton(self.directory_box, text='',command=self.openDownloadToFolder, cursor='hand2', image=self.xe_images.folderImg, fg_color=self.colors.utils_color,width=20, height=25, hover=False)
         self.change_folder_btn.pack(side='left')
@@ -50,11 +60,11 @@ class LinkBox():
         self.path_btn = ctk.CTkLabel(self.directory_box, text='', image=self.xe_images.arrowDown,fg_color=self.colors.utils_color,cursor='hand2', width=18, height=25,)
         self.path_btn.pack(side='left' ,ipadx=0, ipady=0)
         self.path_label = ctk.CTkLabel(self.enter_link_box, text=self.default_download_path,height=15, font=self.font2,fg_color=self.colors.utils_color, text_color=self.colors.utils_color)
-        self.path_label.place(rely=.65, relx=.5, relwidth=1,anchor='center')
-        self.start_download = ctk.CTkButton(self.enter_link_box,hover=False,command=self.add_task_to_downloads,  cursor='hand2', text='Download',font=CTkFont(weight='bold', family='Helvetica', size=11), width=120, height=40, corner_radius=10, fg_color=self.colors.secondary_color)
+        self.path_label.place(rely=.65, relx=.5, relwidth=.9,anchor='center')
+        self.start_download = ctk.CTkButton(self.enter_link_box,hover=False,command=self.add_task_to_downloads,  cursor='hand2', text='Download',font=CTkFont(weight='bold', family='Helvetica', size=11), width=120, height=40, corner_radius=5, fg_color=self.colors.secondary_color)
         self.start_download.pack(side='bottom' ,pady=10)
 
-        self.enter_link_box.place(relx=.4, rely=.45, anchor='center')
+        self.enter_link_box.pack()
         
         self.enter_link_box.pack_propagate(False)
         
@@ -130,39 +140,20 @@ class LinkBox():
 
                     self.selected_filename = filename
                     self.selected_link = link
-
-
                     
-                    
+                    asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((link, filename)),self.xdm_instance.loop)
+
                     if self.xdm_instance.is_downloading:
                         
-                        self.xdm_instance.addQueue((link , filename))
                         self.status_label.configure(text="Task Added!")
 
-
                     else:                        
-                        self.theThread((link, filename))
                         self.status_label.configure(text="Started Downloading")
 
 
-                    self.enter_link_box.after(2000, self.self_destruct)
-
-    def self_destruct(self):
-        if self.pos > 0: 
-            self.enter_link_box.place(relx=.4, rely=self.pos, anchor='center')
-            self.pos -= 0.05
-            self.enter_link_box.after(10, self.self_destruct)
-        else:
-            self.enter_link_box.destroy()  
-    def theThread(self, file):
-        my_thread = threading.Thread(target=lambda: self.startTask(file), daemon=True)
-        my_thread.start()
-
-    def startTask(self, file):         
-        
-        asyncio.run(self.xdm_instance.main(file))
-       
                     
+
+             
 
                     
 

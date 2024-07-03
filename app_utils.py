@@ -12,6 +12,8 @@ class Images():
         self.downloadImg = CTkImage(Image.open('images/download.png'),  size=(25,25))
         self.aboutImg = CTkImage(Image.open('images/about.png'),  size=(25,25))
         self.folderImg = CTkImage(Image.open('images/folder.png'),  size=(25,25))
+        self.close = CTkImage(Image.open('images/close.png'),  size=(15,15))
+        
 
         self.document_d = CTkImage(Image.open('images/document_d.png'),  size=(20,20))
         self.program_d = CTkImage(Image.open('images/program_d.png'),  size=(20,20))

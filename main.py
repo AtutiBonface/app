@@ -139,7 +139,24 @@ class MyApp(ctk.CTk):
         self.index_of_page_opened = 0 # 0 home // 1 downloadin // 2 downloaded // 3 about // 4 settings
         self.about_frame = None
         self.settings_frame = None
-        self.geometry('800x500+300+100')
+      
+        window_width = 800
+        window_height = 500
+
+        self.geometry(f'{window_width}x{window_height}')
+        self.update_idletasks()
+
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+
+        self.previously_clicked_file = None
+
+
+        half_w = int((screen_width / 2) - (window_width / 2))
+        half_h = int((screen_height / 2) - (window_height / 2))
+
+        self.geometry(f'{window_width}x{window_height}+{half_w}+{half_h}')
+
         self.minsize(800,500)
         self.iconbitmap('xe-logos/main.ico')
         self.title('Xengine Downloader')
@@ -155,11 +172,11 @@ class MyApp(ctk.CTk):
         self.app_container.pack(expand=True, fill='both')
         
         
-        self.side_nav_bar = ctk.CTkFrame(self.app_container, width=200, fg_color=self.colors.primary_color, corner_radius=10, bg_color=self.colors.secondary_color)
+        self.side_nav_bar = ctk.CTkFrame(self.app_container, width=200, fg_color=self.colors.primary_color, corner_radius=5, bg_color=self.colors.secondary_color)
         self.btn_bottom = ctk.CTkFrame(self.side_nav_bar, fg_color=self.colors.primary_color, height=80, width= 150)
         self.font12 = CTkFont(weight='bold', size=10, family='Arial')
 
-        self.home_btn = ctk.CTkButton(self.side_nav_bar, command=self.open_home_page, corner_radius=10,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Home', hover=False,fg_color=self.colors.utils_color)
+        self.home_btn = ctk.CTkButton(self.side_nav_bar, command=self.open_home_page, corner_radius=5,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Home', hover=False,fg_color=self.colors.utils_color)
         self.filter_files_box = ctk.CTkFrame(self.side_nav_bar, height=300, width=130, fg_color='transparent')
         self.video_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Videos',anchor='w', font=self.font12,text_color=self.colors.text_color,fg_color='transparent', image=self.xe_images.video_d, compound='left')
         self.video_files.pack(fill='x',  pady=2)
@@ -174,8 +191,8 @@ class MyApp(ctk.CTk):
 
         self.filter_files_box.place(x=60, y=90)
         self.filter_files_box.pack_propagate(False)
-        self.about_btn = ctk.CTkButton(self.btn_bottom, command=self.open_about_page, corner_radius=10,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Help and support', hover=False,fg_color=self.colors.secondary_color)
-        self.settings_btn = ctk.CTkButton(self.btn_bottom, command=self.open_settings_page, corner_radius=10,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Settings', hover=False,fg_color=self.colors.secondary_color)
+        self.about_btn = ctk.CTkButton(self.btn_bottom, command=self.open_about_page, corner_radius=5,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Help and support', hover=False,fg_color=self.colors.secondary_color)
+        self.settings_btn = ctk.CTkButton(self.btn_bottom, command=self.open_settings_page, corner_radius=5,font=CTkFont(family="Helvetica", size=11, weight="bold"), width=120,height=30, text='Settings', hover=False,fg_color=self.colors.secondary_color)
 
 
         self.home_btn.place(x=60, y=50)
@@ -183,7 +200,7 @@ class MyApp(ctk.CTk):
         self.about_btn.pack(pady=5)
         self.settings_btn.pack(pady=5)
 
-        self.side_bar_icon_btns = ctk.CTkFrame(self.side_nav_bar,fg_color=self.colors.secondary_color, width=50, corner_radius=10)
+        self.side_bar_icon_btns = ctk.CTkFrame(self.side_nav_bar,fg_color=self.colors.secondary_color, width=50, corner_radius=5)
         self.side_bar_icon_btns.pack_propagate(False)
 
         self.icon_btn_bottom = ctk.CTkFrame(self.side_bar_icon_btns, height=80,width=50, fg_color=self.colors.secondary_color)
@@ -211,12 +228,12 @@ class MyApp(ctk.CTk):
         self.content_container = ctk.CTkFrame(self.app_container, fg_color=self.colors.secondary_color, corner_radius=0)
         
         self.content_container.pack(side=ctk.LEFT, fill=ctk.BOTH, expand=True)
-        self.search_entry = ctk.CTkEntry(self.app_container, width=200, height=30, placeholder_text="Search", corner_radius=10,border_color='#3d539f', bg_color=self.colors.text_color)
+        self.search_entry = ctk.CTkEntry(self.app_container, width=200, height=30, placeholder_text="Search", corner_radius=5,border_color='#3d539f', bg_color=self.colors.text_color)
 
 
         self.top_container = ctk.CTkFrame(self.content_container, fg_color=self.colors.primary_color, height=100)
         self.add_link = ctk.CTkButton(self.top_container,image=self.xe_images.link,command=self.open_link_box, text='New',hover=False,cursor='hand2',font=self.font12,fg_color=self.colors.secondary_color,  width=50).pack(padx=10, side='left')
-        self.segmented_btns = ctk.CTkFrame(self.top_container,width=150,  fg_color="transparent", corner_radius=10)
+        self.segmented_btns = ctk.CTkFrame(self.top_container,width=150,  fg_color="transparent", corner_radius=5)
         
         self.all_down = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.all_downloads,text='All',width=50, height=30, hover=False,fg_color=self.colors.secondary_color)
         self.downloading = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.downloading_downloads,text='Complete',width=60, height=30, hover=False,fg_color=self.colors.secondary_color)
@@ -255,27 +272,32 @@ class MyApp(ctk.CTk):
         
         
         self.xdm_class = TaskManager(self)
-        File(self, 'home.png', '10M', 100, 1.5, 'Zip')
+        File(self, 'home.png', '6M', 100, 1.5, 'Zip')
+        File(self, 'rihanna-work-ft-drake-.mp4', '27M', 100, 1, 'Video')
+        File(self, 'with-you-ft-ChrisBrown', '3.5M', 100, 1.2, 'Music')
+        File(self, 'file.html', '300Kb', 100, 1.8, 'Document')
+        File(self, 'Xengine Downloader.exe', '57M', 100, 0.8, 'Program')
         moreOfDownloading(self)
         
         
 
 class moreOfDownloading():
     def __init__(self, parent):
+        self.parent = parent
         self.colors = Colors()
         self.font11 = CTkFont(weight='bold', family='Helvetica', size=11)
-        self.container = ctk.CTkFrame(parent.content_container, height=50, fg_color=self.colors.primary_color,bg_color='transparent', corner_radius=10)
+        self.container = ctk.CTkFrame(parent.content_container, height=50, fg_color=self.colors.primary_color,bg_color='transparent', corner_radius=5)
         self.actions_label = ctk.CTkLabel(self.container, text="", anchor='w', fg_color='transparent', height=10, font=self.font11, text_color=self.colors.text_color)
         self.actions_label.pack(padx=10, fill='x', expand=True)
         self.actions = ctk.CTkFrame(self.container, fg_color=self.colors.primary_color, bg_color='transparent')
 
         self.xe_images =app_utils.Images()
-        self.open = ctk.CTkButton(self.actions, text='',command=lambda state='Open':self.change_download_state(state), image=self.xe_images.open, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.delete = ctk.CTkButton(self.actions, text='',command=lambda state='Delete':self.change_download_state(state), image=self.xe_images.delete, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.pause = ctk.CTkButton(self.actions, text='',command=lambda state='Pause':self.change_download_state(state), image=self.xe_images.pause, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.resume = ctk.CTkButton(self.actions, text='',command=lambda state='Resume':self.change_download_state(state), image=self.xe_images.play, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.restart = ctk.CTkButton(self.actions, text='',command=lambda state='Restart':self.change_download_state(state), image=self.xe_images.restart, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.stop = ctk.CTkButton(self.actions, text='',command=lambda state='Stop':self.change_download_state(state), image=self.xe_images.stop, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.open = ctk.CTkButton(self.actions, text='',command=lambda state='Open':self.change_download_state(state, self.open), image=self.xe_images.open, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.delete = ctk.CTkButton(self.actions, text='',command=lambda state='Delete':self.change_download_state(state, self.delete), image=self.xe_images.delete, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.pause = ctk.CTkButton(self.actions, text='',command=lambda state='Pause':self.change_download_state(state, self.pause), image=self.xe_images.pause, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.resume = ctk.CTkButton(self.actions, text='',command=lambda state='Resume':self.change_download_state(state, self.resume), image=self.xe_images.play, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.restart = ctk.CTkButton(self.actions, text='',command=lambda state='Restart':self.change_download_state(state, self.restart), image=self.xe_images.restart, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.stop = ctk.CTkButton(self.actions, text='',command=lambda state='Stop':self.change_download_state(state, self.stop), image=self.xe_images.stop, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
 
         self.open.pack(side='left', padx=10, pady=10)
         self.delete.pack(side='left', padx=10, pady=10)
@@ -296,28 +318,63 @@ class moreOfDownloading():
         self.restart.bind('<Enter>', lambda event , state='Restart':self.on_actions_enter(event, state))
         self.stop.bind('<Enter>', lambda event , state='Stop':self.on_actions_enter(event, state))
 
-        self.open.bind('<Leave>', self.on_actions_leave)
-        self.delete.bind('<Leave>', self.on_actions_leave)
-        self.pause.bind('<Leave>', self.on_actions_leave)
-        self.resume.bind('<Leave>', self.on_actions_leave)
-        self.restart.bind('<Leave>', self.on_actions_leave)
-        self.stop.bind('<Leave>', self.on_actions_leave)
+        self.open.bind('<Leave>', lambda event:self.on_actions_leave(event, self.open))
+        self.delete.bind('<Leave>', lambda event:self.on_actions_leave(event, self.delete))
+        self.pause.bind('<Leave>', lambda event:self.on_actions_leave(event, self.pause))
+        self.resume.bind('<Leave>', lambda event:self.on_actions_leave(event, self.resume))
+        self.restart.bind('<Leave>', lambda event:self.on_actions_leave(event, self.restart))
+        self.stop.bind('<Leave>', lambda event:self.on_actions_leave(event, self.stop))
         
 
         
         
-    def change_download_state(self, state):
-       
-        print(state)
+    def change_download_state(self, state,me):
+        if self.parent.previously_clicked_file:       
+            print(state)
+            me.configure(fg_color = self.colors.utils_color)
+        else:
+            print("Nothing has been selected")
 
     def on_actions_enter(self, event, state):
         self.actions_label.configure(text=state)
 
-    def on_actions_leave(self,event):
+    def on_actions_leave(self,event, me):
         self.actions_label.configure(text='')
+        me.configure(fg_color=self.colors.secondary_color)
 class File():
+   
+    
+
+    def propagate_file_btn(self,event, parent):
+        if parent.previously_clicked_file:
+            for i in parent.previously_clicked_file:  
+                try:
+                    i.configure(fg_color=parent.colors.secondary_color, text_color=parent.colors.text_color)
+                except:
+                    i.configure(fg_color=parent.colors.secondary_color)
+        
+
+        self.download_item.configure(fg_color=parent.colors.utils_color)
+        self.file_type.configure(fg_color=parent.colors.utils_color)
+        self.download_status.configure(fg_color=parent.colors.utils_color, text_color=parent.colors.secondary_color)
+        self.file_size.configure(fg_color=parent.colors.utils_color, text_color=parent.colors.secondary_color)
+        self.file_name.configure(fg_color=parent.colors.utils_color, text_color=parent.colors.secondary_color)
+        self.file_download_date.configure(fg_color=parent.colors.utils_color, text_color=parent.colors.secondary_color)
+
+        ## adding clic
+        parent.previously_clicked_file = [
+            self.download_item,
+            self.file_name,
+            self.file_size,
+            self.file_type,
+            self.file_download_date,
+            self.download_status,
+        ]
+
+
     def __init__(self, parent, filename, size, complete, speed, file_type) -> None:
-        self.download_item = ctk.CTkFrame(parent.downloading_list, fg_color='transparent',height=40,corner_radius=5, cursor='hand2')
+        self.task_name = filename
+        self.download_item = ctk.CTkFrame(parent.downloading_list, fg_color=parent.colors.secondary_color,height=40,corner_radius=5, cursor='hand2')
         
         self.file_type = ctk.CTkLabel(self.download_item, text='', image=parent.return_file_type(file_type), fg_color='transparent')
         self.file_type.pack(side='left', padx=10)
@@ -336,11 +393,11 @@ class File():
         self.download_item.pack_propagate(False)
         
 
-        self.download_item.bind('<Button-1>', command=parent.propagate_file_btn)
-            
-        
-        self.file_size.bind('<Button-1>', command=parent.propagate_file_btn)
-        self.file_name.bind('<Button-1>', command=parent.propagate_file_btn)
-        self.file_download_date.bind('<Button-1>', command=parent.propagate_file_btn)
+        self.download_item.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
+        self.file_type.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
+        self.download_status.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
+        self.file_size.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
+        self.file_name.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
+        self.file_download_date.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
 app = MyApp()
 app.mainloop()
