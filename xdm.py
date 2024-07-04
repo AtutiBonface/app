@@ -34,7 +34,7 @@ class TaskManager():
             speed = int(speed * 1000)
             return f'{speed} bytes/s'
     async def addQueue(self, file):
-        await self.links_and_filenames.put_nowait(file)
+        self.links_and_filenames.put_nowait(file)
         
 
     ## this adds index to file name if file exists

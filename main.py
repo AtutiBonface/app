@@ -33,29 +33,7 @@ class MyApp(ctk.CTk):
         return round(extent, 1)
     
     
-    def propagate_file_btn(self,event):
-        pass
-
-    def item_clicked(self , me):
-       
-        if self.previously_clicked_btn:
-            for i in self.previously_clicked_btn:  
-                try:
-                    i.configure(fg_color=self.colors.text_color, text_color='black', bg_color=self.colors.text_color)
-                except:
-                    i.configure(fg_color=self.colors.text_color)
-        
-        new_color = 'transparent'
-        self.download_item.configure(fg_color=new_color, bg_color=new_color)
-        self.file_name.configure(fg_color=new_color, text_color=self.colors.text_color)
-        self.file_size.configure(fg_color=new_color, text_color=self.colors.text_color)
-
-        self.previously_clicked_btn = [
-            self.download_item,
-            self.file_name,
-            self.file_size,
-        ]
-
+    
 
     
     def clear_btn_styles(self):
