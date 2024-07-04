@@ -2,14 +2,15 @@ import customtkinter as ctk
 from customtkinter import CTkFont
 from app_utils import Colors
 import clipboard
-
+from customtkinter import filedialog
+from pathlib import Path
 
 
 
 class Settings(ctk.CTkFrame):
     def return_setting_value(self, setting):
         
-        with open('config.txt', 'r', encoding='utf-8') as f:
+        with open('config.txt', 'r') as f:
             for line in f.readlines():
                 if line.startswith(setting):
                     new_line = str(line.split('<x:e>')[1].strip())
@@ -22,16 +23,27 @@ class Settings(ctk.CTkFrame):
         with open('config.txt', 'r') as file:
             lines = file.readlines()
 
-        with open('config.txt', 'w', encoding='utf-8') as f:
+        with open('config.txt', 'w') as f:
             for line in lines:
                 if line.startswith(setting):
                     f.write(f'{setting} <x:e> {value}\n')
                 else:
                     f.write(line)
                 
-    def compoBoxValue(self):       
-        self.change_settings_state(' max_concurrent_downloads', 0)
-
+    def onOptionSelection(self, event):
+          
+        value = self.max_value_selected.get() 
+        self.change_settings_state('max_concurrent_downloads', value)
+        
+    def changePathFn(self):
+        home = Path().home()
+        path = filedialog.askdirectory(initialdir=home, mustexist=True, title='Select default folder')
+        if path:
+            self.change_settings_state('defaut_download_path', path)
+            self.access_download_path.set(path)
+        else:
+            pass
+        
     def __init__(self, parent):
         super().__init__(parent) 
         self.colors = Colors()
@@ -40,29 +52,32 @@ class Settings(ctk.CTkFrame):
         self.auto_resume_downl = ctk.StringVar()
         self.overide_fi_exis = ctk.StringVar()
         self.max_value_selected = ctk.StringVar()
+        self.access_download_path = ctk.StringVar()
         
         self.max_value_selected.set(f'{self.return_setting_value('max_concurrent_downloads')}')
         self.overide_fi_exis.set(f'{self.return_setting_value('overide_file')}')
         self.auto_resume_downl.set(f'{self.return_setting_value('auto_resume_download')}')
         self.download_c_w.set(f'{self.return_setting_value('show_download_complete_window')}')
         self.proges_w.set(f'{self.return_setting_value('show_progress_window')}')
+        self.access_download_path.set(f'{self.return_setting_value('defaut_download_path')}')
+
         
         
         self.configure(fg_color='transparent')  
         self.font14_bold = CTkFont(family='Helvetica', weight='bold', size=14)
-        self.font11_bold = CTkFont(family='Helvetica', weight='bold', size=11, slant='italic')
+        self.font11_bold = CTkFont(family='Helvetica', weight='normal', size=11, slant='italic')
         self.font11_bold2 = CTkFont(family='Helvetica', weight='bold', size=11)
 
         self.general_s = ctk.CTkFrame(self, fg_color='transparent', width=500)
         self.title = ctk.CTkLabel(self.general_s, text='General Settings',text_color=self.colors.text_color, anchor='w' ,font=self.font14_bold)
-        self.title.pack(padx=20,pady=15, fill='x')
+        self.title.pack(padx=20,pady=10, fill='x')
         # path to where files are downloaded to 
         self.defaut_download_box = ctk.CTkFrame(self.general_s,fg_color='transparent')
         self.defaut_download_title = ctk.CTkLabel(self.defaut_download_box,text='Default download path',anchor='w', text_color=self.colors.text_color, font=self.font11_bold)
         self.defaut_download_title.pack(pady=5,fill='x', side='top')
-        self.path_entry = ctk.CTkEntry(self.defaut_download_box,border_width=0,width=300, corner_radius=5, height=30, state='disabled')
+        self.path_entry = ctk.CTkEntry(self.defaut_download_box,font=self.font11_bold2,border_width=0,width=300,textvariable=self.access_download_path, corner_radius=5, height=30, state='disabled')
         self.path_entry.pack(fill='x',side='left')
-        self.change_path_btn = ctk.CTkButton(self.defaut_download_box, text='change',cursor='hand2',font=self.font11_bold2,hover=False, width=50, height=30, fg_color=self.colors.primary_color, corner_radius=5)
+        self.change_path_btn = ctk.CTkButton(self.defaut_download_box,command=self.changePathFn, text='change',cursor='hand2',font=self.font11_bold2,hover=False, width=50, height=32, fg_color=self.colors.utils_color, corner_radius=5)
         self.change_path_btn.pack(side='left', padx=5)
         self.defaut_download_box.pack(fill='x', padx=15)
         ##
@@ -71,9 +86,9 @@ class Settings(ctk.CTkFrame):
         #max downloads
         self.select_max_simult_download_t = ctk.CTkLabel(self.other_s,height=40, text='Maximum concurrent downloads',anchor='w', text_color=self.colors.text_color, font=self.font11_bold)
         self.select_max_simult_download_t.pack(fill='x',)
-        self.values = ["1", "3", "5", "10", "20", "\u221E"]
+        self.values = ["1", "3", "5", "10", "20", "100"]
         
-        self.option_box = ctk.CTkComboBox(self.other_s,border_width=0,button_color=self.colors.utils_color, width=70,corner_radius=5,dropdown_text_color=self.colors.text_color,dropdown_hover_color=self.colors.utils_color, height=30, dropdown_fg_color=self.colors.secondary_color, values=self.values, variable=self.max_value_selected)
+        self.option_box = ctk.CTkOptionMenu(self.other_s,button_color=self.colors.utils_color, width=70,corner_radius=5,dropdown_text_color=self.colors.text_color,dropdown_hover_color=self.colors.utils_color, height=30, dropdown_fg_color=self.colors.secondary_color,command=self.onOptionSelection ,fg_color=self.colors.primary_color, values=self.values, variable=self.max_value_selected)
         self.option_box.place(relx=.6, y=20, anchor='w')
 
         #other settings on auto-resume-download , overide file, show windows for process, and download complete
@@ -107,7 +122,7 @@ class Settings(ctk.CTkFrame):
         self.link.pack(fill='x', padx=20, pady=10)
         ##
         #button to copy extensions link to the system clipboard
-        self.copy_link = ctk.CTkButton(self.browser_monitor_s,hover=False,command=lambda :self.copy_to_clipboard(self.extensions_link), font=self.font11_bold2,text='copy link', width=70, corner_radius=5, fg_color=self.colors.primary_color)
+        self.copy_link = ctk.CTkButton(self.browser_monitor_s,hover=False,command=lambda :self.copy_to_clipboard(self.extensions_link), font=self.font11_bold2,text='copy link', width=70, corner_radius=5, fg_color=self.colors.utils_color)
         self.copy_link.pack(side='left', pady=10, padx=15)
         self.browser_monitor_s.pack(fill='x')
         
@@ -118,10 +133,12 @@ class Settings(ctk.CTkFrame):
        
         self.general_s.pack_propagate(False)
 
+        ## call function onComboSelection when value is selected in the Combobox
+        
         
 
     def copy_to_clipboard(self, link):
-        self.copy_link.configure(fg_color=self.colors.utils_color, text='copied')
+        self.copy_link.configure(fg_color=self.colors.primary_color, text='copied')
         
         ## pasting extension link to system clipboard
         clipboard.copy(link)
@@ -133,6 +150,6 @@ class Settings(ctk.CTkFrame):
 
     #reverting the color of button once mouse leaves the button
     def return_btn_to_default(self,event, btn):
-        btn.configure(fg_color=self.colors.primary_color)   
+        btn.configure(fg_color=self.colors.utils_color)   
         
         

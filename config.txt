@@ -2,12 +2,12 @@
 
 *Note* Do not write or edit on this file because your Xengine Downloader will be faulty! Very faulty!
 
-defaut_download_path <x:e> c:/Users/Bonface/Downloads/Xengine
-max_concurrent_downloads <x:e> 10
+defaut_download_path <x:e> C:/Users/Bonface/Desktop
+max_concurrent_downloads <x:e> 100
 auto_resume_download <x:e> false
 overide_file <x:e> false
 show_progress_window <x:e> true
 show_download_complete_window <x:e> true
 
-extensions_link <x:e> https://xengine.imaginekenya.site/xe-extensions hellow
+extensions_link <x:e> https://xengine.imaginekenya.site/xe-extensions
 VERSION <x:e> Xengine 1.0.1

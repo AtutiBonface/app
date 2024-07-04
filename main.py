@@ -66,44 +66,51 @@ class MyApp(ctk.CTk):
 
     ## pages lauching
     def open_home_page(self):
-        if self.about_frame:
-            self.about_frame.destroy()
+        self.about_page_opened = False
+        self.settings_page_opened = False
+        if self.home_page_opened:
+            if self.about_frame:
+                self.about_frame.destroy()
+            else:
+                self.about_frame = None
 
-        if self.settings_frame:
-            self.settings_frame.destroy()
+            if self.settings_frame:
+                self.settings_frame.destroy()
 
+            else:
+                self.about_frame = None
         
-        self.about_frame = About(self.content_container)
-        self.index_of_page_opened = 0
-        self.btns_to_default()
-        self.home_btn.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
-        self.side_nav_bar.update()
+            self.btns_to_default()
+            self.home_btn.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
+            self.side_nav_bar.update()
     
      
         
    
     def open_about_page(self):
-        
-        if self.settings_frame:
-            self.settings_frame.destroy()
-        
-        
-        
-        self.btns_to_default()
-        self.index_of_page_opened = 3
-        self.about_btn.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
-        self.about_frame = About(self.content_container)
-        self.about_frame.place(relwidth=1, relheight=1)
+         ## prevents opening page twice
+        self.settings_page_opened = False
+        if not self.about_page_opened:
+            if self.settings_frame:
+                self.settings_frame.destroy()
+            
+            self.btns_to_default()
+            self.about_btn.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
+            self.about_frame = About(self.content_container)
+            self.about_frame.place(relwidth=1, relheight=1)
+            self.about_page_opened = True
     def open_settings_page(self):
-        if self.about_frame:
-            self.about_frame.destroy()
-        
-        self.btns_to_default()
-        self.index_of_page_opened = 4
-        self.settings_btn.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
-        self.settings_frame = Settings(self.content_container)
-        self.settings_frame.place(relwidth=1, relheight=1)
-
+        ## prevents opening page twice
+        self.about_page_opened = False
+        if not self.settings_page_opened:
+            if self.about_frame:
+                self.about_frame.destroy()
+            
+            self.btns_to_default()
+            self.settings_btn.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
+            self.settings_frame = Settings(self.content_container)
+            self.settings_frame.place(relwidth=1, relheight=1)
+            self.settings_page_opened = True
 
     def open_link_box(self):
         LinkBox(self, self.xdm_class)
@@ -117,6 +124,10 @@ class MyApp(ctk.CTk):
         self.index_of_page_opened = 0 # 0 home // 1 downloadin // 2 downloaded // 3 about // 4 settings
         self.about_frame = None
         self.settings_frame = None
+
+        self.about_page_opened = False
+        self.settings_page_opened = False
+        self.home_page_opened = True
       
         window_width = 800
         window_height = 500
@@ -148,6 +159,8 @@ class MyApp(ctk.CTk):
 
         self.app_container = ctk.CTkFrame(self)
         self.app_container.pack(expand=True, fill='both')
+
+
         
         
         self.side_nav_bar = ctk.CTkFrame(self.app_container, width=200, fg_color=self.colors.primary_color, corner_radius=5, bg_color=self.colors.secondary_color)
