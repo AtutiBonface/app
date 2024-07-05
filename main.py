@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import app_utils
-from app_utils import Colors
+from app_utils import Colors, ConfigFilesHandler
 from add_link import LinkBox
 from customtkinter import CTkFont
 from xdm import TaskManager
@@ -10,21 +10,35 @@ from settings import Settings
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
+    def add_file_downloading(self, filename, extention):
+        print('This has been called')
+        
 
     def update_ui(self, filename, size, complete, speed, file_type):
-        print(filename, size, complete, speed, file_type)
+        
+        print(speed)
 
-    def return_file_type(self, file_t):
-        if file_t == 'Video':
+    def return_file_type(self, extension):
+        extension = extension.lower()# converting all extensions to lower case
+        video_extensions = {'.mp4', '.mkv', '.flv', '.avi', '.mov', '.wmv', '.webm'}
+        audio_extensions = {'.mp3', '.wav', '.aac', '.flac', '.ogg', '.m4a', '.wma'}
+        document_extensions = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.odt', '.ods', '.odp','.html', '.htm'}
+        program_extensions = {'.exe', '.msi', '.bat', '.sh', '.py', '.jar', '.bin'}
+        compressed_extensions = {'.zip', '.rar', '.7z', '.tar', '.gz', '.bz2'}
+        image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.svg', '.webp'}
+
+        if extension in video_extensions:
             return self.xe_images.video_d2
-        elif file_t == 'Document':
+        elif extension in document_extensions:
             return self.xe_images.document_d2
-        elif file_t == 'Program' or file_t == 'Application':
+        elif extension in program_extensions:
             return self.xe_images.program_d2
-        elif file_t == 'Audio' or file_t == 'Music':
+        elif extension in audio_extensions:
             return self.xe_images.music_d2
-        elif file_t == 'Zip' or file_t == 'Compressed':
+        elif extension in compressed_extensions:
             return self.xe_images.zip_d2
+        elif extension in image_extensions:
+            return self.xe_images.image_d2
         else: return self.xe_images.document_d2
     def return_arc_extent(self,percentage):
 
@@ -119,7 +133,7 @@ class MyApp(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-        
+
 
         self.index_of_page_opened = 0 # 0 home // 1 downloadin // 2 downloaded // 3 about // 4 settings
         self.about_frame = None
@@ -258,19 +272,16 @@ class MyApp(ctk.CTk):
         self.downloading_list.pack(expand=True, fill='both')
 
         self.previously_clicked_btn = None
-        
+        self.running_tasks = {}
        
         
         
         self.xdm_class = TaskManager(self)
-        File(self, 'home.png', '6M', 100, 1.5, 'Zip')
-        File(self, 'rihanna-work-ft-drake-.mp4', '27M', 100, 1, 'Video')
-        File(self, 'with-you-ft-ChrisBrown', '3.5M', 100, 1.2, 'Music')
-        File(self, 'file.html', '300Kb', 100, 1.8, 'Document')
-        File(self, 'Xengine Downloader.exe', '57M', 100, 0.8, 'Program')
+        self.file_item_instance = File(self)
         moreOfDownloading(self)
+        self.file_item_instance.add_file_to_ui('video.mp4', '--', 'waiting...', '--', '.mp4')
         
-        
+    
 
 class moreOfDownloading():
     def __init__(self, parent):
@@ -333,10 +344,8 @@ class moreOfDownloading():
         self.actions_label.configure(text='')
         me.configure(fg_color=self.colors.secondary_color)
 class File():
-   
-    
-
-    def propagate_file_btn(self,event, parent):
+    def propagate_file_btn(self,event):
+        parent = self.parent
         if parent.previously_clicked_file:
             for i in parent.previously_clicked_file:  
                 try:
@@ -361,34 +370,42 @@ class File():
             self.file_download_date,
             self.download_status,
         ]
+    def update_ui(self, size, complete):
+        self.file_size.configure(text=size)
+        self.download_status.configure(text=complete)
 
+    def __init__(self, parent) -> None:
+        self.task_name = ''
+        self.parent = parent
+        self.colors = Colors()
 
-    def __init__(self, parent, filename, size, complete, speed, file_type) -> None:
-        self.task_name = filename
-        self.download_item = ctk.CTkFrame(parent.downloading_list, fg_color=parent.colors.secondary_color,height=40,corner_radius=5, cursor='hand2')
+        self.appended_files = []
+
+    def add_file_to_ui(self, filename, size, complete, speed, file_type):
+        self.download_item = ctk.CTkFrame(self.parent.downloading_list, fg_color=self.colors.secondary_color,height=40,corner_radius=5, cursor='hand2')
         
-        self.file_type = ctk.CTkLabel(self.download_item, text='', image=parent.return_file_type(file_type), fg_color='transparent')
+        self.file_type = ctk.CTkLabel(self.download_item, text='', image=self.parent.return_file_type(file_type), fg_color='transparent')
         self.file_type.pack(side='left', padx=10)
 
-        self.file_name = ctk.CTkLabel(self.download_item, text_color=parent.colors.text_color,text=filename, font=parent.font11,fg_color='transparent', anchor='w')
+        self.file_name = ctk.CTkLabel(self.download_item, text_color=self.colors.text_color,text=filename, font=self.parent.font11,fg_color='transparent', anchor='w')
         self.file_name.pack(side='left', fill='x', expand=True, padx=10, pady=1)
        
-        self.file_size = ctk.CTkLabel(self.download_item,text=f"{size}",text_color=parent.colors.text_color,font=parent.font12, fg_color='transparent', width=60)
+        self.file_size = ctk.CTkLabel(self.download_item,text=f"{size}",text_color=self.colors.text_color,font=self.parent.font12, fg_color='transparent', width=60)
         self.file_size.pack(side='right',  padx=5, pady=5)
-        self.file_download_date = ctk.CTkLabel(self.download_item,text_color=parent.colors.text_color,text=f"7/10/2022",font=parent.font12, width=60,fg_color='transparent')
+        self.file_download_date = ctk.CTkLabel(self.download_item,text_color=self.colors.text_color,text=f"7/10/2022",font=self.parent.font12, width=60,fg_color='transparent')
         self.file_download_date.pack(side='right', padx=5, pady=5)
-        self.download_status = ctk.CTkLabel(self.download_item,text_color=parent.colors.text_color, text=complete, width=70, font=parent.font12)
+        self.download_status = ctk.CTkLabel(self.download_item,text_color=self.colors.text_color, text=complete, width=70, font=self.parent.font12)
         self.download_status.pack(side='right')
 
         self.download_item.pack(fill='x')
         self.download_item.pack_propagate(False)
-        
 
-        self.download_item.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
-        self.file_type.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
-        self.download_status.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
-        self.file_size.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
-        self.file_name.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
-        self.file_download_date.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event, parent))
+        
+        self.download_item.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event))
+        self.file_type.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event))
+        self.download_status.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event))
+        self.file_size.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event))
+        self.file_name.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event))
+        self.file_download_date.bind('<Button-1>', command=lambda event: self.propagate_file_btn(event))
 app = MyApp()
 app.mainloop()

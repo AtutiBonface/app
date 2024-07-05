@@ -1,6 +1,8 @@
 from PIL import Image
 from customtkinter import CTkImage, CTkFont
 import customtkinter as ctk
+from pathlib import Path
+import os
 
 class Images():
     def __init__(self):
@@ -26,6 +28,7 @@ class Images():
         self.zip_d2 = CTkImage(Image.open('images/zip_d2.png'),  size=(20,20))
         self.music_d2 = CTkImage(Image.open('images/music_d2.png'),  size=(20,20))
         self.video_d2 = CTkImage(Image.open('images/video_d2.png'),  size=(20,20))
+        self.image_d2 = CTkImage(Image.open('images/image_d2.png'),  size=(20,20))
 
         self.pause = CTkImage(Image.open('images/pause.png'),  size=(20,20))
         self.play = CTkImage(Image.open('images/play.png'),  size=(20,20))
@@ -61,3 +64,46 @@ class Colors():
         self.secondary_color = "#232428"
         self.text_color = '#edeef0'
         self.utils_color = x
+
+class ConfigFilesHandler():
+    def __init__(self) -> None:
+        # writing config file to xengine folder at home folder
+
+        self.path_to_config_file = f"{Path().home()}/.xengine/config.txt"
+
+        self.settings_config = [
+        "### Settings configuration for Xengine ### \n",
+        "\n",
+        "*Note* Do not write or edit on this file because your Xengine Downloader will be faulty! Very faulty!\n",
+        "\n",
+        "defaut_download_path <x:e> C:/Users/Bonface/Downloads/Xengine \n",
+        "max_concurrent_downloads <x:e> 100 \n",
+        "auto_resume_download <x:e> false \n",
+        "overide_file <x:e> false\n",
+        "show_progress_window <x:e> true\n",
+        "show_download_complete_window <x:e> true \n",
+        "\n",
+        "extensions_link <x:e> https://xengine.imaginekenya.site/xe-extensions\n",
+        "VERSION <x:e> Xengine 1.0.1 \n"
+        ]
+
+        xengine_config_path = f"{Path().home()}/.xengine"
+        file = 'config.txt'
+
+        
+
+        try:           
+            os.makedirs(xengine_config_path)
+
+            with open(f"{xengine_config_path}/{file}", 'w') as f:
+                for line in self.settings_config:
+                    f.write(line)
+
+        except FileExistsError:
+            pass
+        except Exception as e:
+            pass
+
+
+
+

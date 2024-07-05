@@ -1,7 +1,7 @@
 import customtkinter as ctk
 from customtkinter import CTkFont
-from app_utils import Colors
-import clipboard
+from app_utils import Colors, ConfigFilesHandler
+import clipboard,os
 from customtkinter import filedialog
 from pathlib import Path
 
@@ -9,26 +9,50 @@ from pathlib import Path
 
 class Settings(ctk.CTkFrame):
     def return_setting_value(self, setting):
-        
-        with open('config.txt', 'r') as f:
-            for line in f.readlines():
-                if line.startswith(setting):
-                    new_line = str(line.split('<x:e>')[1].strip())
+        path_to_config = ConfigFilesHandler().path_to_config_file
 
-                    return new_line
-                
+        if os.path.exists(path_to_config):        
+            with open(path_to_config, 'r') as f:
+                for line in f.readlines():
+                    if line.startswith(setting):
+                        new_line = str(line.split('<x:e>')[1].strip())
+
+                        return new_line
+        else:
+            ConfigFilesHandler()
+            with open(path_to_config, 'r') as f:
+                for line in f.readlines():
+                    if line.startswith(setting):
+                        new_line = str(line.split('<x:e>')[1].strip())
+
+                        return new_line
 
     def change_settings_state(self, setting, value):
         lines = []
-        with open('config.txt', 'r') as file:
-            lines = file.readlines()
+        path_to_config = ConfigFilesHandler().path_to_config_file
 
-        with open('config.txt', 'w') as f:
-            for line in lines:
-                if line.startswith(setting):
-                    f.write(f'{setting} <x:e> {value}\n')
-                else:
-                    f.write(line)
+        if os.path.exists(path_to_config):
+            with open(path_to_config, 'r') as file:
+                lines = file.readlines()
+
+            with open(path_to_config, 'w') as f:
+                for line in lines:
+                    if line.startswith(setting):
+                        f.write(f'{setting} <x:e> {value}\n')
+                    else:
+                        f.write(line)
+        else:
+            ConfigFilesHandler()
+            with open(path_to_config, 'r') as file:
+                lines = file.readlines()
+
+            with open(path_to_config, 'w') as f:
+                for line in lines:
+                    if line.startswith(setting):
+                        f.write(f'{setting} <x:e> {value}\n')
+                    else:
+                        f.write(line)
+
                 
     def onOptionSelection(self, event):
           
@@ -41,6 +65,7 @@ class Settings(ctk.CTkFrame):
         if path:
             self.change_settings_state('defaut_download_path', path)
             self.access_download_path.set(path)
+            self.xengine_download_path_global = path
         else:
             pass
         
@@ -53,6 +78,8 @@ class Settings(ctk.CTkFrame):
         self.overide_fi_exis = ctk.StringVar()
         self.max_value_selected = ctk.StringVar()
         self.access_download_path = ctk.StringVar()
+
+        self.VERSION = f'{self.return_setting_value('VERSION')}'
         
         self.max_value_selected.set(f'{self.return_setting_value('max_concurrent_downloads')}')
         self.overide_fi_exis.set(f'{self.return_setting_value('overide_file')}')
@@ -61,13 +88,18 @@ class Settings(ctk.CTkFrame):
         self.proges_w.set(f'{self.return_setting_value('show_progress_window')}')
         self.access_download_path.set(f'{self.return_setting_value('defaut_download_path')}')
 
+        self.xengine_download_path_global = f'{self.return_setting_value('defaut_download_path')}'
+
         
         
         self.configure(fg_color='transparent')  
         self.font14_bold = CTkFont(family='Helvetica', weight='bold', size=14)
         self.font11_bold = CTkFont(family='Helvetica', weight='normal', size=11, slant='italic')
         self.font11_bold2 = CTkFont(family='Helvetica', weight='bold', size=11)
+        self.font15_bold  = CTkFont(family='Helvetica', weight='bold', size=16)
 
+        self.version_label = ctk.CTkLabel(self, text=self.VERSION, text_color=self.colors.primary_color, font=self.font15_bold)
+        self.version_label.place(relx=.8, rely=.94, anchor='nw')
         self.general_s = ctk.CTkFrame(self, fg_color='transparent', width=500)
         self.title = ctk.CTkLabel(self.general_s, text='General Settings',text_color=self.colors.text_color, anchor='w' ,font=self.font14_bold)
         self.title.pack(padx=20,pady=10, fill='x')
@@ -108,7 +140,7 @@ class Settings(ctk.CTkFrame):
         subtitle_text = 'To allow Xengine to take over downloads and'
         subtitle_text2 = 'capture streaming videos on your browser, install browser extension'
         subtitle_text3 = 'from  link below'
-        self.extensions_link = 'https://xengine.imaginekenya.site/xe-extensions'
+        self.extensions_link = f"{self.return_setting_value('extensions_link')}"
         self.browser_monitor_s = ctk.CTkFrame(self.general_s, fg_color='transparent')
         self.browser_title = ctk.CTkLabel(self.browser_monitor_s,height=15,text='Browser monitoring',text_color=self.colors.text_color, anchor='w' ,font=self.font14_bold)
         self.browser_title.pack(padx=20,pady=10, fill='x')

@@ -21,7 +21,7 @@ class LinkBox():
         self.xdm_instance = xdm_instance
         self.default_download_path = f"{Path.home()}\\Downloads\\Xengine"
         self.colors = Colors()        
-        
+        self.selected_path = None
         self.top_level = ctk.CTkToplevel(parent)
         self.top_level.overrideredirect(True)
         self.top_level.attributes('-topmost', True)
@@ -106,6 +106,10 @@ class LinkBox():
     def openDownloadToFolder(self):
         home = Path.home()
         file_location = filedialog.askdirectory(mustexist=True,initialdir=home, title='Select Folder')
+        if file_location:
+            self.selected_path = file_location
+        else:
+            self.selected_path = None
 
     def add_task_to_downloads(self):
         link = self.link_text.get()
@@ -141,14 +145,17 @@ class LinkBox():
                     self.selected_filename = filename
                     self.selected_link = link
                     
-                    asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((link, filename)),self.xdm_instance.loop)
-
+                    ## adds link filename and path if selected to a queue
+                    asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((link, filename, self.selected_path)),self.xdm_instance.loop)
+                    
                     if self.xdm_instance.is_downloading:
                         
                         self.status_label.configure(text="Task Added!")
 
                     else:                        
                         self.status_label.configure(text="Started Downloading")
+
+                    self.selected_path = None # resets path stored
 
 
                     
