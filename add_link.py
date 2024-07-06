@@ -32,15 +32,16 @@ class LinkBox():
         self.top_level.geometry(f'+{half_w}+{half_h}')
       
         
-        self.enter_link_box = ctk.CTkFrame(self.top_level, height=180, width=360, fg_color=self.colors.utils_color, corner_radius=5, bg_color='transparent')
+        self.enter_link_box = ctk.CTkFrame(self.top_level, height=210, width=360, fg_color=self.colors.utils_color, corner_radius=5, bg_color='transparent')
 
         self.font2 =CTkFont(weight='bold', family='Helvetica', size=9)
         self.font =CTkFont(weight='bold', family='Helvetica', size=11)
-        self.address_label = ctk.CTkLabel(self.enter_link_box,text_color=self.colors.text_color,  font=self.font,text='Address').place(y=45, x=20)
-        self.filename_label = ctk.CTkLabel(self.enter_link_box,text_color=self.colors.text_color, font=self.font,text='Filename').place(y=80, x=20)
-
-        self.status_label = ctk.CTkLabel(self.enter_link_box, text='', font=self.font)
-        self.status_label.pack(pady=5)
+        self.address_label = ctk.CTkLabel(self.enter_link_box,text_color=self.colors.text_color,  font=self.font,text='Address').place(y=63, x=20)
+        self.filename_label = ctk.CTkLabel(self.enter_link_box,text_color=self.colors.text_color, font=self.font,text='Filename').place(y=98, x=20)
+        self.title_bar = ctk.CTkFrame(self.enter_link_box, height=30, fg_color=self.colors.text_color, corner_radius=1)
+        self.title_bar.pack(fill='x')
+        self.status_label = ctk.CTkLabel(self.enter_link_box, text='xxx', font=self.font)
+        self.status_label.pack()
 
         self.link_text = ctk.StringVar()
         self.filename_text = ctk.StringVar()
@@ -48,7 +49,7 @@ class LinkBox():
         self.pos2 = 0
 
         self.close = ctk.CTkButton(self.enter_link_box,text='',corner_radius=2,command=self.self_destruct, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close )
-        self.close.place(x=350, y=10,anchor='ne' )
+        self.close.place(x=355, y=5,anchor='ne' )
         self.link_entry = ctk.CTkEntry(self.enter_link_box, height=30, textvariable=self.link_text,font=CTkFont(weight='bold', family='Helvetica', size=10), border_width=0, corner_radius=5, placeholder_text='insert link')
         self.link_entry.pack(pady=5, fill='x', padx=70)
         self.directory_box = ctk.CTkFrame(self.enter_link_box, fg_color='transparent')

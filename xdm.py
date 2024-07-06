@@ -84,11 +84,22 @@ class TaskManager():
                         downloaded_chuck = 0
                         start_time = time.time()
                         speed = 0
-                        size = 10
-                        complete = 50
+                        size = 0
+                        percentage = 0
                         file_type = 'Video'
-            
-                        async for chunk in resp.content.iter_chunked(8*1024):
+
+                        file_size = resp.headers.get('Content-Length', None)
+
+                        if file_size:
+                            size = int(file_size)
+                            
+                        else:
+                            if resp.headers.get('Transfer-Encoding') == 'chunked':
+                                file_size = 'unknown'
+                            else:
+                                file_size = None
+                        
+                        async for chunk in resp.content.iter_chunked(16*1024):
                             f.write(chunk)
                             unit_time = time.time() - start_time 
                             if not unit_time == 0:
@@ -97,7 +108,8 @@ class TaskManager():
                                 speed = down_in_mbs / unit_time
                                 new_speed = round(speed, 3)
                                 speed = self.returnSpeed(new_speed)
-                                self.ui_callback(filename, size, complete, speed, file_type)
+                                percentage = int((downloaded_chuck/size) * 100)
+                                self.ui_callback(filename, size,downloaded_chuck, percentage, speed)
 
                         new_speed = 0
                         print("Finished !")

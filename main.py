@@ -12,11 +12,22 @@ class MyApp(ctk.CTk):
     ctk.set_default_color_theme('blue')
     def add_file_downloading(self, filename, extention):
         print('This has been called')
-        
 
-    def update_ui(self, filename, size, complete, speed, file_type):
+    def return_size_with_units(self, filesize):
+        if filesize > (1024*1024*1024):
+            return f'{round(filesize/1000000000,2)} GB' 
         
-        print(speed)
+        elif filesize > (1024*1024):
+            return f'{round(filesize/1000000,2)} MB' 
+        
+        elif filesize > (1024):
+            return f'{round(filesize/1000,2)} Kbs' 
+        else: 
+            return f'{round(filesize,1)} bytes' 
+    def update_ui(self, filename, filesize, size_downloaded,percentage, speed):
+        size = self.return_size_with_units(filesize)
+        size_downloaded = self.return_size_with_units(size_downloaded)
+        print(f'Size: [{size_downloaded} / {size}] Percentage : {percentage} speed : {speed}')
 
     def return_file_type(self, extension):
         extension = extension.lower()# converting all extensions to lower case
