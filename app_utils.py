@@ -40,6 +40,10 @@ class Images():
         self.link = CTkImage(Image.open('images/link.png'),  size=(15,15))
 
 
+        self.close_image = CTkImage(Image.open('images/close.png'),  size=(15,15))
+        self.minimize_image = CTkImage(Image.open('images/minimize.png'),  size=(15,15))
+
+
 class DownloadingIndicatorBox():
     def __init__(self, parent):
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)

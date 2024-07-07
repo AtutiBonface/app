@@ -40,7 +40,7 @@ class LinkBox():
         self.filename_label = ctk.CTkLabel(self.enter_link_box,text_color=self.colors.text_color, font=self.font,text='Filename').place(y=98, x=20)
         self.title_bar = ctk.CTkFrame(self.enter_link_box, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
-        self.status_label = ctk.CTkLabel(self.enter_link_box, text='xxx', font=self.font)
+        self.status_label = ctk.CTkLabel(self.enter_link_box, text='', font=self.font)
         self.status_label.pack()
 
         self.link_text = ctk.StringVar()
@@ -50,10 +50,10 @@ class LinkBox():
 
         self.close = ctk.CTkButton(self.enter_link_box,text='',corner_radius=2,command=self.self_destruct, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close )
         self.close.place(x=355, y=5,anchor='ne' )
-        self.link_entry = ctk.CTkEntry(self.enter_link_box, height=30, textvariable=self.link_text,font=CTkFont(weight='bold', family='Helvetica', size=10), border_width=0, corner_radius=5, placeholder_text='insert link')
+        self.link_entry = ctk.CTkEntry(self.enter_link_box, height=30, textvariable=self.link_text,font=CTkFont(weight='bold', family='Helvetica', size=10), border_width=0, corner_radius=3, placeholder_text='insert link')
         self.link_entry.pack(pady=5, fill='x', padx=70)
         self.directory_box = ctk.CTkFrame(self.enter_link_box, fg_color='transparent')
-        self.filename_entry = ctk.CTkEntry(self.directory_box, border_width=0, textvariable=self.filename_text,font=CTkFont(weight='bold', family='Helvetica', size=10), placeholder_text='file name', height=25, corner_radius=5)
+        self.filename_entry = ctk.CTkEntry(self.directory_box, border_width=0, textvariable=self.filename_text,font=CTkFont(weight='bold', family='Helvetica', size=10), placeholder_text='file name', height=25, corner_radius=3)
         self.filename_entry.pack(side='left', fill='x')
         self.change_folder_btn = ctk.CTkButton(self.directory_box, text='',command=self.openDownloadToFolder, cursor='hand2', image=self.xe_images.folderImg, fg_color=self.colors.utils_color,width=20, height=25, hover=False)
         self.change_folder_btn.pack(side='left')
@@ -74,6 +74,17 @@ class LinkBox():
         
         self.path_btn.bind('<Enter>', self.on_enter)
         self.path_btn.bind('<Leave>', self.on_leave)
+        self.title_bar.bind('<ButtonPress-1>', self.set_mouse_pos)
+        self.title_bar.bind('<B1-Motion>', self.drag_container)
+    def drag_container(self, event):
+        x = self.top_level.winfo_pointerx() -self.top_level.x_offset
+        y = self.top_level.winfo_pointery() - self.top_level.y_offset
+
+        self.top_level.geometry(f'+{x}+{y}')
+    def set_mouse_pos(self, event):
+
+        self.top_level.x_offset = event.x
+        self.top_level.y_offset = event.y
     def on_enter(self, event):
         self.path_label.configure(fg_color=self.colors.secondary_color, text_color=self.colors.text_color)
 
