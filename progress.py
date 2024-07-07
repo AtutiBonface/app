@@ -3,8 +3,29 @@ from customtkinter import CTkFont
 from PIL import Image
 from app_utils import Colors, Images
 from customtkinter import CTkImage, CTkFont
+import os
+import subprocess
+import platform
 
-class Progressor(ctk.CTk):
+
+class Progressor():
+
+    ## opens file that finished downloading if open folder is clicked
+    def open_folder(self, path):
+        
+        system_name = platform.system()
+        # returns a system name  
+        if system_name == "Windows":
+            os.startfile(f'{path}') ## for windows
+        
+        elif system_name == "Linux":
+            subprocess.Popen(["xdg-open", path]) ## for kali linux
+
+        else:
+            pass
+
+        self.top_level.destroy()
+        
     def download_failed(self):
         for child in self.container.winfo_children():
             child.destroy()
@@ -20,6 +41,9 @@ class Progressor(ctk.CTk):
 
         self.okay_btn = ctk.CTkButton(self.container, text='close',command=self.self_close, height=40, width=100, corner_radius=5, hover=False, fg_color=self.colors.secondary_color)
         self.okay_btn.pack(side='bottom', pady=10)
+        self.title_bar.bind("<ButtonPress-1>", self.start_drag)
+        self.title_bar.bind("<B1-Motion>", self.do_drag)
+
     def download_complete(self):
         for child in self.container.winfo_children():
             child.destroy()
@@ -54,17 +78,27 @@ class Progressor(ctk.CTk):
         self.location_box.pack(fill='x',pady=10)
 
 
-        self.okay_btn = ctk.CTkButton(self.container,font=self.font12_ro, text='Open Folder',command=self.self_close, height=40, width=100, corner_radius=5, hover=False, fg_color=self.colors.secondary_color)
+        self.okay_btn = ctk.CTkButton(self.container,font=self.font12_ro, text='Open Folder',command=lambda :self.open_folder(self.location_vari.get()), height=40, width=100, corner_radius=5, hover=False, fg_color=self.colors.secondary_color)
         self.okay_btn.pack(side='bottom', pady=10)
+
+        ## used for moving window using titlebar
+        self.title_bar.bind("<ButtonPress-1>", self.start_drag)
+        self.title_bar.bind("<B1-Motion>", self.do_drag)
     def self_close(self):
-        self.destroy()
+        self.top_level.destroy()
     def self_minimize(self):
-        self.withdraw()
-    def __init__(self):
+        self.top_level.withdraw()
+    def __init__(self, parent):
         super().__init__()
         self.xe_images = Images()
         self.colors = Colors()
         
+        self.top_level = ctk.CTkToplevel(parent)
+        width = self.top_level.winfo_screenwidth()
+        height = self.top_level.winfo_screenheight()
+        half_w = int((width/2))
+        half_h = int((height/2))
+        self.top_level.geometry(f'+{half_w}+{half_h}')
        
 
         self.font_12 = CTkFont(family='Helvetica', weight='normal',size=12, slant='italic' )
@@ -75,13 +109,13 @@ class Progressor(ctk.CTk):
         self.font12_ro = CTkFont(weight='bold', family='Helvetica', size=12) 
         self.font10_ro = CTkFont(weight='bold', family='Helvetica', size=10) 
 
-        self.title("Downloading..")  # Set the window title
+          # Set the window title
          # Set the window size
-        self.configure(fg_color=self.colors.secondary_color)  # Set the background color
-        self.overrideredirect(True)
+        self.top_level.configure(fg_color=self.colors.secondary_color)  # Set the background color
+        self.top_level.overrideredirect(True)
         
         
-        self.container = ctk.CTkFrame(self, height=210, width=360, fg_color=self.colors.utils_color, corner_radius=5)
+        self.container = ctk.CTkFrame(self.top_level, height=210, width=360, fg_color=self.colors.utils_color, corner_radius=5)
         self.container.pack(fill='both', expand=True)
         self.title_bar = ctk.CTkFrame(self.container, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
@@ -123,19 +157,22 @@ class Progressor(ctk.CTk):
         self.my_canvas.create_arc(5,5, 75, 75, start=90, extent=-320, width=7, outline=self.colors.text_color, style=ctk.ARC)
         self.my_canvas.create_text(40, 40, text='90%', fill=self.colors.secondary_color,font=CTkFont(weight='bold', family='Helvetica', size=14))
 
-
+        ## used for moving window using titlebar
         self.title_bar.bind("<ButtonPress-1>", self.start_drag)
         self.title_bar.bind("<B1-Motion>", self.do_drag)
 
-        self.after(10000, self.download_failed)
+        #used to make window to be topmost
+        self.top_level.attributes('-topmost', True)
 
+        
+
+        
+    ## used for moving window using titlebar
     def start_drag(self, event):
-        self.x_offset = event.x
-        self.y_offset = event.y
+        self.top_level.x_offset = event.x
+        self.top_level.y_offset = event.y
 
     def do_drag(self, event):
-        x = self.winfo_pointerx() - self.x_offset
-        y = self.winfo_pointery() - self.y_offset
-        self.geometry(f"+{x}+{y}")
-p = Progressor()
-p.mainloop()
+        x = self.top_level.winfo_pointerx() - self.top_level.x_offset
+        y = self.top_level.winfo_pointery() - self.top_level.y_offset
+        self.top_level.geometry(f"+{x}+{y}")

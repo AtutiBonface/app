@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from customtkinter import CTkFont
 import app_utils 
+from progress import Progressor
 import customtkinter as ctk
 from customtkinter import CTkFont
 from customtkinter import filedialog
@@ -20,7 +21,8 @@ class LinkBox():
         self.xe_images = app_utils.Images()
         self.xdm_instance = xdm_instance
         self.default_download_path = f"{Path.home()}\\Downloads\\Xengine"
-        self.colors = Colors()        
+        self.colors = Colors()  
+        self.parent = parent  
         self.selected_path = None
         self.top_level = ctk.CTkToplevel(parent)
         self.top_level.overrideredirect(True)
@@ -168,6 +170,14 @@ class LinkBox():
                         self.status_label.configure(text="Started Downloading")
 
                     self.selected_path = None # resets path stored
+                    self.top_level.destroy()## once link is added the add_link is destroyed while the process toplevel is packed
+                    Progressor(self.parent)
+
+                    
+
+
+
+                    
 
 
                     

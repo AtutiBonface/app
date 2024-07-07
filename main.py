@@ -27,7 +27,7 @@ class MyApp(ctk.CTk):
     def update_ui(self, filename, filesize, size_downloaded,percentage, speed):
         size = self.return_size_with_units(filesize)
         size_downloaded = self.return_size_with_units(size_downloaded)
-        print(f'Size: [{size_downloaded} / {size}] Percentage : {percentage} speed : {speed}')
+        print(f'Name : {filename} Size: [{size_downloaded} / {size}] Percentage : {percentage} speed : {speed}')
 
     def return_file_type(self, extension):
         extension = extension.lower()# converting all extensions to lower case
