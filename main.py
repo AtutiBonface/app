@@ -1,5 +1,5 @@
 import customtkinter as ctk
-import app_utils
+import app_utils ,re, os
 from app_utils import Colors, ConfigFilesHandler
 from add_link import LinkBox
 from customtkinter import CTkFont
@@ -14,22 +14,27 @@ class MyApp(ctk.CTk):
         print('This has been called')
 
     def return_size_with_units(self, filesize):
-        if filesize > (1024*1024*1024):
-            return f'{round(filesize/1000000000,2)} GB' 
-        
-        elif filesize > (1024*1024):
-            return f'{round(filesize/1000000,2)} MB' 
-        
-        elif filesize > (1024):
-            return f'{round(filesize/1000,2)} Kbs' 
-        else: 
-            return f'{round(filesize,1)} bytes' 
+        try:
+            filesize = int(filesize)
+            if filesize > (1024*1024*1024):
+                return f'{round(filesize/1000000000,2)} GB' 
+            
+            elif filesize > (1024*1024):
+                return f'{round(filesize/1000000,2)} MB' 
+            
+            elif filesize > (1024):
+                return f'{round(filesize/1000,2)} Kbs' 
+            else: 
+                return f'{round(filesize,1)} bytes' 
+        except Exception as e:
+            return '---'
     def update_ui(self, filename, filesize, size_downloaded,percentage, speed):
         size = self.return_size_with_units(filesize)
         size_downloaded = self.return_size_with_units(size_downloaded)
         print(f'Name : {filename} Size: [{size_downloaded} / {size}] Percentage : {percentage} speed : {speed}')
 
-    def return_file_type(self, extension):
+    def return_file_type(self, filename):
+        name , extension = os.path.splitext(filename)
         extension = extension.lower()# converting all extensions to lower case
         video_extensions = {'.mp4', '.mkv', '.flv', '.avi', '.mov', '.wmv', '.webm'}
         audio_extensions = {'.mp3', '.wav', '.aac', '.flac', '.ogg', '.m4a', '.wma'}
@@ -288,9 +293,40 @@ class MyApp(ctk.CTk):
         
         
         self.xdm_class = TaskManager(self)
-        self.file_item_instance = File(self)
+        
+        self.file_in_ui()
         moreOfDownloading(self)
-        self.file_item_instance.add_file_to_ui('video.mp4', '--', 'waiting...', '--', '.mp4')
+       
+
+    def file_in_ui(self):
+        file_details = []
+
+        with open('downloading_tasks.txt', 'r') as f:
+            entry = {}
+            for line in f.readlines():
+                line.strip()
+
+                if line.startswith('<file>'):
+                    entry = {}
+                elif line.startswith('</file>'):
+                    file_details.append(entry)
+
+                else:
+                    match = re.findall(r'\s*(\S+):\s*(.+)', line)
+                    
+                    if match:
+                        key , value = match[0]
+
+                        entry[key.strip()] =  value.strip()
+
+        
+        for value in file_details: 
+            size = f'{self.return_size_with_units(value['size'])}'
+            self.file_item_instance = File(self)
+            self.file_item_instance.add_file_to_ui(value['filename'], size, value['status'], value['date-modified'])
+
+
+
         
     
 
@@ -392,10 +428,10 @@ class File():
 
         self.appended_files = []
 
-    def add_file_to_ui(self, filename, size, complete, speed, file_type):
+    def add_file_to_ui(self, filename, size, status, date):
         self.download_item = ctk.CTkFrame(self.parent.downloading_list, fg_color=self.colors.secondary_color,height=40,corner_radius=5, cursor='hand2')
         
-        self.file_type = ctk.CTkLabel(self.download_item, text='', image=self.parent.return_file_type(file_type), fg_color='transparent')
+        self.file_type = ctk.CTkLabel(self.download_item, text='', image=self.parent.return_file_type(filename), fg_color='transparent')
         self.file_type.pack(side='left', padx=10)
 
         self.file_name = ctk.CTkLabel(self.download_item, text_color=self.colors.text_color,text=filename, font=self.parent.font11,fg_color='transparent', anchor='w')
@@ -403,9 +439,9 @@ class File():
        
         self.file_size = ctk.CTkLabel(self.download_item,text=f"{size}",text_color=self.colors.text_color,font=self.parent.font12, fg_color='transparent', width=60)
         self.file_size.pack(side='right',  padx=5, pady=5)
-        self.file_download_date = ctk.CTkLabel(self.download_item,text_color=self.colors.text_color,text=f"7/10/2022",font=self.parent.font12, width=60,fg_color='transparent')
+        self.file_download_date = ctk.CTkLabel(self.download_item,text_color=self.colors.text_color,text=date,font=self.parent.font12, width=60,fg_color='transparent')
         self.file_download_date.pack(side='right', padx=5, pady=5)
-        self.download_status = ctk.CTkLabel(self.download_item,text_color=self.colors.text_color, text=complete, width=70, font=self.parent.font12)
+        self.download_status = ctk.CTkLabel(self.download_item,text_color=self.colors.text_color, text=status, width=70, font=self.parent.font12)
         self.download_status.pack(side='right')
 
         self.download_item.pack(fill='x')

@@ -1,4 +1,4 @@
-import os, asyncio,aiohttp, ssl, certifi, time, threading
+import os, asyncio,aiohttp, ssl, certifi, time, threading, re
 from asyncio import Queue
 from settings import Settings
 
@@ -22,6 +22,67 @@ class TaskManager():
             self.download_thread.start()
 
             self.is_downloading = False
+    def append_file_details_to_storage(self, filename, path, address, date):
+        if not path:
+            path = Settings(self.parent.content_container).xengine_download_path_global## the path stored in config file
+
+        file_details = [
+            "\n",
+            "<file> \n",
+            f"filename: {filename}\n",
+            "size:  ---\n",
+            "downloaded: ---\n",
+            "status: waiting...\n",
+            f"date-modified: {date}\n",
+            f"address: {address} \n",
+            f"path: {path} \n" ,
+            "</file>\n",
+            "\n",
+        ]
+
+        with open('downloading_tasks.txt', 'a') as f:
+            for line in file_details:
+                f.write(line)
+
+        print('Added!')
+
+    def update_file_details_on_storage_during_download(self, filename, size, downloaded, status, date):
+        file_details = []
+        
+        with open('downloading_tasks.txt', 'r') as f:
+            entry = {}
+            for line in f.readlines():
+                line.strip()
+                if line.startswith('<file>'):
+                    entry = {}
+                elif line.startswith('</file>'):
+                    file_details.append(entry)
+                else:
+                    match = re.findall(r'\s*(\S+):\s*(.+)', line)
+                    if match:
+                        key, value = match[0]
+                       
+                        entry[key.strip()] = value.strip()
+
+        split_name = os.path.basename(filename)
+        
+        with open('downloading_tasks.txt', 'w') as f:
+            for entry in file_details:
+                if entry.get('filename') == split_name:
+                    entry['size'] = size if size != 0 else entry.get('size', '---')
+                    entry['downloaded'] = downloaded
+                    entry['status'] = status
+                    entry['date-modified'] = date
+
+                    
+
+                f.write("<file>\n")
+                for key, value in entry.items():
+                    f.write(f"{key}: {value}\n")
+                f.write("</file>\n")
+                f.write("\n")
+
+         
     def download_task_manager(self):
         # where threads starts and asyncio couritine is started
         asyncio.set_event_loop(self.loop)
@@ -84,8 +145,11 @@ class TaskManager():
                 ## using asyncio.create-task is to be done to create new process
                 ## and appending
                 link, filename ,path= file  ##(adress , filename, path if chosen by default it checks for path set)
+
                 filename = self.validate_filename(filename, path) 
                 file = (link, filename, path)  ## assigning file newly updated values
+                name_with_no_path = os.path.basename(filename)
+                self.append_file_details_to_storage(name_with_no_path, path, link, time.strftime(r'%Y-%m-%d'))
                 tasks.append(asyncio.create_task(self.start_task(file)))
                 self.links_and_filenames.task_done()  
             if self.links_and_filenames.empty():
@@ -100,19 +164,16 @@ class TaskManager():
         self.ssl_context = ssl.create_default_context(cafile=certifi.where())
         self.connector = aiohttp.TCPConnector(ssl=self.ssl_context)
         async with aiohttp.ClientSession(connector=self.connector, headers=self.headers,timeout=self.timeout) as session:
-               
+            downloaded_chunk = 0
+            speed = 0
+            size = 0
+            percentage = 0
+            file_type = 'Video' 
             try:
                 async with session.get(link) as resp:
                     if resp.status == 200:
                         with open(filename, 'wb') as f:
-                            
-                            downloaded_chuck = 0
                             start_time = time.time()
-                            speed = 0
-                            size = 0
-                            percentage = 0
-                            file_type = 'Video'
-
                             file_size = resp.headers.get('Content-Length', None)
 
                             if file_size:
@@ -128,18 +189,24 @@ class TaskManager():
                                 f.write(chunk)
                                 unit_time = time.time() - start_time 
                                 if not unit_time == 0:
-                                    downloaded_chuck += len(chunk)
-                                    down_in_mbs = int(downloaded_chuck / (1024*1024))
+                                    downloaded_chunk += len(chunk)
+                                    down_in_mbs = int(downloaded_chunk / (1024*1024))
                                     speed = down_in_mbs / unit_time
                                     new_speed = round(speed, 3)
                                     speed = self.returnSpeed(new_speed)
-                                    percentage = round((downloaded_chuck/size) * 100,0)
-                                    self.ui_callback(filename, size,downloaded_chuck, percentage, speed)
+                                    percentage = round((downloaded_chunk/size) * 100,0)
+                                    self.update_file_details_on_storage_during_download(
+                                    filename, size, downloaded_chunk, 'downloading', time.strftime(r'%Y-%m-%d')
+                                )
 
                             new_speed = 0
-                            print("Finished !")
+                            self.update_file_details_on_storage_during_download(
+                            filename, size, size, 'completed', time.strftime(r'%Y-%m-%d')
+                        )
             except Exception as e:
                 print(e)
-                ### open download failed toplevel and say 
+                self.update_file_details_on_storage_during_download(
+                filename, size, downloaded_chunk, 'failed', time.strftime('%Y-%m-%d')
+                )
                         
-
+        
