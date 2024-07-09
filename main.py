@@ -1,5 +1,5 @@
 import customtkinter as ctk
-import app_utils ,re, os, subprocess, platform
+import app_utils ,re, os, subprocess, platform, sys
 from app_utils import Colors, ConfigFilesHandler, downloadDetailsHandler
 from add_link import LinkBox
 from customtkinter import CTkFont
@@ -133,6 +133,15 @@ class MyApp(ctk.CTk):
     def open_link_box(self):
         LinkBox(self, self.xdm_class)
 
+    def resource_path(self,relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
 
 
     def __init__(self):
@@ -165,7 +174,7 @@ class MyApp(ctk.CTk):
         self.geometry(f'{window_width}x{window_height}+{half_w}+{half_h}')
 
         self.minsize(800,500)
-        self.iconbitmap('xe-logos/main.ico')
+        self.iconbitmap(self.resource_path('xe-logos/main.ico'))
         self.title('Xengine Downloader')
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)
         self.font12 = CTkFont(weight='normal', family='Helvetica', size=12) 

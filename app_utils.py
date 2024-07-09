@@ -2,46 +2,55 @@ from PIL import Image
 from customtkinter import CTkImage, CTkFont
 import customtkinter as ctk
 from pathlib import Path
-import os
+import os, sys
 
 class Images():
+    def resource_path(self, relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
     def __init__(self):
 
 
         
-        self.homeImg = CTkImage(Image.open('images/home.png'), size=(25,25))
-        self.settingsImg = CTkImage(Image.open('images/settings.png'),  size=(25,25))
-        self.downloadImg = CTkImage(Image.open('images/download.png'),  size=(25,25))
-        self.aboutImg = CTkImage(Image.open('images/about.png'),  size=(25,25))
-        self.folderImg = CTkImage(Image.open('images/folder.png'),  size=(25,25))
-        self.close = CTkImage(Image.open('images/close.png'),  size=(15,15))
+        self.homeImg = CTkImage(Image.open(self.resource_path('images/home.png')), size=(25,25))
+        self.settingsImg = CTkImage(Image.open(self.resource_path('images/settings.png')),  size=(25,25))
+        self.downloadImg = CTkImage(Image.open(self.resource_path('images/download.png')),  size=(25,25))
+        self.aboutImg = CTkImage(Image.open(self.resource_path('images/about.png')),  size=(25,25))
+        self.folderImg = CTkImage(Image.open(self.resource_path('images/folder.png')),  size=(25,25))
+        self.close = CTkImage(Image.open(self.resource_path('images/close.png')),  size=(15,15))
         
 
-        self.document_d = CTkImage(Image.open('images/document_d.png'),  size=(20,20))
-        self.program_d = CTkImage(Image.open('images/program_d.png'),  size=(20,20))
-        self.zip_d = CTkImage(Image.open('images/zip_d.png'),  size=(20,20))
-        self.music_d = CTkImage(Image.open('images/music_d.png'),  size=(20,20))
-        self.video_d = CTkImage(Image.open('images/video_d.png'),  size=(20,20))
+        self.document_d = CTkImage(Image.open(self.resource_path('images/document_d.png')),  size=(20,20))
+        self.program_d = CTkImage(Image.open(self.resource_path('images/program_d.png')),  size=(20,20))
+        self.zip_d = CTkImage(Image.open(self.resource_path('images/zip_d.png')),  size=(20,20))
+        self.music_d = CTkImage(Image.open(self.resource_path('images/music_d.png')),  size=(20,20))
+        self.video_d = CTkImage(Image.open(self.resource_path('images/video_d.png')),  size=(20,20))
 
-        self.document_d2 = CTkImage(Image.open('images/document_d2.png'),  size=(20,20))
-        self.program_d2 = CTkImage(Image.open('images/program_d2.png'),  size=(20,20))
-        self.zip_d2 = CTkImage(Image.open('images/zip_d2.png'),  size=(20,20))
-        self.music_d2 = CTkImage(Image.open('images/music_d2.png'),  size=(20,20))
-        self.video_d2 = CTkImage(Image.open('images/video_d2.png'),  size=(20,20))
-        self.image_d2 = CTkImage(Image.open('images/image_d2.png'),  size=(20,20))
+        self.document_d2 = CTkImage(Image.open(self.resource_path('images/document_d2.png')),  size=(20,20))
+        self.program_d2 = CTkImage(Image.open(self.resource_path('images/program_d2.png')),  size=(20,20))
+        self.zip_d2 = CTkImage(Image.open(self.resource_path('images/zip_d2.png')),  size=(20,20))
+        self.music_d2 = CTkImage(Image.open(self.resource_path('images/music_d2.png')),  size=(20,20))
+        self.video_d2 = CTkImage(Image.open(self.resource_path('images/video_d2.png')),  size=(20,20))
+        self.image_d2 = CTkImage(Image.open(self.resource_path('images/image_d2.png')),  size=(20,20))
 
-        self.pause = CTkImage(Image.open('images/pause.png'),  size=(20,20))
-        self.play = CTkImage(Image.open('images/play.png'),  size=(20,20))
-        self.restart = CTkImage(Image.open('images/restart.png'),  size=(20,20))
-        self.stop = CTkImage(Image.open('images/stop.png'),  size=(20,20))
-        self.arrowDown = CTkImage(Image.open('images/arrow_down.png'),  size=(20,20))
-        self.open = CTkImage(Image.open('images/open.png'),  size=(20,20))
-        self.delete = CTkImage(Image.open('images/trash.png'),  size=(20,20))
-        self.link = CTkImage(Image.open('images/link.png'),  size=(15,15))
+        self.pause = CTkImage(Image.open(self.resource_path('images/pause.png')),  size=(20,20))
+        self.play = CTkImage(Image.open(self.resource_path('images/play.png')),  size=(20,20))
+        self.restart = CTkImage(Image.open(self.resource_path('images/restart.png')),  size=(20,20))
+        self.stop = CTkImage(Image.open(self.resource_path('images/stop.png')),  size=(20,20))
+        self.arrowDown = CTkImage(Image.open(self.resource_path('images/arrow_down.png')),  size=(20,20))
+        self.open = CTkImage(Image.open(self.resource_path('images/open.png')),  size=(20,20))
+        self.delete = CTkImage(Image.open(self.resource_path('images/trash.png')),  size=(20,20))
+        self.link = CTkImage(Image.open(self.resource_path('images/link.png')),  size=(15,15))
 
 
-        self.close_image = CTkImage(Image.open('images/close.png'),  size=(15,15))
-        self.minimize_image = CTkImage(Image.open('images/minimize.png'),  size=(15,15))
+        self.close_image = CTkImage(Image.open(self.resource_path('images/close.png')),  size=(15,15))
+        self.minimize_image = CTkImage(Image.open(self.resource_path('images/minimize.png')),  size=(15,15))
 
 
 class DownloadingIndicatorBox():
