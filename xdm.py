@@ -1,6 +1,7 @@
 import os, asyncio,aiohttp, ssl, certifi, time, threading, re
 from asyncio import Queue
 from settings import Settings
+from app_utils import downloadDetailsHandler
 
 class TaskManager():
     def __init__(self, parent) -> None:
@@ -12,10 +13,10 @@ class TaskManager():
             self.ui_files = []
             self.parent = parent
 
-            self.ui_callback = parent.update_ui
+            self.ui_callback = parent
             self.condition = asyncio.Condition() ## used to check if queue is not empty and when file is added to a queue queue has value
 
-            
+            self.path_to_download_txt_file = f'{downloadDetailsHandler().path_to_download_conf_file}/downloading.txt'
             self.loop = asyncio.new_event_loop()## creating a new loop
             self.download_thread = threading.Thread(target=self.download_task_manager, daemon=True)
             # starting a different thread to run downloads
@@ -40,7 +41,7 @@ class TaskManager():
             "\n",
         ]
 
-        with open('downloading_tasks.txt', 'a') as f:
+        with open(self.path_to_download_txt_file, 'a') as f:
             for line in file_details:
                 f.write(line)
 
@@ -49,7 +50,7 @@ class TaskManager():
     def update_file_details_on_storage_during_download(self, filename, size, downloaded, status, date):
         file_details = []
         
-        with open('downloading_tasks.txt', 'r') as f:
+        with open(self.path_to_download_txt_file, 'r') as f:
             entry = {}
             for line in f.readlines():
                 line.strip()
@@ -66,7 +67,7 @@ class TaskManager():
 
         split_name = os.path.basename(filename)
         
-        with open('downloading_tasks.txt', 'w') as f:
+        with open(self.path_to_download_txt_file, 'w') as f:
             for entry in file_details:
                 if entry.get('filename') == split_name:
                     entry['size'] = size if size != 0 else entry.get('size', '---')
@@ -196,17 +197,19 @@ class TaskManager():
                                     speed = self.returnSpeed(new_speed)
                                     percentage = round((downloaded_chunk/size) * 100,0)
                                     self.update_file_details_on_storage_during_download(
-                                    filename, size, downloaded_chunk, 'downloading', time.strftime(r'%Y-%m-%d')
-                                )
+                                    filename, size, downloaded_chunk, f'{percentage}%', time.strftime(r'%Y-%m-%d'))
+                                    
 
-                            new_speed = 0
+                            
                             self.update_file_details_on_storage_during_download(
-                            filename, size, size, 'completed', time.strftime(r'%Y-%m-%d')
-                        )
+                            filename, size, size, 'completed.', time.strftime(r'%Y-%m-%d'))
+                            
+
             except Exception as e:
-                print(e)
+                
                 self.update_file_details_on_storage_during_download(
-                filename, size, downloaded_chunk, 'failed', time.strftime('%Y-%m-%d')
+                filename, size, downloaded_chunk, 'failed!', time.strftime('%Y-%m-%d')
                 )
+                
                         
         

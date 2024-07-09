@@ -89,6 +89,7 @@ class Settings(ctk.CTkFrame):
         self.access_download_path.set(f'{self.return_setting_value('defaut_download_path')}')
 
         self.xengine_download_path_global = f'{self.return_setting_value('defaut_download_path')}'
+        
 
         
         

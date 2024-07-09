@@ -68,13 +68,23 @@ class Colors():
         self.secondary_color = "#232428"
         self.text_color = '#edeef0'
         self.utils_color = x
+class downloadDetailsHandler():
+    def __init__(self) -> None:
+        self.path_to_download_conf_file = f"{Path().home()}/.xengine/temp"
+        file = 'downloading.txt'
 
+        try:
+            os.makedirs(self.path_to_download_conf_file)
+        except Exception as e:
+            pass
+        
 class ConfigFilesHandler():
+
     def __init__(self) -> None:
         # writing config file to xengine folder at home folder
 
         self.path_to_config_file = f"{Path().home()}/.xengine/config.txt"
-
+        
         self.settings_config = [
         "### Settings configuration for Xengine ### \n",
         "\n",
@@ -94,10 +104,9 @@ class ConfigFilesHandler():
         xengine_config_path = f"{Path().home()}/.xengine"
         file = 'config.txt'
 
-        
-
         try:           
             os.makedirs(xengine_config_path)
+            
 
             with open(f"{xengine_config_path}/{file}", 'w') as f:
                 for line in self.settings_config:
@@ -107,7 +116,8 @@ class ConfigFilesHandler():
             pass
         except Exception as e:
             pass
-
+        
+       
 
 
 
