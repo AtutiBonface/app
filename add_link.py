@@ -17,6 +17,7 @@ class LinkBox():
     def self_destruct(self):
         self.top_level.destroy()
             
+    #def __init__(self, parent, xdm_instance):
     def __init__(self, parent, xdm_instance):
         self.xe_images = app_utils.Images()
         self.xdm_instance = xdm_instance
@@ -31,6 +32,7 @@ class LinkBox():
         height = self.top_level.winfo_screenheight()
         half_w = int((width/2))
         half_h = int((height/2))
+        
         self.top_level.geometry(f'+{half_w}+{half_h}')
       
         
@@ -146,8 +148,7 @@ class LinkBox():
                 initial_filename = self.filename_text.get()
                 name, extension = os.path.splitext(initial_filename)
 
-                if not extension:
-                    extension = '.html'
+                
                 if not name:
                     self.status_label.configure(text=f'No file name!', text_color='brown')
                  

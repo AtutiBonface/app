@@ -1,0 +1,38 @@
+{
+    "name": "Black Juice",
+    "manifest_version": 3,
+    "description": "Black juice extention",
+    "version": "1.0",
+    "action":{
+        "default_popup":"popup.html",
+        "default_icon":{
+            "16": "xe-logos/xe-16.png",
+            "48": "xe-logos/xe-48.png",
+            "128": "xe-logos/xe-128.png"
+        }
+    },
+    "icons": {
+      "16": "xe-logos/xe-16.png",
+      "48": "xe-logos/xe-48.png",
+      "128": "xe-logos/xe-128.png"
+    },
+    "permissions":[
+        "contextMenus",
+        "scripting",
+        "storage",
+        "activeTab"
+        
+    ],
+    "content_scripts": [
+        {
+          "matches": ["<all_urls>"],
+          "js": ["content.js"],
+          "css": ["styles.css"]        
+        }
+    ],
+    "background":{
+        "service_worker": "background2.js"
+    }
+   
+
+}

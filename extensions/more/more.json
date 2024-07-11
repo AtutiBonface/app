@@ -1,0 +1,69 @@
+{
+    "manifest_version": 3,
+    "name": "My Chrome Extension",
+    "version": "1.0",
+    "description": "A simple Chrome extension.",
+    "icons": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    },
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "images/icon16.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+      },
+      "default_title": "My Extension"
+    },
+    "permissions": [
+      "activeTab",
+      "storage",
+      "tabs"
+    ],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["<all_urls>"],
+        "js": ["content.js"],
+        "css": ["styles.css"],
+        "run_at": "document_idle"
+      }
+    ],
+    "options_ui": {
+      "page": "options.html",
+      "chrome_style": true
+    },
+    "commands": {
+      "_execute_action": {
+        "suggested_key": {
+          "default": "Ctrl+Shift+Y",
+          "mac": "Command+Shift+Y"
+        },
+        "description": "Open the extension"
+      }
+    },
+    "content_security_policy": {
+      "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+    "host_permissions": [
+      "http://*/*",
+      "https://*/*"
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": ["images/*"],
+        "matches": ["<all_urls>"]
+      }
+    ],
+    "storage": {
+      "managed_schema": "schema.json"
+    },
+    "omnibox": {
+      "keyword": "myext"
+    }
+  }
+  

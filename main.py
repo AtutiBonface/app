@@ -1,5 +1,5 @@
 import customtkinter as ctk
-import app_utils ,re, os, subprocess, platform, sys
+import app_utils ,re, os, subprocess, platform, sys, asyncio , websockets, threading
 from app_utils import Colors, ConfigFilesHandler, downloadDetailsHandler
 from add_link import LinkBox
 from customtkinter import CTkFont
@@ -12,7 +12,23 @@ class MyApp(ctk.CTk):
     ctk.set_default_color_theme('blue')
     def add_file_downloading(self, filename, extention):
         print('This has been called')
-
+    async def handle_websockets(self, websocket, path):
+               
+        try:
+            async for message in websocket:
+                if message:
+                    link_box = LinkBox(self, self.xdm_class)
+                    link_box.enter_link_box.pack_propagate(False)
+                    link_box.enter_link_box.configure(width=360, height=210)
+                    link_box.link_text.set(message)
+                    link_box.getInputValue(None)
+                   
+        except websocket.exceptions.ConnectionClosedError:
+            print(f"web socket closed with {websocket.remote_address}")
+    async def extension_main(self):
+        async with websockets.serve(self.handle_websockets, '127.0.0.1', 65432):
+            print("WebSocket server started.")
+            await asyncio.Future()
     def return_filesize_in_correct_units(self, filesize):
         try:
             filesize = int(filesize)
@@ -141,11 +157,18 @@ class MyApp(ctk.CTk):
         except Exception:
             base_path = os.path.abspath(".")
 
+
+        print(os.path.join(base_path, relative_path))
         return os.path.join(base_path, relative_path)
 
-
+    def start_thread_for_browser_links(self):
+        asyncio.run(self.extension_main())
     def __init__(self):
+       
         super().__init__()
+
+        self.extension_thread = threading.Thread(target=self.start_thread_for_browser_links, daemon=True)
+        self.extension_thread.start()
 
         downloadDetailsHandler()
         self.index_of_page_opened = 0 # 0 home // 1 downloadin // 2 downloaded // 3 about // 4 settings
@@ -174,6 +197,7 @@ class MyApp(ctk.CTk):
         self.geometry(f'{window_width}x{window_height}+{half_w}+{half_h}')
 
         self.minsize(800,500)
+        self.resizable(False, False)
         self.iconbitmap(self.resource_path('xe-logos/main.ico'))
         self.title('Xengine Downloader')
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)

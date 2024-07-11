@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Extension Options</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Extension Options</h1>
+  <form id="optionsForm">
+    <label for="setting">Example Setting:</label>
+    <input type="text" id="setting" name="setting">
+    <br><br>
+    <button type="submit">Save</button>
+  </form>
+  <script>
+    document.getElementById('optionsForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      // Save options
+      let setting = document.getElementById('setting').value;
+      chrome.storage.sync.set({ setting: setting }, function() {
+        console.log('Settings saved');
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load options
+      chrome.storage.sync.get('setting', function(data) {
+        document.getElementById('setting').value = data.setting || '';
+      });
+    });
+  </script>
+</body>
+</html>

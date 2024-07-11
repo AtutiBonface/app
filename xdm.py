@@ -1,7 +1,8 @@
 import os, asyncio,aiohttp, ssl, certifi, time, threading, re
-from asyncio import Queue
+from asyncio import Queue 
 from settings import Settings
 from app_utils import downloadDetailsHandler
+import aiofiles
 
 class TaskManager():
     def __init__(self, parent) -> None:
@@ -158,6 +159,7 @@ class TaskManager():
 
             if tasks:
                 asyncio.gather(*tasks)
+            tasks = []
 
     async def start_task(self, file): 
         link, filename ,path= file
@@ -176,6 +178,9 @@ class TaskManager():
                         with open(filename, 'wb') as f:
                             start_time = time.time()
                             file_size = resp.headers.get('Content-Length', None)
+                            cont_type = resp.headers.get('Content-Type', None)
+
+                            
 
                             if file_size:
                                 size = int(file_size)
@@ -206,6 +211,7 @@ class TaskManager():
                             
 
             except Exception as e:
+                print(e)
                 
                 self.update_file_details_on_storage_during_download(
                 filename, size, downloaded_chunk, 'failed!', time.strftime('%Y-%m-%d')
