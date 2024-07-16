@@ -22,7 +22,7 @@ class Images():
         self.settingsImg = CTkImage(Image.open(self.resource_path('images/settings.png')),  size=(25,25))
         self.downloadImg = CTkImage(Image.open(self.resource_path('images/download.png')),  size=(25,25))
         self.aboutImg = CTkImage(Image.open(self.resource_path('images/about.png')),  size=(25,25))
-        self.folderImg = CTkImage(Image.open(self.resource_path('images/folder.png')),  size=(25,25))
+        self.folderImg = CTkImage(Image.open(self.resource_path('images/folder.png')),  size=(20,20))
         self.close = CTkImage(Image.open(self.resource_path('images/close.png')),  size=(15,15))
         
 
@@ -43,14 +43,17 @@ class Images():
         self.play = CTkImage(Image.open(self.resource_path('images/play.png')),  size=(20,20))
         self.restart = CTkImage(Image.open(self.resource_path('images/restart.png')),  size=(20,20))
         self.stop = CTkImage(Image.open(self.resource_path('images/stop.png')),  size=(20,20))
-        self.arrowDown = CTkImage(Image.open(self.resource_path('images/arrow_down.png')),  size=(20,20))
+        self.arrowDown = CTkImage(Image.open(self.resource_path('images/arrow_down.png')),  size=(15,15))
         self.open = CTkImage(Image.open(self.resource_path('images/open.png')),  size=(20,20))
         self.delete = CTkImage(Image.open(self.resource_path('images/trash.png')),  size=(20,20))
+        self.more = CTkImage(Image.open(self.resource_path('images/more.png')),  size=(20,20))
         self.link = CTkImage(Image.open(self.resource_path('images/link.png')),  size=(15,15))
 
 
         self.close_image = CTkImage(Image.open(self.resource_path('images/close.png')),  size=(15,15))
         self.minimize_image = CTkImage(Image.open(self.resource_path('images/minimize.png')),  size=(15,15))
+
+        self.sub_logo = CTkImage(Image.open(self.resource_path('xe-logos/xe-128.png')),  size=(25,25))
 
 
 class DownloadingIndicatorBox():

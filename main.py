@@ -1,5 +1,5 @@
 import customtkinter as ctk
-import app_utils ,re, os, subprocess, platform, sys, asyncio , websockets, threading
+import app_utils ,re, os, subprocess, platform, sys, asyncio , websockets, threading , json
 from app_utils import Colors, ConfigFilesHandler, downloadDetailsHandler
 from add_link import LinkBox
 from customtkinter import CTkFont
@@ -12,22 +12,30 @@ class MyApp(ctk.CTk):
     ctk.set_default_color_theme('blue')
     def add_file_downloading(self, filename, extention):
         print('This has been called')
+
+    
     async def handle_websockets(self, websocket, path):
-               
+              
         try:
             async for message in websocket:
                 if message:
-                    link_box = LinkBox(self, self.xdm_class)
-                    link_box.enter_link_box.pack_propagate(False)
-                    link_box.enter_link_box.configure(width=360, height=210)
-                    link_box.link_text.set(message)
-                    link_box.getInputValue(None)
-                   
-        except websocket.exceptions.ConnectionClosedError:
-            print(f"web socket closed with {websocket.remote_address}")
+                    data = json.loads(message)
+                    filename = data['name']
+                    url = data['link']
+
+                    self.after(0, lambda : self.openUrlPopup(url =url, filename=filename))
+                else:
+                    pass
+        except Exception as e:
+            pass
+
+    def openUrlPopup(self, url , filename):
+        link_box = LinkBox(self, self.xdm_class)
+        link_box.update_idletasks()
+        link_box.link_text.set(url)
+        link_box.filename_text.set(filename)
     async def extension_main(self):
         async with websockets.serve(self.handle_websockets, '127.0.0.1', 65432):
-            print("WebSocket server started.")
             await asyncio.Future()
     def return_filesize_in_correct_units(self, filesize):
         try:
@@ -212,10 +220,12 @@ class MyApp(ctk.CTk):
         self.app_container.pack(expand=True, fill='both')
 
 
+        
+
 
 
         
-        
+       
         self.side_nav_bar = ctk.CTkFrame(self.app_container, width=200, fg_color=self.colors.primary_color, corner_radius=5, bg_color=self.colors.secondary_color)
         self.btn_bottom = ctk.CTkFrame(self.side_nav_bar, fg_color=self.colors.primary_color, height=80, width= 150)
         self.font12 = CTkFont(weight='bold', size=10, family='Arial')
@@ -315,6 +325,8 @@ class MyApp(ctk.CTk):
         self.running_tasks = {}
         self.file_widgets = []
         self.last_mtime = None
+
+        self.filter_all_downloads()
 
         self.w_state = self.wm_state()
        
@@ -440,6 +452,8 @@ class actionsForDisplayedFiles():
         self.container = ctk.CTkFrame(parent.content_container, height=50, fg_color=self.colors.primary_color,bg_color='transparent', corner_radius=5)
         self.actions_label = ctk.CTkLabel(self.container, text=" ",  fg_color='transparent', height=20,width=70, font=self.font11, text_color=self.colors.text_color)
         self.actions_label.place(x=20, rely=.5 , anchor='w')
+        self.more_actions = ctk.CTkButton(self.container, hover=False,width=30, fg_color='transparent',cursor='hand2' ,text='', image=parent.xe_images.more)
+        self.more_actions.place(relx=1, rely=.5, anchor='e')
         self.actions = ctk.CTkFrame(self.container, fg_color=self.colors.primary_color, bg_color='transparent')
 
         self.xe_images =app_utils.Images()
@@ -473,6 +487,7 @@ class actionsForDisplayedFiles():
         self.resume.bind('<Leave>', lambda event:self.on_actions_leave(event, self.resume))
         self.restart.bind('<Leave>', lambda event:self.on_actions_leave(event, self.restart))
         self.stop.bind('<Leave>', lambda event:self.on_actions_leave(event, self.stop))
+
         
     def close_opened_popup_window(self, window):
         window.destroy()
@@ -513,7 +528,9 @@ class actionsForDisplayedFiles():
         self.message_box = ctk.CTkFrame(self.error_top_window, height=180, width=320, fg_color=self.colors.utils_color, corner_radius=5)
         self.title_bar = ctk.CTkFrame(self.message_box, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
-        self.close = ctk.CTkButton(self.message_box,text='',corner_radius=2,command=lambda : self.close_opened_popup_window(self.error_top_window), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
+        self.logo = ctk.CTkLabel(self.title_bar,text='', width=25, cursor='hand2',fg_color='transparent',  height=25, image=self.xe_images.sub_logo )
+        self.logo.place(x=5, y=2.5,anchor='nw' )
+        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=lambda : self.close_opened_popup_window(self.error_top_window), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
         self.close.place(x=315, y=5,anchor='ne' )
         self.error = ctk.CTkLabel(self.message_box, anchor='w',text='File not found!', text_color=self.colors.text_color,font=self.font17)
         self.error.pack(fill='x',pady=5, padx=10)
@@ -537,18 +554,22 @@ class actionsForDisplayedFiles():
         self.message_box = ctk.CTkFrame(self.delete_file_top_window, height=210, width=360, fg_color=self.colors.utils_color, corner_radius=5)
         self.title_bar = ctk.CTkFrame(self.message_box, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
-        self.close = ctk.CTkButton(self.message_box,text='',corner_radius=2,command= lambda :self.close_opened_popup_window(self.delete_file_top_window), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
+        self.logo = ctk.CTkLabel(self.title_bar,text='', width=25, cursor='hand2',fg_color='transparent',  height=25, image=self.xe_images.sub_logo )
+        self.logo.place(x=5, y=2.5,anchor='nw' )
+        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command= lambda :self.close_opened_popup_window(self.delete_file_top_window), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
         self.close.place(x=355, y=5,anchor='ne' )
         self.prompt = ctk.CTkLabel(self.message_box, anchor='w',text='Confirm Deletion', text_color=self.colors.text_color,font=self.font17)
         self.prompt.pack(fill='x',pady=5, padx=10)
-        self.prompt_error = ctk.CTkLabel(self.message_box,anchor='w', text='Are you sure you want to delete selected downloads?', font=self.font12)
-        self.prompt_error.pack(padx=10, fill='x')
-        self.check_box = ctk.CTkCheckBox(self.message_box,checkbox_height=15,corner_radius=1,offvalue=0, onvalue=1,variable=self.check_value, checkbox_width=15, hover=False, text='Delete file from disk')
-        self.check_box.pack(padx=10, pady=10,fill='x')
-        self.no = ctk.CTkButton(self.message_box, text='no', height=40,command= lambda :self.close_opened_popup_window(self.delete_file_top_window), width=100,hover=False, corner_radius=5, fg_color=self.colors.secondary_color)
-        self.no.pack(side='left', pady=10, expand=True)
-        self.yes = ctk.CTkButton(self.message_box, text='yes', height=40,command= lambda :self.delete_file_from_storage_temp_file_or_both(self.delete_file_top_window), width=100,hover=False, corner_radius=5, fg_color=self.colors.secondary_color)
-        self.yes.pack(side='left', pady=10, expand=True)
+        self.prompt_error = ctk.CTkLabel(self.message_box,anchor='w', text='Are you sure you want to delete selected downloads?', font=self.font11)
+        self.prompt_error.pack(padx=20, fill='x')
+        self.check_box = ctk.CTkCheckBox(self.message_box,checkbox_height=15,corner_radius=1,text_color='white',font=self.font11,offvalue=0, onvalue=1,variable=self.check_value, checkbox_width=15, hover=False, text='Delete file from disk')
+        self.check_box.pack(padx=20, pady=5,fill='x')
+        self.delete_actions = ctk.CTkFrame(self.message_box, fg_color='transparent')
+        self.delete_actions.pack()
+        self.no = ctk.CTkButton(self.delete_actions, text='NO', height=40,command= lambda :self.close_opened_popup_window(self.delete_file_top_window), width=100,hover=False, corner_radius=5, fg_color=self.colors.secondary_color)
+        self.no.pack(side='left', pady=10, padx=5)
+        self.yes = ctk.CTkButton(self.delete_actions, text='YES', height=40,command= lambda :self.delete_file_from_storage_temp_file_or_both(self.delete_file_top_window), width=100,hover=False, corner_radius=5, fg_color=self.colors.secondary_color)
+        self.yes.pack(side='left', pady=10, padx=5)
         self.message_box.pack_propagate(False)
         self.message_box.pack()
 
