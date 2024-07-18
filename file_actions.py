@@ -20,12 +20,12 @@ class actionsForDisplayedFiles():
         self.actions = ctk.CTkFrame(self.container, fg_color=self.colors.primary_color, bg_color='transparent')
 
         self.xe_images =Images()
-        self.open = ctk.CTkButton(self.actions, text='',command=lambda state='Open':self.change_download_state(state, self.open), image=self.xe_images.open, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.delete = ctk.CTkButton(self.actions, text='',command=lambda state='Delete':self.change_download_state(state, self.delete), image=self.xe_images.delete, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.pause = ctk.CTkButton(self.actions, text='',command=lambda state='Pause':self.change_download_state(state, self.pause), image=self.xe_images.pause, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.resume = ctk.CTkButton(self.actions, text='',command=lambda state='Resume':self.change_download_state(state, self.resume), image=self.xe_images.play, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.restart = ctk.CTkButton(self.actions, text='',command=lambda state='Restart':self.change_download_state(state, self.restart), image=self.xe_images.restart, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.stop = ctk.CTkButton(self.actions, text='',command=lambda state='Stop':self.change_download_state(state, self.stop), image=self.xe_images.stop, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.open = ctk.CTkButton(self.actions, text='',command=lambda state='Open':self.perform_file_actions(state, self.open), image=self.xe_images.open, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.delete = ctk.CTkButton(self.actions, text='',command=lambda state='Delete':self.perform_file_actions(state, self.delete), image=self.xe_images.delete, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.pause = ctk.CTkButton(self.actions, text='',command=lambda state='Pause':self.perform_file_actions(state, self.pause), image=self.xe_images.pause, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.resume = ctk.CTkButton(self.actions, text='',command=lambda state='Resume':self.perform_file_actions(state, self.resume), image=self.xe_images.play, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.restart = ctk.CTkButton(self.actions, text='',command=lambda state='Restart':self.perform_file_actions(state, self.restart), image=self.xe_images.restart, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        self.stop = ctk.CTkButton(self.actions, text='',command=lambda state='Stop':self.perform_file_actions(state, self.stop), image=self.xe_images.stop, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
 
         self.open.pack(side='left', padx=10, pady=10)
         self.delete.pack(side='left', padx=10, pady=10)
@@ -139,7 +139,7 @@ class actionsForDisplayedFiles():
 
 
 
-    def change_download_state(self, state,me):
+    def perform_file_actions(self, state,me):
         if self.parent.details_of_file_clicked:
             f_name , path, status = self.parent.details_of_file_clicked 
             if state == 'Open':
@@ -161,7 +161,7 @@ class actionsForDisplayedFiles():
             
             me.configure(fg_color = self.colors.utils_color)
         else:
-            print("Nothing has been selected")
+            pass
 
     def on_actions_enter(self, event, state):
         self.actions_label.configure(text=state, fg_color=self.colors.utils_color)

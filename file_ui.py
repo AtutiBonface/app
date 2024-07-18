@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from app_utils import Colors
+from app_utils import Colors, OtherMethods
 
 class File(ctk.CTkFrame):
 
@@ -43,17 +43,19 @@ class File(ctk.CTkFrame):
         self.colors = Colors()
         self.file_id = filename
 
+        self.ui_methods = OtherMethods()
+
         self.appended_files = []
 
         self.alter_details = (filename, path, status)
         
-        self.file_type = ctk.CTkLabel(self, text='', image=self.parent.return_file_type(filename), fg_color='transparent')
+        self.file_type = ctk.CTkLabel(self, text='', image=self.ui_methods.return_file_type(filename), fg_color='transparent')
         self.file_type.pack(side='left', padx=10)
 
         self.file_name = ctk.CTkLabel(self, text_color=self.colors.text_color,text=filename, font=self.parent.font11,fg_color='transparent', anchor='w')
         self.file_name.pack(side='left', fill='x', expand=True, padx=10, pady=1)
        
-        self.file_size = ctk.CTkLabel(self,text=f"{size}",anchor='w',text_color='gray',font=self.parent.font12, fg_color='transparent', width=60)
+        self.file_size = ctk.CTkLabel(self,text=self.ui_methods.return_filesize_in_correct_units(size),anchor='w',text_color='gray',font=self.parent.font12, fg_color='transparent', width=60)
         self.file_size.pack(side='right',  padx=5, pady=5)
         self.file_download_date = ctk.CTkLabel(self,anchor='w',text_color='gray',text=date,font=self.parent.font12, width=60,fg_color='transparent')
         self.file_download_date.pack(side='right', padx=5, pady=5)

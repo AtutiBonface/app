@@ -75,20 +75,12 @@ class DownloadingIndicatorBox():
 
 class Colors():
     def __init__(self) -> None: 
-        x = "#48D1CC"       
+          
         self.primary_color = '#1b1c1e'
         self.secondary_color = "#232428"
         self.text_color = '#edeef0'
-        self.utils_color = x
-class downloadDetailsHandler():
-    def __init__(self) -> None:
-        self.path_to_download_conf_file = f"{Path().home()}/.xengine/temp"
-        file = 'downloading.txt'
+        self.utils_color ="#48D1CC"
 
-        try:
-            os.makedirs(self.path_to_download_conf_file)
-        except Exception as e:
-            pass
         
 class ConfigFilesHandler():
 
@@ -128,6 +120,52 @@ class ConfigFilesHandler():
             pass
         except Exception as e:
             pass
+
+
+
+class OtherMethods():
+    
+    def return_filesize_in_correct_units(self, filesize):
+        try:
+            filesize = int(filesize)
+            if filesize > (1024*1024*1024):
+                return f'{round(filesize/10**9,2)} GB' 
+            
+            elif filesize > (1024*1024):
+                return f'{round(filesize/10**6,2)} MB' 
+            
+            elif filesize > (1024):
+                return f'{round(filesize/10**3,2)} Kbs' 
+            else: 
+                return f'{round(filesize,1)} bytes' 
+        except Exception as e:
+            return '---'
+    
+    def return_file_type(self, filename):
+        xe_images = Images()
+
+        name , extension = os.path.splitext(filename)
+        extension = extension.lower()# converting all extensions to lower case
+        video_extensions = {'.mp4', '.mkv', '.flv', '.avi', '.mov', '.wmv', '.webm'}
+        audio_extensions = {'.mp3', '.wav', '.aac', '.flac', '.ogg', '.m4a', '.wma'}
+        document_extensions = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.odt', '.ods', '.odp','.html', '.htm'}
+        program_extensions = {'.exe', '.msi', '.bat', '.sh', '.py', '.jar', '.bin'}
+        compressed_extensions = {'.zip', '.rar', '.7z', '.tar', '.gz', '.bz2'}
+        image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.svg', '.webp'}
+
+        if extension in video_extensions:
+            return xe_images.video_d2
+        elif extension in document_extensions:
+            return xe_images.document_d2
+        elif extension in program_extensions:
+            return xe_images.program_d2
+        elif extension in audio_extensions:
+            return xe_images.music_d2
+        elif extension in compressed_extensions:
+            return xe_images.zip_d2
+        elif extension in image_extensions:
+            return xe_images.image_d2
+        else: return xe_images.document_d2
         
        
 

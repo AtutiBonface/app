@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3, os
 def initiate_database():
     conn = sqlite3.connect('downloads.db')
     cursor = conn.cursor()
@@ -23,36 +23,33 @@ def get_all_data():
     cursor = conn3.cursor()
     cursor.execute('''SELECT * FROM downloads''')
 
-    my_list = cursor.fetchall()    
+    all_downloads = cursor.fetchall()    
+
 
     conn3.close()
-    print(my_list)
-    if len(my_list) == 0:
-        print("there is no data now !")
+    return all_downloads
 
 def get_incomplete_downloads():
     conn = sqlite3.connect('downloads.db')
     cursor = conn.cursor()
-    cursor.execute(''' SELECT * FROM downloads WHERE status != "complete"''')
-    failed = cursor.fetchall()
+    cursor.execute(''' SELECT * FROM downloads WHERE status != "completed."''')
+    incomplete_downloads = cursor.fetchall()
 
-    print(failed)
-    if len(failed) == 0:
-        print('No incomplete files')
+    return incomplete_downloads
 
 def get_complete_downloads():
     conn = sqlite3.connect('downloads.db')
     cursor = conn.cursor()
-    cursor.execute('''SELECT * FROM downloads WHERE status == "complete" ''')
+    cursor.execute('''SELECT * FROM downloads WHERE status == "completed." ''')
     complete_downloads = cursor.fetchall()
-    print(complete_downloads)
-    if len(complete_downloads) == 0:
-        print('No complete files ')
+    
+    return complete_downloads
 
-def update_data(filename1, filename2):
+def update_data(filename, address,size, downloaded, status, date):
+    filename = os.path.basename(filename)
     conn = sqlite3.connect('downloads.db')
     cursor = conn.cursor()
-    cursor.execute(''' UPDATE downloads SET filename = ?  WHERE filename = ? ''', (filename1, filename2))
+    cursor.execute(''' UPDATE downloads SET  filesize = ?, downloaded = ?, status= ?, modification_date =?  WHERE filename = ?  ''', (size, downloaded, status, date, filename))
     conn.commit()
     conn.close()
 def delete_all_data():
@@ -70,14 +67,3 @@ def delete_individual_file(filename):
     conn.commit()
     conn.close()
 
-initiate_database()
-#update_data('music.cdsj', 'rihanna-work-ft-drake.mp4')
-
-#delete_all_data()
-#delete_individual_file('rihanna-work-ft-drake.mp4')
-print('--------------------------------- complete------------------------------')
-get_complete_downloads()
-print('---------------------------------incomplete------------------------------')
-get_incomplete_downloads()
-print('---------------------------------all-----------------------------')
-get_all_data()

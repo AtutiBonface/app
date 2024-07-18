@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import app_utils , os, sys, asyncio , websockets, threading , json
-from app_utils import Colors,  downloadDetailsHandler
+from app_utils import Colors
 from file_actions import actionsForDisplayedFiles
 from add_link import LinkBox
 from customtkinter import CTkFont
@@ -8,12 +8,11 @@ from xdm import TaskManager
 from about import About
 from settings import Settings
 from file_ui import File
-
+import database
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
-    def add_file_downloading(self, filename, extention):
-        print('This has been called')
+    
 
     
     async def handle_websockets(self, websocket, path):
@@ -39,61 +38,34 @@ class MyApp(ctk.CTk):
     async def extension_main(self):
         async with websockets.serve(self.handle_websockets, '127.0.0.1', 65432):
             await asyncio.Future()
-    def return_filesize_in_correct_units(self, filesize):
-        try:
-            filesize = int(filesize)
-            if filesize > (1024*1024*1024):
-                return f'{round(filesize/1000000000,2)} GB' 
-            
-            elif filesize > (1024*1024):
-                return f'{round(filesize/1000000,2)} MB' 
-            
-            elif filesize > (1024):
-                return f'{round(filesize/1000,2)} Kbs' 
-            else: 
-                return f'{round(filesize,1)} bytes' 
-        except Exception as e:
-            return '---'
     
-    def return_file_type(self, filename):
-        name , extension = os.path.splitext(filename)
-        extension = extension.lower()# converting all extensions to lower case
-        video_extensions = {'.mp4', '.mkv', '.flv', '.avi', '.mov', '.wmv', '.webm'}
-        audio_extensions = {'.mp3', '.wav', '.aac', '.flac', '.ogg', '.m4a', '.wma'}
-        document_extensions = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.odt', '.ods', '.odp','.html', '.htm'}
-        program_extensions = {'.exe', '.msi', '.bat', '.sh', '.py', '.jar', '.bin'}
-        compressed_extensions = {'.zip', '.rar', '.7z', '.tar', '.gz', '.bz2'}
-        image_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.svg', '.webp'}
 
-        if extension in video_extensions:
-            return self.xe_images.video_d2
-        elif extension in document_extensions:
-            return self.xe_images.document_d2
-        elif extension in program_extensions:
-            return self.xe_images.program_d2
-        elif extension in audio_extensions:
-            return self.xe_images.music_d2
-        elif extension in compressed_extensions:
-            return self.xe_images.zip_d2
-        elif extension in image_extensions:
-            return self.xe_images.image_d2
-        else: return self.xe_images.document_d2
-
-   
+    def clear_download_list_from_page(self):
+        self.previously_clicked_btn = None
+        self.previously_clicked_file = None
+        for child in self.downloading_list.winfo_children():
+            if child:
+                child.destroy()
     def clear_btn_styles(self):
         self.all_down.configure(text_color=self.colors.text_color, fg_color=self.colors.secondary_color)
         self.downloading.configure(text_color=self.colors.text_color, fg_color=self.colors.secondary_color)
         self.failed.configure(text_color=self.colors.text_color, fg_color=self.colors.secondary_color)
     def filter_all_downloads(self):
+        self.clear_download_list_from_page()
         self.clear_btn_styles()
         self.all_down.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
+        self.display_all_downloads_on_page()
 
-    def filter_downloading_downloads(self):
+    def filter_complete_downloads(self):
+        self.clear_download_list_from_page()
         self.clear_btn_styles()
         self.downloading.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
-    def filter_failed_downloads(self):
+        self.display_complete_downloads_on_page()
+    def filter_incomplete_downloads(self):
+        self.clear_download_list_from_page()
         self.clear_btn_styles()
         self.failed.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
+        self.display_incomplete_downloads_on_page()
 
        
     def btns_to_default(self):
@@ -128,8 +100,6 @@ class MyApp(ctk.CTk):
             self.home_btn.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
             self.side_nav_bar.update()
     
-     
-        
    
     def open_about_page(self):
          ## prevents opening page twice
@@ -168,19 +138,45 @@ class MyApp(ctk.CTk):
             base_path = os.path.abspath(".")
 
 
-        print(os.path.join(base_path, relative_path))
         return os.path.join(base_path, relative_path)
 
     def start_thread_for_browser_links(self):
         asyncio.run(self.extension_main())
+
+
+    def delete_details_or_make_changes(self, filename):
+        database.delete_individual_file(filename)
+
+    def clear_displayed_files_widgets(self):
+        for widget in self.file_widgets:
+            widget.destroy()
+        self.file_widgets.clear()
+
+    def display_all_downloads_on_page(self):
+        all_downloads = database.get_all_data()
+        for file in all_downloads:
+            id ,filename, address,filesize, downloaded, status, modification_date, path = file
+            File(self, filename, filesize, status, modification_date, path).pack(fill='x')
+        
+
+    def display_complete_downloads_on_page(self):
+        complete_downloads = database.get_complete_downloads()
+        for file in complete_downloads:
+            id ,filename, address,filesize, downloaded, status, modification_date, path = file
+            File(self, filename, filesize, status, modification_date, path).pack(fill='x')
+
+    def display_incomplete_downloads_on_page(self):
+        incomplete_downloads = database.get_incomplete_downloads()
+        for file in incomplete_downloads:
+            id ,filename, address,filesize, downloaded, status, modification_date, path = file
+            File(self, filename, filesize, status, modification_date, path).pack(fill='x')
+
+
     def __init__(self):
-       
         super().__init__()
 
         self.extension_thread = threading.Thread(target=self.start_thread_for_browser_links, daemon=True)
         self.extension_thread.start()
-
-        downloadDetailsHandler()
         self.index_of_page_opened = 0 # 0 home // 1 downloadin // 2 downloaded // 3 about // 4 settings
         self.about_frame = None
         self.settings_frame = None
@@ -271,8 +267,8 @@ class MyApp(ctk.CTk):
         self.segmented_btns = ctk.CTkFrame(self.top_container,width=150,  fg_color="transparent", corner_radius=5)
         
         self.all_down = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.filter_all_downloads,text='All',width=50, height=30, hover=False,fg_color=self.colors.secondary_color)
-        self.downloading = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.filter_downloading_downloads,text='Complete',width=60, height=30, hover=False,fg_color=self.colors.secondary_color)
-        self.failed = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.filter_failed_downloads,text='Incomplete',width=50, height=30, hover=False,fg_color=self.colors.secondary_color)
+        self.downloading = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.filter_complete_downloads,text='Complete',width=60, height=30, hover=False,fg_color=self.colors.secondary_color)
+        self.failed = ctk.CTkButton(self.segmented_btns, font=self.font12,corner_radius=5,command=self.filter_incomplete_downloads,text='Incomplete',width=50, height=30, hover=False,fg_color=self.colors.secondary_color)
 
         self.all_down.pack(padx=5, pady=5,side='left')
         self.downloading.pack(padx=5, pady=5,side='left')
@@ -304,28 +300,17 @@ class MyApp(ctk.CTk):
         self.running_tasks = {}
         self.file_widgets = []
         self.last_mtime = None
-
-        self.filter_all_downloads()
-        File(self, 'rihanna-work-ft-drake.mp4', 29.5, 'failed', '10-9-24', 'no path').pack(fill='x')
-        File(self, 'rihanna-work-ft-drake.mp3', 5.2, 'complete', '10-9-24', 'no path').pack(fill='x')
-
         self.w_state = self.wm_state()      
-        
-        
         self.xdm_class = TaskManager(self)
-        
-        
+
         actionsForDisplayedFiles(self)
 
-    def delete_details_or_make_changes(self, filename):
-        pass
-
-    def clear_displayed_files_widgets(self):
-        for widget in self.file_widgets:
-            widget.destroy()
-        self.file_widgets.clear()
+        self.filter_all_downloads()
 
     
+
+    
+
 
 
 app = MyApp()

@@ -1,8 +1,7 @@
 import os, asyncio,aiohttp, ssl, certifi, time, threading, re
 from asyncio import Queue 
 from settings import Settings
-from app_utils import downloadDetailsHandler
-import aiofiles
+import aiofiles, database
 
 class TaskManager():
     def __init__(self, parent) -> None:
@@ -20,7 +19,7 @@ class TaskManager():
             self.ui_callback = parent
             self.condition = asyncio.Condition() ## used to check if queue is not empty and when file is added to a queue queue has value
 
-            self.path_to_download_txt_file = f'{downloadDetailsHandler().path_to_download_conf_file}/downloading.txt'
+            
             self.loop = asyncio.new_event_loop()## creating a new loop
             self.download_thread = threading.Thread(target=self.download_task_manager, daemon=True)
             # starting a different thread to run downloads
@@ -31,62 +30,15 @@ class TaskManager():
         if not path:
             path = Settings(self.parent.content_container).xengine_download_path_global## the path stored in config file
 
-        file_details = [
-            "\n",
-            "<file> \n",
-            f"filename: {filename}\n",
-            "size:  ---\n",
-            "downloaded: ---\n",
-            "status: waiting...\n",
-            f"date-modified: {date}\n",
-            f"address: {address} \n",
-            f"path: {path} \n" ,
-            "</file>\n",
-            "\n",
-        ]
+        database.add_data(filename,address, '---', '---', 'waiting...', date, path)
 
-        with open(self.path_to_download_txt_file, 'a') as f:
-            for line in file_details:
-                f.write(line)
-
-        print('Added!')
-
-    def update_file_details_on_storage_during_download(self, filename, size, downloaded, status, date):
+        
+    def update_file_details_on_storage_during_download(self, filename, address,size, downloaded, status, date):
         file_details = []
+
+        database.update_data(filename, address,size, downloaded, status, date)
         
-        with open(self.path_to_download_txt_file, 'r') as f:
-            entry = {}
-            for line in f.readlines():
-                line.strip()
-                if line.startswith('<file>'):
-                    entry = {}
-                elif line.startswith('</file>'):
-                    file_details.append(entry)
-                else:
-                    match = re.findall(r'\s*(\S+):\s*(.+)', line)
-                    if match:
-                        key, value = match[0]
-                       
-                        entry[key.strip()] = value.strip()
-
-        split_name = os.path.basename(filename)
         
-        with open(self.path_to_download_txt_file, 'w') as f:
-            for entry in file_details:
-                if entry.get('filename') == split_name:
-                    entry['size'] = size if size != 0 else entry.get('size', '---')
-                    entry['downloaded'] = downloaded
-                    entry['status'] = status
-                    entry['date-modified'] = date
-
-                    
-
-                f.write("<file>\n")
-                for key, value in entry.items():
-                    f.write(f"{key}: {value}\n")
-                f.write("</file>\n")
-                f.write("\n")
-
          
     def download_task_manager(self):
         # where threads starts and asyncio couritine is started
@@ -202,19 +154,19 @@ class TaskManager():
                                         speed = self.returnSpeed(new_speed)
                                         percentage = round((downloaded_chunk/size) * 100,0)
                                         self.update_file_details_on_storage_during_download(
-                                        filename, size, downloaded_chunk, f'{percentage}%', time.strftime(r'%Y-%m-%d'))
+                                        filename,link,size, downloaded_chunk, f'{percentage}%', time.strftime(r'%Y-%m-%d'))
                                         
 
                                 
                                 self.update_file_details_on_storage_during_download(
-                                filename, size, size, 'completed.', time.strftime(r'%Y-%m-%d'))
+                                filename, link,size, size, 'completed.', time.strftime(r'%Y-%m-%d'))
                                 
 
                 except Exception as e:
                     print(e)
                     
                     self.update_file_details_on_storage_during_download(
-                    filename, size, downloaded_chunk, 'failed!', time.strftime('%Y-%m-%d')
+                    filename,link, size, downloaded_chunk, 'failed!', time.strftime('%Y-%m-%d')
                     )
                 
                         
