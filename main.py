@@ -12,9 +12,7 @@ import database
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
-    
-
-    
+        
     async def handle_websockets(self, websocket, path):
               
         try:
@@ -146,6 +144,10 @@ class MyApp(ctk.CTk):
 
     def delete_details_or_make_changes(self, filename):
         database.delete_individual_file(filename)
+        self.xengine_downloads = {}
+        self.load_downloads_from_db() 
+        self.filter_all_downloads()
+           
 
     def clear_displayed_files_widgets(self):
         for widget in self.file_widgets:
@@ -153,24 +155,60 @@ class MyApp(ctk.CTk):
         self.file_widgets.clear()
 
     def display_all_downloads_on_page(self):
-        all_downloads = database.get_all_data()
-        for file in all_downloads:
-            id ,filename, address,filesize, downloaded, status, modification_date, path = file
-            File(self, filename, filesize, status, modification_date, path).pack(fill='x')
-        
-
+        for detail in self.return_all_downloads().items():
+            filename = detail[0].strip()
+            widget = File(self, filename, detail[1]['filesize'], detail[1]['status'], detail[1]['modification_date'], detail[1]['path'])
+            widget.pack(fill='x')
+            self.file_widgets.append(widget)
+            
     def display_complete_downloads_on_page(self):
         complete_downloads = database.get_complete_downloads()
         for file in complete_downloads:
             id ,filename, address,filesize, downloaded, status, modification_date, path = file
-            File(self, filename, filesize, status, modification_date, path).pack(fill='x')
+            File(self, filename, filesize, status, modification_date, path)
 
     def display_incomplete_downloads_on_page(self):
         incomplete_downloads = database.get_incomplete_downloads()
         for file in incomplete_downloads:
             id ,filename, address,filesize, downloaded, status, modification_date, path = file
+           
             File(self, filename, filesize, status, modification_date, path).pack(fill='x')
 
+    def load_downloads_from_db(self):
+        all_downloads = database.get_all_data()
+        for download in all_downloads:
+            id, filename, address, filesize, downloaded, status, modification_date, path = download
+            self.xengine_downloads[filename] = {
+                'url': address,
+                'status': status,
+                'downloaded': downloaded,
+                'filesize': filesize,
+                'modification_date': modification_date,
+                'path': path
+            }
+    def add_download_to_list(self, filename, address, path, date):
+        self.xengine_downloads[filename] = {
+            'url': address,
+            'status': 'waiting...',
+            'downloaded': '---',
+            'filesize': '---',
+            'modification_date': date,
+            'path': path
+        }
+    def update_download(self, filename, status, size, date):
+        filename = os.path.basename(filename)
+       
+        if filename in self.xengine_downloads:
+            self.xengine_downloads[filename]['status'] = status
+            self.xengine_downloads[filename]['filesize'] = size
+            self.xengine_downloads[filename]['modification_date'] = date
+        
+        
+        
+            
+            
+    def return_all_downloads(self):
+        return self.xengine_downloads
 
     def __init__(self):
         super().__init__()
@@ -184,6 +222,9 @@ class MyApp(ctk.CTk):
         self.about_page_opened = False
         self.settings_page_opened = False
         self.home_page_opened = True
+
+        self.xengine_downloads = {}
+        self.load_downloads_from_db()
       
         window_width = 800
         window_height = 500
@@ -276,8 +317,6 @@ class MyApp(ctk.CTk):
         self.segmented_btns.pack(side='right', padx=10, pady=2)  
         self.top_container.pack(fill='x', padx=5, pady=5)
 
-
-
        
         ### files here
         self.files_labels = ctk.CTkFrame(self.content_container, fg_color='transparent', height=20)
@@ -297,6 +336,7 @@ class MyApp(ctk.CTk):
 
         self.previously_clicked_btn = None
         self.details_of_file_clicked = None
+
         self.running_tasks = {}
         self.file_widgets = []
         self.last_mtime = None
@@ -308,9 +348,6 @@ class MyApp(ctk.CTk):
         self.filter_all_downloads()
 
     
-
-    
-
 
 
 app = MyApp()

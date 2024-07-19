@@ -1,5 +1,5 @@
 import customtkinter as ctk
-from app_utils import Colors, OtherMethods
+from app_utils import Colors, OtherMethods, os
 
 class File(ctk.CTkFrame):
 
@@ -36,12 +36,19 @@ class File(ctk.CTkFrame):
         self.file_size.configure(text=size)
         self.download_status.configure(text=complete)
 
+    def return_short_filename(self, filename):
+        filename = filename.strip()
+        name, exten = os.path.splitext(filename)
+        if len(name) > 45:
+            filename = f'{name[:20]}...{name[-22:]}{exten}'
+        return filename
+
     def __init__(self, parent, filename, size, status, date, path) -> None:
         super().__init__(parent.downloading_list, fg_color=parent.colors.secondary_color,height=40,corner_radius=5, cursor='hand2')
         self.task_name = ''
         self.parent = parent
         self.colors = Colors()
-        self.file_id = filename
+        self.file_id = os.path.basename(filename)
 
         self.ui_methods = OtherMethods()
 
@@ -49,10 +56,11 @@ class File(ctk.CTkFrame):
 
         self.alter_details = (filename, path, status)
         
+        
         self.file_type = ctk.CTkLabel(self, text='', image=self.ui_methods.return_file_type(filename), fg_color='transparent')
         self.file_type.pack(side='left', padx=10)
 
-        self.file_name = ctk.CTkLabel(self, text_color=self.colors.text_color,text=filename, font=self.parent.font11,fg_color='transparent', anchor='w')
+        self.file_name = ctk.CTkLabel(self, text_color=self.colors.text_color,text=self.return_short_filename(filename), font=self.parent.font11,fg_color='transparent', anchor='w')
         self.file_name.pack(side='left', fill='x', expand=True, padx=10, pady=1)
        
         self.file_size = ctk.CTkLabel(self,text=self.ui_methods.return_filesize_in_correct_units(size),anchor='w',text_color='gray',font=self.parent.font12, fg_color='transparent', width=60)
@@ -62,7 +70,6 @@ class File(ctk.CTkFrame):
         self.download_status = ctk.CTkLabel(self,text_color='gray',anchor='w', text=status, width=70, font=self.parent.font12)
         self.download_status.pack(side='right')
 
-        
 
         
         self.pack_propagate(False)
@@ -74,4 +81,6 @@ class File(ctk.CTkFrame):
         self.file_size.bind('<Button-1>', self.propagate_file_btn)
         self.file_name.bind('<Button-1>', self.propagate_file_btn)
         self.file_download_date.bind('<Button-1>', self.propagate_file_btn)
-    
+
+
+

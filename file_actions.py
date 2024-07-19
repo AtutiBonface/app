@@ -76,7 +76,7 @@ class actionsForDisplayedFiles():
             except Exception as e: 
                 pass
 
-            
+        
         window.destroy()
         
     def show_filenotfound_popup(self, parent):

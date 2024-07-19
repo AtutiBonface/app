@@ -12,7 +12,6 @@ class TaskManager():
             self.links_and_filenames = Queue()## link and filename is appended
             self.ui_files = []
             self.parent = parent
-
             self.max_concurrent_downloads = 5  # Set the maximum number of concurrent downloads
             self.semaphore = asyncio.Semaphore(self.max_concurrent_downloads)
 
@@ -29,13 +28,13 @@ class TaskManager():
     def append_file_details_to_storage(self, filename, path, address, date):
         if not path:
             path = Settings(self.parent.content_container).xengine_download_path_global## the path stored in config file
-
+        self.parent.add_download_to_list(filename, address, path, date)
         database.add_data(filename,address, '---', '---', 'waiting...', date, path)
 
         
     def update_file_details_on_storage_during_download(self, filename, address,size, downloaded, status, date):
         file_details = []
-
+        self.parent.update_download(filename, status, size, date)
         database.update_data(filename, address,size, downloaded, status, date)
         
         
