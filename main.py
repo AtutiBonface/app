@@ -1,14 +1,14 @@
 import customtkinter as ctk
 import app_utils , os, sys, asyncio , websockets, threading , json
 from app_utils import Colors
-from file_actions import actionsForDisplayedFiles
+from file_actions import actionsForDisplayedFiles, More
 from add_link import LinkBox
 from customtkinter import CTkFont
 from xdm import TaskManager
 from about import About
 from settings import Settings
 from file_ui import File
-import database
+import database, queue
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
@@ -146,34 +146,18 @@ class MyApp(ctk.CTk):
         database.delete_individual_file(filename)
         self.xengine_downloads = {}
         self.load_downloads_from_db() 
-        self.filter_all_downloads()
+        
            
 
     def clear_displayed_files_widgets(self):
         for widget in self.file_widgets:
             widget.destroy()
-        self.file_widgets.clear()
+        
 
-    def display_all_downloads_on_page(self):
-        for detail in self.return_all_downloads().items():
-            filename = detail[0].strip()
-            widget = File(self, filename, detail[1]['filesize'], detail[1]['status'], detail[1]['modification_date'], detail[1]['path'])
-            widget.pack(fill='x')
-            self.file_widgets.append(widget)
+    
+
             
-    def display_complete_downloads_on_page(self):
-        complete_downloads = database.get_complete_downloads()
-        for file in complete_downloads:
-            id ,filename, address,filesize, downloaded, status, modification_date, path = file
-            File(self, filename, filesize, status, modification_date, path)
-
-    def display_incomplete_downloads_on_page(self):
-        incomplete_downloads = database.get_incomplete_downloads()
-        for file in incomplete_downloads:
-            id ,filename, address,filesize, downloaded, status, modification_date, path = file
-           
-            File(self, filename, filesize, status, modification_date, path).pack(fill='x')
-
+    
     def load_downloads_from_db(self):
         all_downloads = database.get_all_data()
         for download in all_downloads:
@@ -186,6 +170,10 @@ class MyApp(ctk.CTk):
                 'modification_date': modification_date,
                 'path': path
             }
+
+    def return_all_downloads(self):
+        return self.xengine_downloads
+    
     def add_download_to_list(self, filename, address, path, date):
         self.xengine_downloads[filename] = {
             'url': address,
@@ -195,29 +183,81 @@ class MyApp(ctk.CTk):
             'modification_date': date,
             'path': path
         }
+        self.update_queue.put((filename, 'waiting...', '---', date))
+
     def update_download(self, filename, status, size, date):
         filename = os.path.basename(filename)
-       
         if filename in self.xengine_downloads:
             self.xengine_downloads[filename]['status'] = status
             self.xengine_downloads[filename]['filesize'] = size
             self.xengine_downloads[filename]['modification_date'] = date
-        
+            self.update_queue.put((filename, status, size, date))
+
+
+    def process_updates(self):
+        while True:
+            try:
+                task = self.update_queue.get(timeout=0.1)
+                filename, status, size, date = self.update_queue.get(timeout=0.1)
+                self.update_file_widget(filename, status, size, date)
+                
+                
+            except queue.Empty:
+                continue
+
+    def update_file_widget(self, filename, status, size, date):
+        if filename in self.file_widgets:
+            self.file_widgets[filename].update_file_info(status, size, date)
+        else:
+            self.add_new_file_widget(filename, status, size, date)
+
+    def add_new_file_widget(self, filename, status, size, date):
+        new_widget = File(self, filename, size, status, date, self.xengine_downloads[filename]['path'])
+        new_widget.pack(fill='x')
+        self.file_widgets[filename] = new_widget
+
+    def display_all_downloads_on_page(self):
+        for filename, detail in self.return_all_downloads().items():
+            if filename not in self.file_widgets:
+                self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
+            elif filename and not self.filter_page == 'all':
+                
+                self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
+                
         
         
             
-            
-    def return_all_downloads(self):
-        return self.xengine_downloads
+    def display_complete_downloads_on_page(self):
+        complete_downloads = database.get_complete_downloads()
+        for file in complete_downloads:
+            id ,filename, address,filesize, downloaded, status, modification_date, path = file
+            File(self, filename, filesize, status, modification_date, path)
+        self.filter_page = 'complete'
+    def display_incomplete_downloads_on_page(self):
+        incomplete_downloads = database.get_incomplete_downloads()
+
+        for file in incomplete_downloads:
+            id ,filename, address,filesize, downloaded, status, modification_date, path = file
+           
+            File(self, filename, filesize, status, modification_date, path).pack(fill='x')
+        self.filter_page = 'incomplete'
+
 
     def __init__(self):
         super().__init__()
 
+        self.update_queue = queue.Queue()
         self.extension_thread = threading.Thread(target=self.start_thread_for_browser_links, daemon=True)
         self.extension_thread.start()
+        self.update_ui_thread = threading.Thread(target=self.process_updates, daemon=True)
+        self.update_ui_thread.start()
         self.index_of_page_opened = 0 # 0 home // 1 downloadin // 2 downloaded // 3 about // 4 settings
         self.about_frame = None
         self.settings_frame = None
+
+        self.filter_page = 'all'
+
+        
 
         self.about_page_opened = False
         self.settings_page_opened = False
@@ -246,7 +286,7 @@ class MyApp(ctk.CTk):
         self.minsize(800,500)
         self.resizable(False, False)
         self.iconbitmap(self.resource_path('xe-logos/main.ico'))
-        self.title('Xengine Downloader')
+        self.title('BlackJuice')
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)
         self.font12 = CTkFont(weight='normal', family='Helvetica', size=12) 
         self.font11 = CTkFont(weight='normal', family='Helvetica', size=11, slant='italic') 
@@ -296,7 +336,7 @@ class MyApp(ctk.CTk):
         self.settings_icon_btn.pack(pady=5)
         self.icon_btn_bottom.pack(side='bottom', pady=20)
         self.side_bar_icon_btns.pack(side=ctk.LEFT, fill='y' , pady=5, padx=5)
-        self.btn_bottom.pack(side='bottom', pady=20)
+        self.btn_bottom.pack(side='bottom', pady=25)
         self.side_nav_bar.pack(fill=ctk.Y, side='left')
         self.side_nav_bar.pack_propagate(False)
 
@@ -337,16 +377,28 @@ class MyApp(ctk.CTk):
         self.previously_clicked_btn = None
         self.details_of_file_clicked = None
 
+        self.more_actions = None
+
         self.running_tasks = {}
-        self.file_widgets = []
+        self.file_widgets = {}
         self.last_mtime = None
         self.w_state = self.wm_state()      
         self.xdm_class = TaskManager(self)
 
+       
         actionsForDisplayedFiles(self)
+        
 
         self.filter_all_downloads()
 
+    def show_more(self, event):
+        if not self.more_actions:
+            self.more_actions = More(self)
+            self.more_actions.place(relx=.955, rely=.95, anchor='se')
+            self.more_actions.pack_propagate(False)   
+        self.more_actions = None
+
+   
     
 
 

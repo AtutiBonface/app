@@ -32,9 +32,10 @@ class File(ctk.CTkFrame):
         ]
         parent.details_of_file_clicked = self.alter_details
 
-    def update_ui(self, size, complete):
+    def update_file_info(self, status, size, date):
+        self.download_status.configure(text=status)
         self.file_size.configure(text=size)
-        self.download_status.configure(text=complete)
+        self.file_download_date.configure(text=date)
 
     def return_short_filename(self, filename):
         filename = filename.strip()

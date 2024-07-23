@@ -4,6 +4,7 @@ import customtkinter as ctk
 import subprocess, os, platform
 
 class actionsForDisplayedFiles():
+    
 
     def __init__(self, parent):
         self.parent = parent
@@ -43,6 +44,8 @@ class actionsForDisplayedFiles():
         self.resume.bind('<Enter>', lambda event , state='Resume':self.on_actions_enter(event, state))
         self.restart.bind('<Enter>', lambda event , state='Restart':self.on_actions_enter(event, state))
         self.stop.bind('<Enter>', lambda event , state='Stop':self.on_actions_enter(event, state))
+
+        self.more_actions.bind('<Enter>', parent.show_more)
 
         self.open.bind('<Leave>', lambda event:self.on_actions_leave(event, self.open))
         self.delete.bind('<Leave>', lambda event:self.on_actions_leave(event, self.delete))
@@ -170,4 +173,27 @@ class actionsForDisplayedFiles():
         self.actions_label.configure(text='', fg_color=self.colors.primary_color)
         me.configure(fg_color=self.colors.secondary_color)
 
-        
+class More(ctk.CTkFrame):
+    def __init__(self, parent):        
+
+        super().__init__(parent.content_container,width=150, height=200, fg_color=parent.colors.primary_color) 
+        self.colors = Colors()
+        font12 = CTkFont(family="Helvetica", size=11, weight="bold") 
+
+        self.add_link = ctk.CTkButton(self,font=font12,anchor='w', fg_color=self.colors.secondary_color, hover_color=self.colors.utils_color,corner_radius=5,   text='Add Link')
+        self.clear_finished = ctk.CTkButton(self,font=font12,anchor='w', fg_color=self.colors.secondary_color, hover_color=self.colors.utils_color,corner_radius=5,   text='Clear Finished')
+        self.delete_download = ctk.CTkButton(self,font=font12,anchor='w', fg_color=self.colors.secondary_color, hover_color=self.colors.utils_color,corner_radius=5,   text='Delete Download')
+        self.speed_limiter = ctk.CTkButton(self,font=font12,anchor='w', fg_color=self.colors.secondary_color, hover_color=self.colors.utils_color,corner_radius=5,   text='Limit Speed')
+        self.exit = ctk.CTkButton(self,font=font12,anchor='w', fg_color=self.colors.secondary_color, hover_color=self.colors.utils_color,corner_radius=5,   text='close')
+
+         
+
+       
+
+        self.add_link.pack(pady=5)
+        self.clear_finished.pack(pady=5)
+        self.delete_download.pack(pady=5)
+        self.speed_limiter.pack(pady=5)
+        self.exit.pack(pady=5)
+         
+   
