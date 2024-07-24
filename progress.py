@@ -1,14 +1,14 @@
 import customtkinter as ctk
 from customtkinter import CTkFont
 from PIL import Image
-from app_utils import Colors, Images
+from app_utils import Colors, Images, OtherMethods
 from customtkinter import CTkImage, CTkFont
-import os
+import os, time
 import subprocess
 import platform
 
 
-class Progressor():
+class Progressor(ctk.CTkToplevel):
 
     ## opens file that finished downloading if open folder is clicked
     def open_folder(self, path):
@@ -24,7 +24,7 @@ class Progressor():
         else:
             pass
 
-        self.top_level.destroy()
+        self.destroy()
         
     def download_failed(self):
         for child in self.container.winfo_children():
@@ -85,20 +85,33 @@ class Progressor():
         self.title_bar.bind("<ButtonPress-1>", self.start_drag)
         self.title_bar.bind("<B1-Motion>", self.do_drag)
     def self_close(self):
-        self.top_level.destroy()
+        self.destroy()
     def self_minimize(self):
-        self.top_level.withdraw()
-    def __init__(self, parent):
-        super().__init__()
+        self.withdraw()
+
+    def update_progressor_ui(self, size,downloaded):
+        pass
+    def return_download_speed(self, size, downloaded):
+        initial_time = time.time()
+        if size == '---' or downloaded == '---':
+            return '---'
+        else:
+            size = int(size)
+            downloaded = int(downloaded)
+            speed = size
+    def __init__(self, parent,  filename, address, status, size, downloaded):
+        super().__init__(parent)
         self.xe_images = Images()
         self.colors = Colors()
         
-        self.top_level = ctk.CTkToplevel(parent)
-        width = self.top_level.winfo_screenwidth()
-        height = self.top_level.winfo_screenheight()
+       
+        width = self.winfo_screenwidth()
+        height = self.winfo_screenheight()
         half_w = int((width/2))
         half_h = int((height/2))
-        self.top_level.geometry(f'+{half_w}+{half_h}')
+        self.geometry(f'+{half_w}+{half_h}')
+
+        self.other_methods = OtherMethods()
        
 
         self.font_12 = CTkFont(family='Helvetica', weight='normal',size=12, slant='italic' )
@@ -111,11 +124,11 @@ class Progressor():
 
           # Set the window title
          # Set the window size
-        self.top_level.configure(fg_color=self.colors.secondary_color)  # Set the background color
-        self.top_level.overrideredirect(True)
+        self.configure(fg_color=self.colors.secondary_color)  # Set the background color
+        self.overrideredirect(True)
         
         
-        self.container = ctk.CTkFrame(self.top_level, height=210, width=360, fg_color=self.colors.utils_color, corner_radius=5)
+        self.container = ctk.CTkFrame(self, height=210, width=360, fg_color=self.colors.utils_color, corner_radius=5)
         self.container.pack(fill='both', expand=True)
         self.title_bar = ctk.CTkFrame(self.container, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
@@ -125,7 +138,7 @@ class Progressor():
         self.close.place(x=355, y=5,anchor='ne' )
         self.minimize = ctk.CTkButton(self.container,text='',corner_radius=2,command=self.self_minimize, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.minimize_image )
         self.minimize.place(x=320, y=5,anchor='ne' )
-        self.filename = ctk.CTkLabel(self.container, text='rihanna-work.mp4', text_color=self.colors.text_color, font=self.font12_ro)
+        self.filename = ctk.CTkLabel(self.container, text=filename, text_color=self.colors.text_color, font=self.font12_ro)
         self.filename.pack(pady=15)
         self.middle_box = ctk.CTkFrame(self.container, fg_color='transparent')
 
@@ -143,7 +156,7 @@ class Progressor():
         self.progress_bar.place(x=0)
         self.progress_bar_box.pack(side='top', fill='x')
         
-        self.file_size = ctk.CTkLabel(self.to_right,font=self.font10_ro,text_color=self.colors.secondary_color,height=15, text='Size 40mb', anchor='w')
+        self.file_size = ctk.CTkLabel(self.to_right,font=self.font10_ro,text_color=self.colors.secondary_color,height=15, text=self.other_methods.return_filesize_in_correct_units(size), anchor='w')
         self.file_size.pack(side='top', fill='x', pady=5)
         self.download_speed = ctk.CTkLabel(self.container,font=self.font12_ro,text_color=self.colors.secondary_color, text='1.2 Mbs/s')
         self.download_speed.place(y=130, x=15)
@@ -164,17 +177,17 @@ class Progressor():
         self.title_bar.bind("<B1-Motion>", self.do_drag)
 
         #used to make window to be topmost
-        self.top_level.attributes('-topmost', True)
+        self.attributes('-topmost', True)
 
         
 
         
     ## used for moving window using titlebar
     def start_drag(self, event):
-        self.top_level.x_offset = event.x
-        self.top_level.y_offset = event.y
+        self.x_offset = event.x
+        self.y_offset = event.y
 
     def do_drag(self, event):
-        x = self.top_level.winfo_pointerx() - self.top_level.x_offset
-        y = self.top_level.winfo_pointery() - self.top_level.y_offset
-        self.top_level.geometry(f"+{x}+{y}")
+        x = self.winfo_pointerx() - self.x_offset
+        y = self.winfo_pointery() - self.y_offset
+        self.geometry(f"+{x}+{y}")

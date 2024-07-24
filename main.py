@@ -4,6 +4,7 @@ from app_utils import Colors
 from file_actions import actionsForDisplayedFiles, More
 from add_link import LinkBox
 from customtkinter import CTkFont
+from progress import Progressor
 from xdm import TaskManager
 from about import About
 from settings import Settings
@@ -183,7 +184,11 @@ class MyApp(ctk.CTk):
             'modification_date': date,
             'path': path
         }
+        self.after(1000, lambda : self.open_progress_window(filename, address, 'waiting...', '---', '---'))
         self.update_queue.put((filename, 'waiting...', '---', date))
+
+    def open_progress_window(self, filename, address, status, size, downloaded):
+        Progressor(self, filename, address, status, size, downloaded)
 
     def update_download(self, filename, status, size, date):
         filename = os.path.basename(filename)
@@ -193,6 +198,7 @@ class MyApp(ctk.CTk):
             self.xengine_downloads[filename]['modification_date'] = date
             self.update_queue.put((filename, status, size, date))
 
+            
 
     def process_updates(self):
         while True:
@@ -214,7 +220,7 @@ class MyApp(ctk.CTk):
         new_widget = File(self, filename, size, status, date, self.xengine_downloads[filename]['path'])
         new_widget.pack(fill='x')
         self.file_widgets[filename] = new_widget
-
+        
     def display_all_downloads_on_page(self):
         for filename, detail in self.return_all_downloads().items():
             if filename not in self.file_widgets:

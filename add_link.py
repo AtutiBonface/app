@@ -181,7 +181,7 @@ class LinkBox(ctk.CTkToplevel):
 
                     self.selected_path = None # resets path stored
                     self.destroy()## once link is added the add_link is destroyed while the process toplevel is packed
-                    Progressor(self.parent)
+                    
 
                     
 

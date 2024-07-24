@@ -200,12 +200,10 @@ class TaskManager():
         }
         
         for filename, info in self.paused_downloads.items():
-            if name == filename: 
-                await self.update_all_active_downloads('resuming...')               
+            if name == filename:                          
                 await self.addQueue((info['link'], filename, None))
-
             
-        
+        await self.update_all_active_downloads('resuming...')      
         async with self.condition:
             self.condition.notify_all()
 
@@ -221,11 +219,12 @@ class TaskManager():
     async def _update_progress(self,filename, link, size, downloaded_chunk, start_time):
         unit_time = time.time() - start_time
         if unit_time > 0:           
-            #down_in_mbs = int(downloaded_chunk / (1024*1024))
-            #speed = down_in_mbs / unit_time
-            #new_speed = round(speed, 3)
-            #speed = self.returnSpeed(new_speed)
+            down_in_mbs = int(downloaded_chunk / (1024*1024))
+            speed = down_in_mbs / unit_time
+            new_speed = round(speed, 3)
+            speed = self.returnSpeed(new_speed)
             percentage = round((downloaded_chunk/size) * 100,0)
+            print(speed)
             await self.update_file_details_on_storage_during_download(
                 filename, link, size, downloaded_chunk, f'{percentage}%', time.strftime(r'%Y-%m-%d')
             )
