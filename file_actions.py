@@ -134,7 +134,7 @@ class actionsForDisplayedFiles():
         self.delete_actions.pack()
         self.no = ctk.CTkButton(self.delete_actions, text='NO', height=40,command= lambda :self.close_opened_popup_window(self.delete_file_top_window), width=100,hover=False, corner_radius=5, fg_color=self.colors.secondary_color)
         self.no.pack(side='left', pady=10, padx=5)
-        self.yes = ctk.CTkButton(self.delete_actions, text='YES', height=40,command= lambda :self.delete_file_from_storage_temp_file_or_both(self.delete_file_top_window), width=100,hover=False, corner_radius=5, fg_color=self.colors.secondary_color)
+        self.yes = ctk.CTkButton(self.delete_actions, text='YES', height=40,command= lambda :self.delete_file_from_storage_temp_file_or_both(self.delete_file_top_window), width=100,hover=False, corner_radius=5, fg_color='red')
         self.yes.pack(side='left', pady=10, padx=5)
         self.message_box.pack_propagate(False)
         self.message_box.pack()
@@ -145,21 +145,26 @@ class actionsForDisplayedFiles():
     def perform_file_actions(self, state,me):
         if self.parent.details_of_file_clicked:
             f_name , path, status = self.parent.details_of_file_clicked 
+            path_and_file = os.path.join(path, f_name)
             if state == 'Open':
-                if not os.path.exists(f'{path}/{f_name}'):
+                if not os.path.exists(path_and_file):
                     self.show_filenotfound_popup(self.parent)
                 else:
                     system_name = platform.system()   
                 
                     if system_name == 'Windows':
-                        os.startfile(f'{path}/{f_name}')
+                        os.startfile(path_and_file)
 
                     elif system_name == 'Linux':
-                        subprocess.Popen(["xdg-open", f'{path}/{f_name}'])
+                        subprocess.Popen(["xdg-open", path_and_file])
             elif state == 'Delete':
                 self.show_delete_file_popup(self.parent)
 
+            elif state == 'Pause':
+                self.parent.pause_downloading_file(path_and_file)
 
+            elif state == 'Resume':
+                self.parent.resume_paused_file(path_and_file)
 
             
             me.configure(fg_color = self.colors.utils_color)
@@ -167,7 +172,14 @@ class actionsForDisplayedFiles():
             pass
 
     def on_actions_enter(self, event, state):
-        self.actions_label.configure(text=state, fg_color=self.colors.utils_color)
+        self.state_color = self.colors.utils_color
+        if state == 'Delete':
+            self.state_color = 'red'
+        elif state == 'Stop':
+            self.state_color = 'orange'
+        elif state == 'Resume':
+            self.state_color = 'green'
+        self.actions_label.configure(text=state, fg_color=self.state_color)
 
     def on_actions_leave(self,event, me):
         self.actions_label.configure(text='', fg_color=self.colors.primary_color)

@@ -18,24 +18,26 @@ class TaskManager():
             self.ui_callback = parent
             self.condition = asyncio.Condition() ## used to check if queue is not empty and when file is added to a queue queue has value
 
-            
+            self.paused_downloads = {}
+            self.is_paused = False
+
             self.loop = asyncio.new_event_loop()## creating a new loop
             self.download_thread = threading.Thread(target=self.download_task_manager, daemon=True)
             # starting a different thread to run downloads
             self.download_thread.start()
 
             self.is_downloading = False
-    def append_file_details_to_storage(self, filename, path, address, date):
+    async def append_file_details_to_storage(self, filename, path, address, date):
         if not path:
             path = Settings(self.parent.content_container).xengine_download_path_global## the path stored in config file
-        self.parent.add_download_to_list(filename, address, path, date)
-        database.add_data(filename,address, '---', '---', 'waiting...', date, path)
+        await asyncio.to_thread(self.parent.add_download_to_list ,filename, address, path, date)
+        await asyncio.to_thread(database.add_data,filename,address, '---', '---', 'waiting...', date, path)
 
         
-    def update_file_details_on_storage_during_download(self, filename, address,size, downloaded, status, date):
+    async def update_file_details_on_storage_during_download(self, filename, address,size, downloaded, status, date):
         file_details = []
-        self.parent.update_download(filename, status, size, date)
-        database.update_data(filename, address,size, downloaded, status, date)
+        await asyncio.to_thread(self.parent.update_download, filename, status, size, date)
+        await asyncio.to_thread(database.update_data, filename, address,size, downloaded, status, date)
         
         
          
@@ -58,9 +60,12 @@ class TaskManager():
             return f'{speed} bytes/s'
     async def addQueue(self, file):       
         self.links_and_filenames.put_nowait(file)
-        # adds to queue,
+        # adds to queue,              
+            
         async with self.condition:
             await self.condition.notify_all()
+
+
 
         # sends a notification that a queue was added
         
@@ -71,17 +76,18 @@ class TaskManager():
         if selected_path:
             path = selected_path
         try:
-            os.makedirs(path)## making directory if it does exist
+            os.makedirs(path, exist_ok=True)## making directory if it does exist
         except Exception as e:
             pass
-        file_path = f'{path}/{filename}'
+        file_path = os.path.join(path, filename)
         index = 1
         name, extension = os.path.splitext(filename)
 
         new_name = file_path
 
         while os.path.exists(new_name):
-            new_name = f'{path}/{name}_{index}{extension}'
+            
+            new_name = os.path.join(path, f'{name}_{index}{extension}')
             index += 1
 
         return new_name
@@ -98,15 +104,19 @@ class TaskManager():
             while not self.links_and_filenames.empty():
                 file = await self.links_and_filenames.get()
                 link, filename, path = file
-                filename = self.validate_filename(filename, path)
+                if not filename in self.paused_downloads:
+                    filename = self.validate_filename(filename, path)
+                    name_with_no_path = os.path.basename(filename)
+                    await self.append_file_details_to_storage(name_with_no_path, path, link, time.strftime(r'%Y-%m-%d'))
+                   
                 file = (link, filename, path)
-                name_with_no_path = os.path.basename(filename)
-                self.append_file_details_to_storage(name_with_no_path, path, link, time.strftime(r'%Y-%m-%d'))
-                tasks.append(self.start_task(file))
+                
+                tasks.append(asyncio.create_task(self.start_task(file)))
                 self.links_and_filenames.task_done()
 
             if tasks:
                 await asyncio.gather(*tasks)
+                tasks.clear()
 
             if self.links_and_filenames.empty():
                 self.is_downloading = False
@@ -118,55 +128,107 @@ class TaskManager():
             self.ssl_context = ssl.create_default_context(cafile=certifi.where())
             self.connector = aiohttp.TCPConnector(ssl=self.ssl_context)
             async with aiohttp.ClientSession(connector=self.connector, headers=self.headers,timeout=self.timeout) as session:
-                downloaded_chunk = 0
-                speed = 0
+                downloaded_chunk = self.paused_downloads.get(filename, {}).get('downloaded', 0)
                 size = 0
-                percentage = 0
-                file_type = 'Video' 
+               
                 try:
-                    async with session.get(link) as resp:
-                        if resp.status == 200:
-                            async with aiofiles.open(filename, 'wb') as f:
-                                start_time = time.time()
-                                file_size = resp.headers.get('Content-Length', None)
-                                cont_type = resp.headers.get('Content-Type', None)
-
-                                
-
-                                if file_size:
-                                    size = int(file_size)
-                                    
-                                else:
-                                    if resp.headers.get('Transfer-Encoding') == 'chunked':
-                                        file_size = 'unknown'
-                                    else:
-                                        file_size = None
-                                
-                                async for chunk in resp.content.iter_chunked(16*1024):
-                                    await f.write(chunk)
-                                    unit_time = time.time() - start_time 
-                                    if not unit_time == 0:
-                                        downloaded_chunk += len(chunk)
-                                        down_in_mbs = int(downloaded_chunk / (1024*1024))
-                                        speed = down_in_mbs / unit_time
-                                        new_speed = round(speed, 3)
-                                        speed = self.returnSpeed(new_speed)
-                                        percentage = round((downloaded_chunk/size) * 100,0)
-                                        self.update_file_details_on_storage_during_download(
-                                        filename,link,size, downloaded_chunk, f'{percentage}%', time.strftime(r'%Y-%m-%d'))
-                                        
-
-                                
-                                self.update_file_details_on_storage_during_download(
-                                filename, link,size, size, 'completed.', time.strftime(r'%Y-%m-%d'))
-                                
-
-                except Exception as e:
-                    print(e)
-                    
-                    self.update_file_details_on_storage_during_download(
+                    async with session.get(link, headers={'Range': f'bytes={downloaded_chunk}-'}) as resp:
+                        if resp.status in (200, 206):
+                            await self._handle_download(resp, filename, link, downloaded_chunk)
+                            
+                        else:
+                            await self.update_file_details_on_storage_during_download(
+                    filename,link, size, downloaded_chunk, 'failed!', time.strftime('%Y-%m-%d'))
+                            
+                except Exception as e:                   
+                    await self.update_file_details_on_storage_during_download(
                     filename,link, size, downloaded_chunk, 'failed!', time.strftime('%Y-%m-%d')
                     )
+
+    async def _handle_download(self, resp,filename, link, initial_chuck=0):
+        downloaded_chunk = initial_chuck
+        size = int(resp.headers.get('Content-Length', 0)) + initial_chuck
+        mode = 'ab' if initial_chuck > 0 else 'wb'
+
+     
+        async with aiofiles.open(filename, mode) as f:
+            start_time = time.time()
+            async for chunk in resp.content.iter_chunked(16*1024):
+                if filename in self.paused_downloads and self.paused_downloads[filename]['resume'] == False:
+                    self.paused_downloads[filename] = {
+                        'downloaded': downloaded_chunk,
+                        'size': size,
+                        'link': link
+                    }
+                    await self.update_file_details_on_storage_during_download(
+                        filename, link, size, downloaded_chunk, 'paused.', time.strftime(r'%Y-%m-%d')
+                    )
+        
+                    return
+                await f.write(chunk)
+
+                downloaded_chunk += len(chunk)
+               
+                await self._update_progress(filename, link, size, downloaded_chunk, start_time)
+
+            if filename in self.paused_downloads:
+                del self.paused_downloads[filename]
+
+            await self.update_file_details_on_storage_during_download(
+                filename, link, size, size, 'completed.', time.strftime(r'%Y-%m-%d')
+            )
+        
+            
+
+    async def pause_downloads_fn(self, filename, size, link ,downloaded):
+        self.paused_downloads[filename] = {
+                        'downloaded': downloaded,
+                        'size': size,
+                        'link': link,
+                        'resume': False
+                    }
+       
+        await self.update_all_active_downloads('paused.')
+
+    async def resume_downloads_fn(self, name, address, downloaded):
+
+        self.paused_downloads[name] = {
+            'downloaded': downloaded,
+            'size': '---',
+            'link': address,
+            'resume': True
+        }
+        
+        for filename, info in self.paused_downloads.items():
+            if name == filename: 
+                await self.update_all_active_downloads('resuming...')               
+                await self.addQueue((info['link'], filename, None))
+
+            
+        
+        async with self.condition:
+            self.condition.notify_all()
+
+
+
+
+    async def update_all_active_downloads(self, status):
+        for filename, info in self.paused_downloads.items():
+            await self.update_file_details_on_storage_during_download(
+                filename, info['link'], info['size'], info['downloaded'], status, time.strftime(r'%Y-%m-%d')
+            )
+
+    async def _update_progress(self,filename, link, size, downloaded_chunk, start_time):
+        unit_time = time.time() - start_time
+        if unit_time > 0:           
+            #down_in_mbs = int(downloaded_chunk / (1024*1024))
+            #speed = down_in_mbs / unit_time
+            #new_speed = round(speed, 3)
+            #speed = self.returnSpeed(new_speed)
+            percentage = round((downloaded_chunk/size) * 100,0)
+            await self.update_file_details_on_storage_during_download(
+                filename, link, size, downloaded_chunk, f'{percentage}%', time.strftime(r'%Y-%m-%d')
+            )
                 
                         
         

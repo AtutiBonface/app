@@ -34,8 +34,17 @@ class File(ctk.CTkFrame):
 
     def update_file_info(self, status, size, date):
         self.download_status.configure(text=status)
-        self.file_size.configure(text=size)
+        self.file_size.configure(text=self.ui_methods.return_filesize_in_correct_units(size))
         self.file_download_date.configure(text=date)
+
+        if status in ('completed.', '100.0%'):
+            self.download_status.configure(text_color='green')
+
+        elif status == 'failed!':
+            self.download_status.configure(text_color='red')
+        else:
+            self.download_status.configure(text_color= self.colors.text_color)
+            
 
     def return_short_filename(self, filename):
         filename = filename.strip()

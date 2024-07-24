@@ -200,8 +200,7 @@ class MyApp(ctk.CTk):
                 task = self.update_queue.get(timeout=0.1)
                 filename, status, size, date = self.update_queue.get(timeout=0.1)
                 self.update_file_widget(filename, status, size, date)
-                
-                
+                                
             except queue.Empty:
                 continue
 
@@ -220,9 +219,9 @@ class MyApp(ctk.CTk):
         for filename, detail in self.return_all_downloads().items():
             if filename not in self.file_widgets:
                 self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
-            elif filename and not self.filter_page == 'all':
+            #elif filename and not self.filter_page == 'all':
                 
-                self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
+            #    self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
                 
         
         
@@ -242,15 +241,39 @@ class MyApp(ctk.CTk):
             File(self, filename, filesize, status, modification_date, path).pack(fill='x')
         self.filter_page = 'incomplete'
 
+    def pause_downloading_file(self, filename):
+        f_name = os.path.basename(filename)
+        self.load_downloads_from_db()## reasign values to xengine_downloads to get updated values for downloaded chuck
+        for name , details in self.xengine_downloads.items():
+            if name == f_name and not (details['status'] == 'completed.' or details['status'] == '100.0%'):
+                size = details['filesize']
+                link = details['url']
+                downloaded = details['downloaded']           
+                asyncio.run_coroutine_threadsafe(self.xdm_class.pause_downloads_fn(filename, size, link ,downloaded), self.xdm_class.loop)
+
+
+    def resume_paused_file(self, filename):
+        f_name = os.path.basename(filename)
+
+        self.load_downloads_from_db()## reasign values to xengine_downloads to get updated values for downloaded chuck
+        for name , details in self.xengine_downloads.items():
+            if name == f_name and not (details['status'] == 'completed.' or details['status'] == '100.0%'):
+                self.downloaded_chuck = 0
+                try:
+                    self.downloaded_chuck = int(details['downloaded'])                    
+
+                except Exception as e:                   
+                    self.downloaded_chuck = 0
+
+                asyncio.run_coroutine_threadsafe(self.xdm_class.resume_downloads_fn(filename,  details['url'], self.downloaded_chuck), self.xdm_class.loop)
+
+
 
     def __init__(self):
         super().__init__()
 
         self.update_queue = queue.Queue()
-        self.extension_thread = threading.Thread(target=self.start_thread_for_browser_links, daemon=True)
-        self.extension_thread.start()
-        self.update_ui_thread = threading.Thread(target=self.process_updates, daemon=True)
-        self.update_ui_thread.start()
+        
         self.index_of_page_opened = 0 # 0 home // 1 downloadin // 2 downloaded // 3 about // 4 settings
         self.about_frame = None
         self.settings_frame = None
@@ -400,7 +423,10 @@ class MyApp(ctk.CTk):
 
    
     
-
-
-app = MyApp()
-app.mainloop()
+if __name__ == "__main__":
+    app = MyApp()
+    extension_thread = threading.Thread(target=app.start_thread_for_browser_links, daemon=True)
+    extension_thread.start()
+    update_ui_thread = threading.Thread(target=app.process_updates, daemon=True)
+    update_ui_thread.start()
+    app.mainloop()
