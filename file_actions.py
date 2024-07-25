@@ -61,7 +61,7 @@ class actionsForDisplayedFiles():
     def delete_file_from_storage_temp_file_or_both(self,window):
         f_name , path, status = self.parent.details_of_file_clicked 
 
-        file_to_delete = f'{path}/{f_name}'
+        file_to_delete = os.path.join(path, f_name)
         if self.check_value.get() == 1:
             try:
                 self.parent.delete_details_or_make_changes(f_name)
@@ -145,7 +145,11 @@ class actionsForDisplayedFiles():
     def perform_file_actions(self, state,me):
         if self.parent.details_of_file_clicked:
             f_name , path, status = self.parent.details_of_file_clicked 
+
+
             path_and_file = os.path.join(path, f_name)
+
+
             if state == 'Open':
                 if not os.path.exists(path_and_file):
                     self.show_filenotfound_popup(self.parent)

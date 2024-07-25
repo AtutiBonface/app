@@ -4,6 +4,7 @@ from app_utils import Colors, OtherMethods, os
 class File(ctk.CTkFrame):
 
     def propagate_file_btn(self, event):
+        
         parent = self.parent
         if parent.previously_clicked_file is None:
             parent.previously_clicked_file = None
@@ -31,6 +32,8 @@ class File(ctk.CTkFrame):
             self.download_status,
         ]
         parent.details_of_file_clicked = self.alter_details
+
+        
 
     def update_file_info(self, status, size, date):
         self.download_status.configure(text=status)
@@ -65,6 +68,8 @@ class File(ctk.CTkFrame):
         self.appended_files = []
 
         self.alter_details = (filename, path, status)
+
+       
         
         
         self.file_type = ctk.CTkLabel(self, text='', image=self.ui_methods.return_file_type(filename), fg_color='transparent')

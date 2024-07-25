@@ -34,9 +34,9 @@ class TaskManager():
         await asyncio.to_thread(database.add_data,filename,address, '---', '---', 'waiting...', date, path)
 
         
-    async def update_file_details_on_storage_during_download(self, filename, address,size, downloaded, status, date):
+    async def update_file_details_on_storage_during_download(self, filename, address,size, downloaded, status, speed, date):
         file_details = []
-        await asyncio.to_thread(self.parent.update_download, filename, status, size, date)
+        await asyncio.to_thread(self.parent.update_download, filename, status, size,downloaded, date, speed)
         await asyncio.to_thread(database.update_data, filename, address,size, downloaded, status, date)
         
         
@@ -130,6 +130,7 @@ class TaskManager():
             async with aiohttp.ClientSession(connector=self.connector, headers=self.headers,timeout=self.timeout) as session:
                 downloaded_chunk = self.paused_downloads.get(filename, {}).get('downloaded', 0)
                 size = 0
+                speed =0
                
                 try:
                     async with session.get(link, headers={'Range': f'bytes={downloaded_chunk}-'}) as resp:
@@ -137,15 +138,18 @@ class TaskManager():
                             await self._handle_download(resp, filename, link, downloaded_chunk)
                             
                         else:
+                            print('The error comes from line 1')
                             await self.update_file_details_on_storage_during_download(
-                    filename,link, size, downloaded_chunk, 'failed!', time.strftime('%Y-%m-%d'))
+                    filename,link, size, downloaded_chunk, 'failed!',speed, time.strftime('%Y-%m-%d'))
                             
-                except Exception as e:                   
+                except Exception as e: 
+                    print('The error comes from line 2', e)
                     await self.update_file_details_on_storage_during_download(
-                    filename,link, size, downloaded_chunk, 'failed!', time.strftime('%Y-%m-%d')
+                    filename,link, size, downloaded_chunk, 'failed!', speed,time.strftime('%Y-%m-%d')
                     )
 
     async def _handle_download(self, resp,filename, link, initial_chuck=0):
+        await asyncio.sleep(1)
         downloaded_chunk = initial_chuck
         size = int(resp.headers.get('Content-Length', 0)) + initial_chuck
         mode = 'ab' if initial_chuck > 0 else 'wb'
@@ -153,6 +157,7 @@ class TaskManager():
      
         async with aiofiles.open(filename, mode) as f:
             start_time = time.time()
+            speed = 0
             async for chunk in resp.content.iter_chunked(16*1024):
                 if filename in self.paused_downloads and self.paused_downloads[filename]['resume'] == False:
                     self.paused_downloads[filename] = {
@@ -161,7 +166,7 @@ class TaskManager():
                         'link': link
                     }
                     await self.update_file_details_on_storage_during_download(
-                        filename, link, size, downloaded_chunk, 'paused.', time.strftime(r'%Y-%m-%d')
+                        filename, link, size, downloaded_chunk, 'paused.',speed, time.strftime(r'%Y-%m-%d')
                     )
         
                     return
@@ -175,7 +180,7 @@ class TaskManager():
                 del self.paused_downloads[filename]
 
             await self.update_file_details_on_storage_during_download(
-                filename, link, size, size, 'completed.', time.strftime(r'%Y-%m-%d')
+                filename, link, size, size, 'completed.',speed, time.strftime(r'%Y-%m-%d')
             )
         
             
@@ -211,9 +216,10 @@ class TaskManager():
 
 
     async def update_all_active_downloads(self, status):
+        speed = 0
         for filename, info in self.paused_downloads.items():
             await self.update_file_details_on_storage_during_download(
-                filename, info['link'], info['size'], info['downloaded'], status, time.strftime(r'%Y-%m-%d')
+                filename, info['link'], info['size'], info['downloaded'], status,speed, time.strftime(r'%Y-%m-%d')
             )
 
     async def _update_progress(self,filename, link, size, downloaded_chunk, start_time):
@@ -224,9 +230,9 @@ class TaskManager():
             new_speed = round(speed, 3)
             speed = self.returnSpeed(new_speed)
             percentage = round((downloaded_chunk/size) * 100,0)
-            print(speed)
+           
             await self.update_file_details_on_storage_during_download(
-                filename, link, size, downloaded_chunk, f'{percentage}%', time.strftime(r'%Y-%m-%d')
+                filename, link, size, downloaded_chunk, f'{percentage}%',speed, time.strftime(r'%Y-%m-%d')
             )
                 
                         

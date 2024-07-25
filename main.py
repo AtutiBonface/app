@@ -23,7 +23,7 @@ class MyApp(ctk.CTk):
                     filename = data['name']
                     url = data['link']
 
-                    self.after(0, lambda : self.openUrlPopup(url =url, filename=filename))
+                    self.after(10, lambda : self.openUrlPopup(url =url, filename=filename))
                 else:
                     pass
         except Exception as e:
@@ -176,6 +176,7 @@ class MyApp(ctk.CTk):
         return self.xengine_downloads
     
     def add_download_to_list(self, filename, address, path, date):
+        
         self.xengine_downloads[filename] = {
             'url': address,
             'status': 'waiting...',
@@ -184,39 +185,61 @@ class MyApp(ctk.CTk):
             'modification_date': date,
             'path': path
         }
-        self.after(1000, lambda : self.open_progress_window(filename, address, 'waiting...', '---', '---'))
-        self.update_queue.put((filename, 'waiting...', '---', date))
+        self.update_queue.put((filename, 'waiting...', '---','---', date))
+        self.after(100, lambda : self.open_progress_window(filename, address, 'waiting...', '---', '---', path))
+        
 
-    def open_progress_window(self, filename, address, status, size, downloaded):
-        Progressor(self, filename, address, status, size, downloaded)
+    def open_progress_window(self, filename, address, status, size, downloaded, path):
+        self.progress_toplevels[filename] = Progressor(self)
+        self.progress_toplevels[filename].start(filename, address, status, size, downloaded, path)
+        if  self.progress_toplevels[filename].progress_bar.winfo_exists():
+            self.progress_toplevels[filename].progress_bar.start()
+        else:
+           pass
+        
 
-    def update_download(self, filename, status, size, date):
+
+    def update_download(self, filename, status, size, downloaded ,date, speed):
         filename = os.path.basename(filename)
+        path = self.xengine_downloads[filename]['path']
         if filename in self.xengine_downloads:
             self.xengine_downloads[filename]['status'] = status
             self.xengine_downloads[filename]['filesize'] = size
             self.xengine_downloads[filename]['modification_date'] = date
-            self.update_queue.put((filename, status, size, date))
+            self.xengine_downloads[filename]['downloaded'] = downloaded
+            self.update_queue.put((filename, status, size, downloaded ,date))
+
+            if filename in self.progress_toplevels:
+                try:
+                    if  self.progress_toplevels[filename].progress_bar.winfo_exists():
+                        self.progress_toplevels[filename].progress_bar.stop()
+                        self.progress_toplevels[filename].progress_bar.configure(mode='determinate')
+                    
+
+                    self.progress_toplevels[filename].update_progressor_ui(filename,size,downloaded, path, status, speed)
+                except Exception as e:
+                    pass
 
             
 
     def process_updates(self):
         while True:
             try:
-                task = self.update_queue.get(timeout=0.1)
-                filename, status, size, date = self.update_queue.get(timeout=0.1)
-                self.update_file_widget(filename, status, size, date)
+                filename, status, size, downloaded ,date = self.update_queue.get(timeout=0.1)
+                self.update_file_widget(filename, status, size, downloaded ,date)
                                 
             except queue.Empty:
                 continue
 
-    def update_file_widget(self, filename, status, size, date):
+    def update_file_widget(self, filename, status, size, downloaded ,date):
+        
         if filename in self.file_widgets:
             self.file_widgets[filename].update_file_info(status, size, date)
         else:
             self.add_new_file_widget(filename, status, size, date)
 
-    def add_new_file_widget(self, filename, status, size, date):
+    def add_new_file_widget(self, filename, status, size, date):       
+
         new_widget = File(self, filename, size, status, date, self.xengine_downloads[filename]['path'])
         new_widget.pack(fill='x')
         self.file_widgets[filename] = new_widget
@@ -247,7 +270,9 @@ class MyApp(ctk.CTk):
             File(self, filename, filesize, status, modification_date, path).pack(fill='x')
         self.filter_page = 'incomplete'
 
+    
     def pause_downloading_file(self, filename):
+
         f_name = os.path.basename(filename)
         self.load_downloads_from_db()## reasign values to xengine_downloads to get updated values for downloaded chuck
         for name , details in self.xengine_downloads.items():
@@ -261,6 +286,8 @@ class MyApp(ctk.CTk):
     def resume_paused_file(self, filename):
         f_name = os.path.basename(filename)
 
+
+
         self.load_downloads_from_db()## reasign values to xengine_downloads to get updated values for downloaded chuck
         for name , details in self.xengine_downloads.items():
             if name == f_name and not (details['status'] == 'completed.' or details['status'] == '100.0%'):
@@ -270,9 +297,23 @@ class MyApp(ctk.CTk):
 
                 except Exception as e:                   
                     self.downloaded_chuck = 0
+                
+                if filename in self.progress_toplevels:
+                    if self.progress_toplevels[filename].winfo_exists():
+                        self.progress_toplevels[filename].destroy()
+                    del self.progress_toplevels[filename]
+
+                self.progress_toplevels[filename] = Progressor(self)                
+                self.progress_toplevels[filename].start(name, details['url'], 'resuming...',details['filesize'] ,self.downloaded_chuck, details['path'])
+                if  self.progress_toplevels[filename].progress_bar.winfo_exists():
+                        self.progress_toplevels[filename].progress_bar.start()
+                        self.progress_toplevels[filename].progress_bar.configure(mode='indeterminate')
+                    
 
                 asyncio.run_coroutine_threadsafe(self.xdm_class.resume_downloads_fn(filename,  details['url'], self.downloaded_chuck), self.xdm_class.loop)
-
+        
+        
+        
 
 
     def __init__(self):
@@ -286,6 +327,9 @@ class MyApp(ctk.CTk):
 
         self.filter_page = 'all'
 
+        self.progress_toplevels = {}
+
+
         
 
         self.about_page_opened = False
@@ -294,7 +338,7 @@ class MyApp(ctk.CTk):
 
         self.xengine_downloads = {}
         self.load_downloads_from_db()
-      
+        
         window_width = 800
         window_height = 500
 
