@@ -85,6 +85,7 @@ class Progressor(ctk.CTkToplevel):
         self.title_bar.bind("<ButtonPress-1>", self.start_drag)
         self.title_bar.bind("<B1-Motion>", self.do_drag)
     def self_close(self):
+        self.pause_file_downloading_fn(self.f_name, self.path)
         self.destroy()
     def self_minimize(self):
         self.withdraw()
@@ -115,8 +116,6 @@ class Progressor(ctk.CTkToplevel):
                     pass
         except Exception as e:
             pass
-
-
     
         
     def return_progress_value(self, size, downloaded):
@@ -196,7 +195,16 @@ class Progressor(ctk.CTkToplevel):
         self.destroy()
 
 
+    def return_short_filename(self, filename):
+        filename = filename.strip()
+        name, exten = os.path.splitext(filename)
+        if len(name) > 45:
+            filename = f'{name[:20]}...{name[-22:]}{exten}'
+        return filename
+
     def start(self, filename, address, status, size, downloaded, path):
+        self.path = path
+        self.f_name = filename
         self.title_bar = ctk.CTkFrame(self.container, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
         self.logo = ctk.CTkLabel(self.title_bar,text='', width=25, cursor='hand2',fg_color='transparent',  height=25, image=self.xe_images.sub_logo )
@@ -205,7 +213,7 @@ class Progressor(ctk.CTkToplevel):
         self.close.place(x=355, y=5,anchor='ne' )
         self.minimize = ctk.CTkButton(self.container,text='',corner_radius=2,command=self.self_minimize, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.minimize_image )
         self.minimize.place(x=320, y=5,anchor='ne' )
-        self.filename = ctk.CTkLabel(self.container, text=filename, text_color=self.colors.text_color, font=self.font12_ro)
+        self.filename = ctk.CTkLabel(self.container, text=self.return_short_filename(filename), text_color=self.colors.text_color, font=self.font12_ro)
         self.filename.pack(pady=15)
         self.middle_box = ctk.CTkFrame(self.container, fg_color='transparent')
 

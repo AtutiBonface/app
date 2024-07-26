@@ -4,9 +4,14 @@ from settings import Settings
 import aiofiles, database
 
 class TaskManager():
+    
+
+
     def __init__(self, parent) -> None:
-            
-           
+            self.LARGE_CHUNK_SIZE = 1024 * 1024  # 1 MB
+            self.SMALL_CHUNK_SIZE = 16 * 1024  # 16 KB
+            self.PROGRESS_UPDATE_INTERVAL = 100 * 1024         
+                
             self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
             self.name = ''
             self.links_and_filenames = Queue()## link and filename is appended
@@ -149,16 +154,18 @@ class TaskManager():
                     )
 
     async def _handle_download(self, resp,filename, link, initial_chuck=0):
-        await asyncio.sleep(1)
+       
         downloaded_chunk = initial_chuck
         size = int(resp.headers.get('Content-Length', 0)) + initial_chuck
         mode = 'ab' if initial_chuck > 0 else 'wb'
+
+        chunk_size = self.LARGE_CHUNK_SIZE if size > self.LARGE_CHUNK_SIZE else self.SMALL_CHUNK_SIZE
 
      
         async with aiofiles.open(filename, mode) as f:
             start_time = time.time()
             speed = 0
-            async for chunk in resp.content.iter_chunked(16*1024):
+            async for chunk in resp.content.iter_chunked(chunk_size):
                 if filename in self.paused_downloads and self.paused_downloads[filename]['resume'] == False:
                     self.paused_downloads[filename] = {
                         'downloaded': downloaded_chunk,
@@ -172,9 +179,16 @@ class TaskManager():
                     return
                 await f.write(chunk)
 
+                
+
                 downloaded_chunk += len(chunk)
+
+                if downloaded_chunk % self.PROGRESS_UPDATE_INTERVAL == 0 or downloaded_chunk == size:
+                    await self._update_progress(filename, link, size, downloaded_chunk, start_time)
+
                
                 await self._update_progress(filename, link, size, downloaded_chunk, start_time)
+                
 
             if filename in self.paused_downloads:
                 del self.paused_downloads[filename]
@@ -224,16 +238,21 @@ class TaskManager():
 
     async def _update_progress(self,filename, link, size, downloaded_chunk, start_time):
         unit_time = time.time() - start_time
-        if unit_time > 0:           
-            down_in_mbs = int(downloaded_chunk / (1024*1024))
+
+        if downloaded_chunk > 0 and unit_time > 1:  # Ensure some time has passed and some data is downloaded
+            down_in_mbs = downloaded_chunk / (1024 * 1024)
             speed = down_in_mbs / unit_time
             new_speed = round(speed, 3)
-            speed = self.returnSpeed(new_speed)
-            percentage = round((downloaded_chunk/size) * 100,0)
-           
+            speed_str = self.returnSpeed(new_speed)
+            percentage = round((downloaded_chunk / size) * 100, 0)
+            print(speed_str)
+            
             await self.update_file_details_on_storage_during_download(
-                filename, link, size, downloaded_chunk, f'{percentage}%',speed, time.strftime(r'%Y-%m-%d')
+                filename, link, size, downloaded_chunk, f'{percentage}%', speed_str, time.strftime(r'%Y-%m-%d')
             )
+        else:
+           
+            print("Calculating speed...")
                 
                         
         

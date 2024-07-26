@@ -9,6 +9,7 @@ from xdm import TaskManager
 from about import About
 from settings import Settings
 from file_ui import File
+from app_utils import OtherMethods
 import database, queue
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
@@ -128,16 +129,7 @@ class MyApp(ctk.CTk):
     def open_link_box(self):
         LinkBox(self, self.xdm_class)
 
-    def resource_path(self,relative_path):
-        """ Get absolute path to resource, works for dev and for PyInstaller """
-        try:
-            # PyInstaller creates a temp folder and stores path in _MEIPASS
-            base_path = sys._MEIPASS
-        except Exception:
-            base_path = os.path.abspath(".")
-
-
-        return os.path.join(base_path, relative_path)
+    
 
     def start_thread_for_browser_links(self):
         asyncio.run(self.extension_main())
@@ -318,8 +310,9 @@ class MyApp(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-
+        database.initiate_database()## creates table if it does not exist
         self.update_queue = queue.Queue()
+        self.other_methods = OtherMethods()
         
         self.index_of_page_opened = 0 # 0 home // 1 downloadin // 2 downloaded // 3 about // 4 settings
         self.about_frame = None
@@ -358,7 +351,7 @@ class MyApp(ctk.CTk):
 
         self.minsize(800,500)
         self.resizable(False, False)
-        self.iconbitmap(self.resource_path('xe-logos/main.ico'))
+        self.iconbitmap(self.other_methods.resource_path('xe-logos/main.ico'))
         self.title('BlackJuice')
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)
         self.font12 = CTkFont(weight='normal', family='Helvetica', size=12) 

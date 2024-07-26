@@ -39,7 +39,7 @@ class LinkBox(ctk.CTkToplevel):
         self.parent = parent  
         self.xe_images = app_utils.Images()
         self.xdm_instance = xdm_instance
-        self.default_download_path = f"{Path.home()}\\Downloads\\Xengine"
+        self.default_download_path = f"{Path.home()}\\Downloads\\BlackJuice"
         self.selected_path = None
 
         self.enter_link_box = ctk.CTkFrame(self, height=210, width=360, fg_color=self.colors.utils_color, corner_radius=5, bg_color='transparent')
@@ -125,14 +125,14 @@ class LinkBox(ctk.CTkToplevel):
             self.filename_text.set('FILE')
 
 
-    def returnFilename(self, path):
-        pass
 
     def openDownloadToFolder(self):
+        
         home = Path.home()
-        file_location = filedialog.askdirectory(mustexist=True,initialdir=home, title='Select Folder')
+        file_location = filedialog.askdirectory(mustexist=True,initialdir=home, title='Select Folder', parent=self)
         if file_location:
             self.selected_path = file_location
+            self.path_label.configure(text=file_location)
         else:
             self.selected_path = None
 

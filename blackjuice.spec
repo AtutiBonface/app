@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['main.py', 'xdm.py', 'settings.py', 'progress.py', 'app_utils.py','add_link.py', 'about.py'],
+    ['main.py', 'xdm.py', 'settings.py', 'progress.py', 'app_utils.py','add_link.py', 'about.py', 'database.py', 'file_ui.py', 'file_actions.py'],
     pathex=['xe-logos', 'images'],
     binaries=[],
     datas=[

@@ -85,27 +85,27 @@ class Colors():
 class ConfigFilesHandler():
 
     def __init__(self) -> None:
-        # writing config file to xengine folder at home folder
+        # writing config file to BlackJuice folder at home folder
 
-        self.path_to_config_file = f"{Path().home()}/.xengine/config.txt"
+        self.path_to_config_file = f"{Path().home()}/.blackjuice/config.txt"
         
         self.settings_config = [
-        "### Settings configuration for Xengine ### \n",
+        "### Settings configuration for Blackjuice ### \n",
         "\n",
-        "*Note* Do not write or edit on this file because your Xengine Downloader will be faulty! Very faulty!\n",
+        "*Note* Do not write or edit on this file because your Blackjuice Downloader will be faulty! Very faulty!\n",
         "\n",
-        "defaut_download_path <x:e> C:/Users/Bonface/Downloads/Xengine \n",
+        "defaut_download_path <x:e> C:/Users/Bonface/Downloads/Blackjuice \n",
         "max_concurrent_downloads <x:e> 100 \n",
         "auto_resume_download <x:e> false \n",
         "overide_file <x:e> false\n",
         "show_progress_window <x:e> true\n",
         "show_download_complete_window <x:e> true \n",
         "\n",
-        "extensions_link <x:e> https://xengine.imaginekenya.site/xe-extensions\n",
-        "VERSION <x:e> Xengine 1.0.1 \n"
+        "extensions_link <x:e> https://blackjuice.imaginekenya.site/xe-extensions\n",
+        "VERSION <x:e> blackjuice 1.0.1 \n"
         ]
 
-        xengine_config_path = f"{Path().home()}/.xengine"
+        xengine_config_path = f"{Path().home()}/.blackjuice"
         file = 'config.txt'
 
         try:           
@@ -166,6 +166,21 @@ class OtherMethods():
         elif extension in image_extensions:
             return xe_images.image_d2
         else: return xe_images.document_d2
+
+
+    def resource_path(self,relative_path):
+        """ Get absolute path to resource, works for dev and for PyInstaller """
+        try:
+            # PyInstaller creates a temp folder and stores path in _MEIPASS
+            base_path = sys._MEIPASS
+        except Exception:
+            base_path = os.path.abspath(".")
+
+        return os.path.join(base_path, relative_path)
+    
+
+    
+
         
        
 

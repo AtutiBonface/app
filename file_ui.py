@@ -4,7 +4,7 @@ from app_utils import Colors, OtherMethods, os
 class File(ctk.CTkFrame):
 
     def propagate_file_btn(self, event):
-        
+
         parent = self.parent
         if parent.previously_clicked_file is None:
             parent.previously_clicked_file = None
@@ -13,6 +13,8 @@ class File(ctk.CTkFrame):
             for widget in parent.previously_clicked_file:
                 try:
                     widget.configure(fg_color=self.colors.secondary_color, text_color='gray')
+                    if widget == self.file_name:
+                        widget.configure(fg_color=self.colors.secondary_color, text_color=self.colors.text_color)
                 except:
                     widget.configure(fg_color=self.colors.secondary_color)
 
@@ -75,7 +77,7 @@ class File(ctk.CTkFrame):
         self.file_type = ctk.CTkLabel(self, text='', image=self.ui_methods.return_file_type(filename), fg_color='transparent')
         self.file_type.pack(side='left', padx=10)
 
-        self.file_name = ctk.CTkLabel(self, text_color=self.colors.text_color,text=self.return_short_filename(filename), font=self.parent.font11,fg_color='transparent', anchor='w')
+        self.file_name = ctk.CTkLabel(self, text_color='gray',text=self.return_short_filename(filename), font=self.parent.font11,fg_color='transparent', anchor='w')
         self.file_name.pack(side='left', fill='x', expand=True, padx=10, pady=1)
        
         self.file_size = ctk.CTkLabel(self,text=self.ui_methods.return_filesize_in_correct_units(size),anchor='w',text_color='gray',font=self.parent.font12, fg_color='transparent', width=60)
