@@ -88,12 +88,28 @@ class TaskManager():
         index = 1
         name, extension = os.path.splitext(filename)
 
+        name_with_no_path = f'{name}{extension}'
+
         new_name = file_path
 
-        while os.path.exists(new_name):
+        while True:
+
+            if os.path.exists(new_name):
             
-            new_name = os.path.join(path, f'{name}_{index}{extension}')
-            index += 1
+                new_name = os.path.join(path, f'{name}_{index}{extension}')
+                index += 1
+                continue
+
+            if database.check_filename_existance(new_name):
+                new_name = os.path.join(path, f'{name}_{index}{extension}')
+                index += 1
+
+                print("Filename is in the database ")
+
+                continue
+
+            break
+
 
         return new_name
     async def download_tasks(self):

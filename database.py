@@ -3,6 +3,7 @@ from pathlib import Path
 path_to_data_base = f'{Path().home()}/.blackjuice'
 
 location = os.path.join(path_to_data_base, 'xe-blackjuice.db')
+
 def initiate_database():
     conn = sqlite3.connect(location)
     cursor = conn.cursor()
@@ -71,6 +72,21 @@ def delete_individual_file(filename):
 
     conn.commit()
     conn.close()
+
+def check_filename_existance(f_name):
+    base_name = os.path.basename(f_name)
+    conn = sqlite3.connect(location)
+
+    cursor = conn.cursor()
+
+    cursor.execute('''SELECT COUNT(*) FROM downloads WHERE filename = ?''', (base_name,))
+
+    count = cursor.fetchone()[0]
+
+    conn.commit()
+    conn.close()
+
+    return count > 0
 
 
 

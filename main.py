@@ -11,6 +11,7 @@ from settings import Settings
 from file_ui import File
 from app_utils import OtherMethods
 import database, queue
+import tkinter as tk
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
@@ -24,7 +25,7 @@ class MyApp(ctk.CTk):
                     filename = data['name']
                     url = data['link']
 
-                    self.after(10, lambda : self.openUrlPopup(url =url, filename=filename))
+                    self.after(0, lambda : self.openUrlPopup(url =url, filename=filename))
                 else:
                     pass
         except Exception as e:
@@ -201,7 +202,7 @@ class MyApp(ctk.CTk):
     def open_progress_window(self, filename, address, status, size, downloaded, path):
 
         self.progress_toplevels[filename] = Progressor(self)
-        
+
         self.progress_toplevels[filename].start(filename, address, status, size, downloaded, path)
         if  self.progress_toplevels[filename].progress_bar.winfo_exists():
             self.progress_toplevels[filename].progress_bar.start()
@@ -227,14 +228,24 @@ class MyApp(ctk.CTk):
             if name in self.progress_toplevels:
                 
                 try:
-                    if  self.progress_toplevels[name].progress_bar.winfo_exists():
-                        self.progress_toplevels[name].progress_bar.stop()
-                        self.progress_toplevels[name].progress_bar.configure(mode='determinate')
+                    progressor = self.progress_toplevels[name]
+                    if  progressor.winfo_exists():
+                        if progressor.progress_bar.winfo_exists():
+                            progressor.progress_bar.stop()
+                            progressor.progress_bar.configure(mode='determinate')                            
                     
+                
+                        #progressor.update_progressor_ui(name,size,downloaded, path, status, speed)
 
-                    self.progress_toplevels[name].update_progressor_ui(name,size,downloaded, path, status, speed)
-                except Exception as e:
-                    print('ERROR is', e)
+                        self.after(0, progressor.update_progressor_ui, name,size,downloaded, path, status, speed)
+                    else:
+                        
+                        del self.progress_toplevels[name]
+                except tk.TclError as e:
+                    del self.progress_toplevels[name]
+
+
+               
             
 
             

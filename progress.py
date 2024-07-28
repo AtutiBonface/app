@@ -84,8 +84,9 @@ class Progressor(ctk.CTkToplevel):
         ## used for moving window using titlebar
         self.title_bar.bind("<ButtonPress-1>", self.start_drag)
         self.title_bar.bind("<B1-Motion>", self.do_drag)
-    def self_close(self):
-        self.pause_file_downloading_fn(self.f_name, self.path)
+    def self_close(self, failed = True):
+        if failed == False:
+            self.pause_file_downloading_fn(self.f_name, self.path)
         self.destroy()
     def self_minimize(self):
         self.withdraw()
@@ -209,7 +210,7 @@ class Progressor(ctk.CTkToplevel):
         self.title_bar.pack(fill='x')
         self.logo = ctk.CTkLabel(self.title_bar,text='', width=25, cursor='hand2',fg_color='transparent',  height=25, image=self.xe_images.sub_logo )
         self.logo.place(x=5, y=2.5,anchor='nw' )
-        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=self.self_close, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
+        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=lambda: self.self_close(False), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
         self.close.place(x=355, y=5,anchor='ne' )
         self.minimize = ctk.CTkButton(self.container,text='',corner_radius=2,command=self.self_minimize, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.minimize_image )
         self.minimize.place(x=320, y=5,anchor='ne' )
