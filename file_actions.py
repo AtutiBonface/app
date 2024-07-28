@@ -153,6 +153,7 @@ class actionsForDisplayedFiles():
             if state == 'Open':
                 if not os.path.exists(path_and_file):
                     self.show_filenotfound_popup(self.parent)
+                    
                 else:
                     system_name = platform.system()   
                 

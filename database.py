@@ -68,6 +68,7 @@ def delete_individual_file(filename):
     conn = sqlite3.connect(location)
     cursor = conn.cursor()
     cursor.execute('''DELETE FROM downloads WHERE  filename = ?''', (filename,))
+
     conn.commit()
     conn.close()
 

@@ -109,7 +109,7 @@ class TaskManager():
             while not self.links_and_filenames.empty():
                 file = await self.links_and_filenames.get()
                 link, filename, path = file
-                if not filename in self.paused_downloads:
+                if not filename in self.paused_downloads:## filename in paused downloads has path with it but if it does not exist it creates name together with path selected
                     filename = self.validate_filename(filename, path)
                     name_with_no_path = os.path.basename(filename)
                     await self.append_file_details_to_storage(name_with_no_path, path, link, time.strftime(r'%Y-%m-%d'))
@@ -143,7 +143,7 @@ class TaskManager():
                             await self._handle_download(resp, filename, link, downloaded_chunk)
                             
                         else:
-                            print('The error comes from line 1')
+                           
                             await self.update_file_details_on_storage_during_download(
                     filename,link, size, downloaded_chunk, 'failed!',speed, time.strftime('%Y-%m-%d'))
                             
