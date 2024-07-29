@@ -1,7 +1,16 @@
 import customtkinter as ctk
 from app_utils import Colors, OtherMethods, os
+import os, subprocess , platform
 
 class File(ctk.CTkFrame):
+    def resetFileStyles(self):
+        self.configure(fg_color=self.colors.secondary_color)
+        self.file_type.configure(fg_color=self.colors.secondary_color)
+        self.download_status.configure(fg_color=self.colors.secondary_color, text_color='gray')
+        self.file_size.configure(fg_color=self.colors.secondary_color, text_color='gray')
+        self.file_name.configure(fg_color=self.colors.secondary_color, text_color='gray')
+        self.file_download_date.configure(fg_color=self.colors.secondary_color, text_color='gray')
+
 
     def propagate_file_btn(self, event):
 
@@ -98,6 +107,31 @@ class File(ctk.CTkFrame):
         self.file_size.bind('<Button-1>', self.propagate_file_btn)
         self.file_name.bind('<Button-1>', self.propagate_file_btn)
         self.file_download_date.bind('<Button-1>', self.propagate_file_btn)
+
+
+        self.bind('<Double-1>', self.openFile)
+        self.file_type.bind('<Double-1>', self.openFile)
+        self.download_status.bind('<Double-1>', self.openFile)
+        self.file_size.bind('<Double-1>', self.openFile)
+        self.file_name.bind('<Double-1>', self.openFile)
+        self.file_download_date.bind('<Double-1>', self.openFile)
+
+
+    def openFile(self, event):
+        f_name, path, _ = self.alter_details
+        path_and_file = os.path.join(path, f_name)
+            
+        if not os.path.exists(path_and_file):
+            pass
+            
+        else:
+            system_name = platform.system()   
+        
+            if system_name == 'Windows':
+                os.startfile(path_and_file)
+
+            elif system_name == 'Linux':
+                subprocess.Popen(["xdg-open", path_and_file])
 
 
 

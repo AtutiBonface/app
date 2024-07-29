@@ -52,18 +52,18 @@ class MyApp(ctk.CTk):
         self.downloading.configure(text_color=self.colors.text_color, fg_color=self.colors.secondary_color)
         self.failed.configure(text_color=self.colors.text_color, fg_color=self.colors.secondary_color)
     def filter_all_downloads(self):
-        self.clear_download_list_from_page()
+        
         self.clear_btn_styles()
         self.all_down.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
         self.display_all_downloads_on_page()
 
     def filter_complete_downloads(self):
-        self.clear_download_list_from_page()
+        
         self.clear_btn_styles()
         self.downloading.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
         self.display_complete_downloads_on_page()
     def filter_incomplete_downloads(self):
-        self.clear_download_list_from_page()
+        
         self.clear_btn_styles()
         self.failed.configure(text_color=self.colors.text_color, fg_color=self.colors.utils_color)
         self.display_incomplete_downloads_on_page()
@@ -138,19 +138,21 @@ class MyApp(ctk.CTk):
 
     def delete_details_or_make_changes(self, filename):
         
-        database.delete_individual_file(filename)
-        #self.xengine_downloads = {}
-        #self.load_downloads_from_db() 
+        database.delete_individual_file(filename)## delete from database
         
-        self.remove_individual_file_widget(filename)
+        
+        self.remove_individual_file_widget(filename) ## destroy widget
 
         
         
     def remove_individual_file_widget(self, filename):
         
+        
         if self.file_widgets[filename].winfo_exists():
             self.file_widgets[filename].destroy()
             del self.file_widgets[filename]
+            del self.xengine_downloads[filename]
+            
             self.previously_clicked_btn = None
             self.previously_clicked_file = None
         else: 
@@ -163,11 +165,7 @@ class MyApp(ctk.CTk):
             widget.destroy()
         self.file_widgets = {}
         
-        
-
-    
-
-            
+          
     
     def load_downloads_from_db(self):
         all_downloads = database.get_all_data()
@@ -274,35 +272,52 @@ class MyApp(ctk.CTk):
         self.file_widgets[filename] = new_widget
         
     def display_all_downloads_on_page(self):
+        self.previously_clicked_btn = None
+        self.previously_clicked_file = None
         for filename, detail in self.return_all_downloads().items():
             if filename not in self.file_widgets:
                 self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
-            #elif filename and not self.filter_page == 'all':
                 
-            #    self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
+            elif self.file_widgets[filename].winfo_exists():
+                self.file_widgets[filename].resetFileStyles()
                 
-        
         
             
     def display_complete_downloads_on_page(self):
-        complete_downloads = database.get_complete_downloads()
-        for file in complete_downloads:
-            id ,filename, address,filesize, downloaded, status, modification_date, path = file
-            File(self, filename, filesize, status, modification_date, path)
-        self.filter_page = 'complete'
-    def display_incomplete_downloads_on_page(self):
-        incomplete_downloads = database.get_incomplete_downloads()
+        self.previously_clicked_btn = None
+        self.previously_clicked_file = None
+        for filename, detail in self.return_all_downloads().items():
+            if filename  in self.file_widgets  and  detail['status'] == 'completed.' and self.file_widgets[filename].winfo_exists():
+                pass
+            elif filename in self.file_widgets and  self.file_widgets[filename].winfo_exists():
+                self.file_widgets[filename].destroy()
+                del self.file_widgets[filename]
+            else:
+                if detail['status'] == 'completed.':
+                    self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
 
-        for file in incomplete_downloads:
-            id ,filename, address,filesize, downloaded, status, modification_date, path = file
-           
-            File(self, filename, filesize, status, modification_date, path).pack(fill='x')
-        self.filter_page = 'incomplete'
+
+
+    def display_incomplete_downloads_on_page(self):
+        self.previously_clicked_btn = None
+        self.previously_clicked_file = None
+        for filename, detail in self.return_all_downloads().items():
+            if filename  in self.file_widgets  and not detail['status'] == 'completed.' and self.file_widgets[filename].winfo_exists():
+                pass
+            elif filename in self.file_widgets and self.file_widgets[filename].winfo_exists():
+                self.file_widgets[filename].destroy()
+                del self.file_widgets[filename]
+            else:
+                if not detail['status'] == 'completed.':
+                    self.add_new_file_widget(filename, detail['status'], detail['filesize'], detail['modification_date'])
+
 
     
     def pause_downloading_file(self, filename_with_path):
 
         f_name = os.path.basename(filename_with_path)
+
+
 
         self.load_downloads_from_db()## reasign values to xengine_downloads to get updated values for downloaded chuck
         for name , details in self.xengine_downloads.items():
@@ -319,7 +334,9 @@ class MyApp(ctk.CTk):
 
 
     def resume_paused_file(self, filename_with_path):
-        f_name = os.path.basename(filename_with_path)        
+        f_name = os.path.basename(filename_with_path) 
+
+            
 
         self.load_downloads_from_db()## reasign values to xengine_downloads to get updated values for downloaded chuck
         for name , details in self.xengine_downloads.items():

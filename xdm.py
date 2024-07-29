@@ -163,11 +163,14 @@ class TaskManager():
                             await self.update_file_details_on_storage_during_download(
                     filename,link, size, downloaded_chunk, 'failed!',speed, time.strftime('%Y-%m-%d'))
                             
-                except Exception as e: 
-                    print('The error comes from line 2', e)
+                except aiohttp.ClientError as e: 
+                    
                     await self.update_file_details_on_storage_during_download(
                     filename,link, size, downloaded_chunk, 'failed!', speed,time.strftime('%Y-%m-%d')
                     )
+                except Exception as e:
+                    print(e)
+                    
 
     async def _handle_download(self, resp,filename, link, initial_chuck=0):
        
@@ -261,7 +264,7 @@ class TaskManager():
             new_speed = round(speed, 3)
             speed_str = self.returnSpeed(new_speed)
             percentage = round((downloaded_chunk / size) * 100, 0)
-            print(speed_str)
+           
             
             await self.update_file_details_on_storage_during_download(
                 filename, link, size, downloaded_chunk, f'{percentage}%', speed_str, time.strftime(r'%Y-%m-%d')
