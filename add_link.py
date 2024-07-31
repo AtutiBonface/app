@@ -10,7 +10,7 @@ from asyncio import Queue
 import os, asyncio, threading
 from urllib.parse import urlparse
 from app_utils import Colors
-import app_utils
+import app_utils , re
 
       
 
@@ -136,6 +136,10 @@ class LinkBox(ctk.CTkToplevel):
         else:
             self.selected_path = None
 
+    def sanitize_filename(self, filename):
+        # Remove any invalid characters for filenames on most operating systems
+        return re.sub(r'[\\/*?:"<>|]', "", filename)
+
     def add_task_to_downloads(self):
         link = self.link_text.get()
         filename = self.filename_text.get() 
@@ -162,9 +166,13 @@ class LinkBox(ctk.CTkToplevel):
                     self.status_label.configure(text=f'No file name!', text_color='brown')
                  
                 else:
+                    name = self.sanitize_filename(name)# removes \\/*?:"<>| which are invalid characters
+
                     filename_and_path = name + extension
                     
                     filename = os.path.basename(filename_and_path)
+
+                    
 
                     self.selected_filename = filename
                     self.selected_link = link

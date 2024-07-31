@@ -8,9 +8,9 @@ class TaskManager():
 
 
     def __init__(self, parent) -> None:
-            self.LARGE_CHUNK_SIZE = 1024 * 1024  # 1 MB
-            self.SMALL_CHUNK_SIZE = 16 * 1024  # 16 KB
-            self.PROGRESS_UPDATE_INTERVAL = 100 * 1024         
+            self.CHUNK_SIZE = 256 * 1024  # 1 MB
+           
+            self.PROGRESS_UPDATE_INTERVAL = 1024 * 1024         
                 
             self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
             self.name = ''
@@ -102,9 +102,7 @@ class TaskManager():
 
             if database.check_filename_existance(new_name):
                 new_name = os.path.join(path, f'{name}_{index}{extension}')
-                index += 1
-
-                print("Filename is in the database ")
+                index += 1               
 
                 continue
 
@@ -147,7 +145,7 @@ class TaskManager():
             link, filename ,path= file
             self.timeout = aiohttp.ClientTimeout(total=None)
             self.ssl_context = ssl.create_default_context(cafile=certifi.where())
-            self.connector = aiohttp.TCPConnector(ssl=self.ssl_context)
+            self.connector = aiohttp.TCPConnector(ssl=self.ssl_context, limit=None)
             async with aiohttp.ClientSession(connector=self.connector, headers=self.headers,timeout=self.timeout) as session:
                 downloaded_chunk = self.paused_downloads.get(filename, {}).get('downloaded', 0)
                 size = 0
@@ -169,7 +167,7 @@ class TaskManager():
                     filename,link, size, downloaded_chunk, 'failed!', speed,time.strftime('%Y-%m-%d')
                     )
                 except Exception as e:
-                    print(e)
+                    print("Error is", e)
                     
 
     async def _handle_download(self, resp,filename, link, initial_chuck=0):
@@ -178,13 +176,13 @@ class TaskManager():
         size = int(resp.headers.get('Content-Length', 0)) + initial_chuck
         mode = 'ab' if initial_chuck > 0 else 'wb'
 
-        chunk_size = self.LARGE_CHUNK_SIZE if size > self.LARGE_CHUNK_SIZE else self.SMALL_CHUNK_SIZE
+        
 
      
         async with aiofiles.open(filename, mode) as f:
             start_time = time.time()
             speed = 0
-            async for chunk in resp.content.iter_chunked(chunk_size):
+            async for chunk in resp.content.iter_chunked(self.CHUNK_SIZE):
                 if filename in self.paused_downloads and self.paused_downloads[filename]['resume'] == False:
                     self.paused_downloads[filename] = {
                         'downloaded': downloaded_chunk,
@@ -203,6 +201,7 @@ class TaskManager():
                 downloaded_chunk += len(chunk)
 
                 if downloaded_chunk % self.PROGRESS_UPDATE_INTERVAL == 0 or downloaded_chunk == size:
+
                     await self._update_progress(filename, link, size, downloaded_chunk, start_time)
 
                
