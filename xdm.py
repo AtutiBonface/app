@@ -208,9 +208,9 @@ class TaskManager():
 
                 downloaded_chunk += len(chunk)
 
-                if downloaded_chunk % self.PROGRESS_UPDATE_INTERVAL == 0 or downloaded_chunk == size:
+                
 
-                    await self._update_progress(filename, link, size, downloaded_chunk, start_time)
+                await self._update_progress(filename, link, size, downloaded_chunk, start_time)
 
                
                 
