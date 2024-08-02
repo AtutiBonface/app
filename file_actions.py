@@ -26,13 +26,13 @@ class actionsForDisplayedFiles():
         self.pause = ctk.CTkButton(self.actions, text='',command=lambda state='Pause':self.perform_file_actions(state, self.pause), image=self.xe_images.pause, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
         self.resume = ctk.CTkButton(self.actions, text='',command=lambda state='Resume':self.perform_file_actions(state, self.resume), image=self.xe_images.play, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
         self.restart = ctk.CTkButton(self.actions, text='',command=lambda state='Restart':self.perform_file_actions(state, self.restart), image=self.xe_images.restart, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
-        self.stop = ctk.CTkButton(self.actions, text='',command=lambda state='Stop':self.perform_file_actions(state, self.stop), image=self.xe_images.stop, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
+        #self.stop = ctk.CTkButton(self.actions, text='',command=lambda state='Stop':self.perform_file_actions(state, self.stop), image=self.xe_images.stop, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
 
         self.open.pack(side='left', padx=10, pady=10)
         self.delete.pack(side='left', padx=10, pady=10)
         self.pause.pack(side='left', padx=10, pady=10)
         self.resume.pack(side='left', padx=10, pady=10)
-        self.stop.pack(side='left', padx=10, pady=10)
+        #self.stop.pack(side='left', padx=10, pady=10)
         self.restart.pack(side='left', padx=10, pady=10)
     
         self.actions.place(rely=.5, relx=.5, anchor='center')
@@ -43,7 +43,7 @@ class actionsForDisplayedFiles():
         self.pause.bind('<Enter>', lambda event , state='Pause':self.on_actions_enter(event, state))
         self.resume.bind('<Enter>', lambda event , state='Resume':self.on_actions_enter(event, state))
         self.restart.bind('<Enter>', lambda event , state='Restart':self.on_actions_enter(event, state))
-        self.stop.bind('<Enter>', lambda event , state='Stop':self.on_actions_enter(event, state))
+        #self.stop.bind('<Enter>', lambda event , state='Stop':self.on_actions_enter(event, state))
 
         self.more_actions.bind('<Enter>', parent.show_more)
 
@@ -52,7 +52,7 @@ class actionsForDisplayedFiles():
         self.pause.bind('<Leave>', lambda event:self.on_actions_leave(event, self.pause))
         self.resume.bind('<Leave>', lambda event:self.on_actions_leave(event, self.resume))
         self.restart.bind('<Leave>', lambda event:self.on_actions_leave(event, self.restart))
-        self.stop.bind('<Leave>', lambda event:self.on_actions_leave(event, self.stop))
+        #self.stop.bind('<Leave>', lambda event:self.on_actions_leave(event, self.stop))
 
         
     def close_opened_popup_window(self, window):

@@ -55,6 +55,8 @@ class Images():
 
         self.sub_logo = CTkImage(Image.open(self.resource_path('xe-logos/xe-128.png')),  size=(25,25))
 
+        self.huge_logo = CTkImage(Image.open(self.resource_path('xe-logos/xe-128.png')),  size=(100,100))
+
 
 class DownloadingIndicatorBox():
     def __init__(self, parent):

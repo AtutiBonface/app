@@ -8,22 +8,24 @@ class TaskManager():
 
 
     def __init__(self, parent) -> None:
-            self.CHUNK_SIZE = 256 * 1024  # 1 MB
+            # Initialize configuration settings
+
+            self.CHUNK_SIZE = 256 * 1024  # 256 kb
            
             self.PROGRESS_UPDATE_INTERVAL = 1024 * 1024         
                 
             self.headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
             self.name = ''
-            self.links_and_filenames = Queue()## link and filename is appended
+            self.links_and_filenames = Queue() # Queue for managing download tasks
             self.ui_files = []
             self.parent = parent
             self.max_concurrent_downloads = 5  # Set the maximum number of concurrent downloads
             self.semaphore = asyncio.Semaphore(self.max_concurrent_downloads)
 
             self.ui_callback = parent
-            self.condition = asyncio.Condition() ## used to check if queue is not empty and when file is added to a queue queue has value
+            self.condition = asyncio.Condition() # Condition to notify when the queue is not empty
 
-            self.paused_downloads = {}
+            self.paused_downloads = {} # Dictionary to keep track of paused downloads
             self.is_paused = False
 
             self.loop = asyncio.new_event_loop()## creating a new loop
@@ -33,6 +35,7 @@ class TaskManager():
 
             self.is_downloading = False
     async def append_file_details_to_storage(self, filename, path, address, date):
+        # Append file details to storage
         if not path:
             path = Settings(self.parent.content_container).xengine_download_path_global## the path stored in config file
         await asyncio.to_thread(self.parent.add_download_to_list ,filename, address, path, date)
@@ -40,20 +43,22 @@ class TaskManager():
 
         
     async def update_file_details_on_storage_during_download(self, filename, address,size, downloaded, status, speed, date):
-        file_details = []
+        # Update file details in storage during download
         await asyncio.to_thread(self.parent.update_download, filename, status, size,downloaded, date, speed)
         await asyncio.to_thread(database.update_data, filename, address,size, downloaded, status, date)
         
         
          
     def download_task_manager(self):
-        # where threads starts and asyncio couritine is started
+        # Manage the download tasks using asyncio
         asyncio.set_event_loop(self.loop)
         self.loop.run_until_complete(self.download_tasks())
         
 
     # converts speed to mbs, kbs, bytes
     def returnSpeed(self, speed):
+        # Convert speed to human-readable format
+
         if speed > 1:
            speed = round(speed, 2)
            return f'{speed} mb/s'
@@ -63,7 +68,9 @@ class TaskManager():
         else: 
             speed = int(speed * 1000)
             return f'{speed} bytes/s'
-    async def addQueue(self, file):       
+    async def addQueue(self, file):  
+        # Add a file to the download queue
+     
         self.links_and_filenames.put_nowait(file)
         # adds to queue,              
             
@@ -111,8 +118,9 @@ class TaskManager():
 
         return new_name
     async def download_tasks(self):
+        # Handle the download tasks
         self.is_downloading = True
-        tasks = []
+       
         while True:
             # waits for self.links and filename queue to have link if it there are links it continues 
             # otherwise it keeps waiting this prevents while True not to run forever as it consumes alot cpu
@@ -130,17 +138,16 @@ class TaskManager():
                    
                 file = (link, filename, path)
                 
-                tasks.append(asyncio.create_task(self.start_task(file)))
+                asyncio.create_task(self.start_task(file))
+
                 self.links_and_filenames.task_done()
 
-            if tasks:
-                await asyncio.gather(*tasks)
-                tasks.clear()
 
             if self.links_and_filenames.empty():
                 self.is_downloading = False
 
     async def start_task(self, file): 
+    
         async with self.semaphore:
             link, filename ,path= file
             self.timeout = aiohttp.ClientTimeout(total=None)
@@ -173,6 +180,7 @@ class TaskManager():
     async def _handle_download(self, resp,filename, link, initial_chuck=0):
        
         downloaded_chunk = initial_chuck
+
         size = int(resp.headers.get('Content-Length', 0)) + initial_chuck
         mode = 'ab' if initial_chuck > 0 else 'wb'
 
@@ -205,7 +213,6 @@ class TaskManager():
                     await self._update_progress(filename, link, size, downloaded_chunk, start_time)
 
                
-                await self._update_progress(filename, link, size, downloaded_chunk, start_time)
                 
 
             if filename in self.paused_downloads:

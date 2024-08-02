@@ -122,7 +122,8 @@ class LinkBox(ctk.CTkToplevel):
 
             self.filename_text.set(filename)
         else:
-            self.filename_text.set('FILE')
+            custom_name = link.split('//')[1].split('.')[0]
+            self.filename_text.set(custom_name)
 
 
 
