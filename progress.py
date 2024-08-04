@@ -33,7 +33,7 @@ class Progressor(ctk.CTkToplevel):
         self.title_bar = ctk.CTkFrame(self.container, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
         self.close = ctk.CTkButton(self.container,text='',corner_radius=2,command=self.self_close, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
-        self.close.place(x=355, y=5,anchor='ne' )
+        self.close.place(x=395, y=5,anchor='ne' )
 
         self.message = ctk.CTkLabel(self.container, text='Failed to download! \n Server returned bad response!', font=self.font12_ro, text_color=self.colors.secondary_color)
         self.message.place(relx=.5, rely=.5, anchor='center')
@@ -51,7 +51,7 @@ class Progressor(ctk.CTkToplevel):
         self.title_bar = ctk.CTkFrame(self.container, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
         self.close = ctk.CTkButton(self.container,text='',corner_radius=2,command=self.self_close, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
-        self.close.place(x=355, y=5,anchor='ne' )
+        self.close.place(x=395, y=5,anchor='ne' )
 
         self.message = ctk.CTkLabel(self.container, text='Download Complete !', font=CTkFont(family='Helvetica', weight='bold',size=18), text_color=self.colors.text_color)
         self.message.pack()
@@ -98,7 +98,8 @@ class Progressor(ctk.CTkToplevel):
             elif status == 'completed.':
                 self.download_complete(path, filename)
             else:                
-                progress_value = self.return_progress_value(size, downloaded)    
+                progress_value = self.return_progress_value(size, downloaded) 
+                   
 
                 if self.progress_bar.winfo_exists():
                     self.progress_bar.set(progress_value)
@@ -113,6 +114,7 @@ class Progressor(ctk.CTkToplevel):
                     self.file_size.configure(text=f'Size {n_size}')
                     self.size_downloaded.configure(text=f'Downloaded {n_downloaded}')
                     self.download_speed.configure(text=speed)
+                    self.percentage.configure(text=status)
                 else:
                     pass
         except Exception as e:
@@ -167,7 +169,7 @@ class Progressor(ctk.CTkToplevel):
         self.overrideredirect(True)
         
         
-        self.container = ctk.CTkFrame(self, height=210, width=360, fg_color=self.colors.utils_color, corner_radius=5)
+        self.container = ctk.CTkFrame(self, height=220, width=400, fg_color=self.colors.utils_color, corner_radius=5)
         self.container.pack(fill='both', expand=True)
         
         self.container.pack_propagate(False)
@@ -211,39 +213,42 @@ class Progressor(ctk.CTkToplevel):
         self.logo = ctk.CTkLabel(self.title_bar,text='', width=25, cursor='hand2',fg_color='transparent',  height=25, image=self.xe_images.sub_logo )
         self.logo.place(x=5, y=2.5,anchor='nw' )
         self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=lambda: self.self_close(False), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
-        self.close.place(x=355, y=5,anchor='ne' )
+        self.close.place(x=395, y=5,anchor='ne' )
         self.minimize = ctk.CTkButton(self.container,text='',corner_radius=2,command=self.self_minimize, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.minimize_image )
-        self.minimize.place(x=320, y=5,anchor='ne' )
+        self.minimize.place(x=360, y=5,anchor='ne' )
         self.filename = ctk.CTkLabel(self.container, text=self.return_short_filename(filename), text_color=self.colors.text_color, font=self.font12_ro)
         self.filename.pack(pady=15)
         self.middle_box = ctk.CTkFrame(self.container, fg_color='transparent')
 
         self.middle_box.place(relwidth=1, rely=.5,relx=.5, anchor='center')
         
+        self.speed_and_percentage = ctk.CTkFrame(self.middle_box, height=70, width=70, corner_radius=5, fg_color='gray')
+        self.percentage = ctk.CTkLabel(self.speed_and_percentage, text='---',anchor='s', fg_color='transparent' , font=CTkFont(family='Helvetica', weight='bold', size=14), text_color=self.colors.text_color)
+        self.percentage.pack()
+        self.download_speed = ctk.CTkLabel(self.speed_and_percentage,anchor='n',font=CTkFont(family='Helvetica', weight='bold', size=10),text_color=self.colors.text_color,fg_color='transparent', text='---', )
+        self.download_speed.pack( pady=5)
+        self.speed_and_percentage.pack(side='left', padx=10)
+        self.speed_and_percentage.pack_propagate(False)
         
-        self.my_canvas = ctk.CTkCanvas(self.middle_box, height=80, width=80,bg=self.colors.utils_color, highlightbackground=self.colors.utils_color, highlightcolor=self.colors.utils_color, insertbackground=self.colors.utils_color )
-        self.my_canvas.pack(side='left', padx=30)
+       
         self.to_right = ctk.CTkFrame(self.middle_box, fg_color='transparent')
-        self.to_right.pack(fill='x')
+        self.to_right.pack(fill='x', expand=True)
         self.size_downloaded = ctk.CTkLabel(self.to_right,font=self.font10_ro,height=15,text_color=self.colors.secondary_color, text='Downloaded ---', anchor='w')
         self.size_downloaded.pack(side='top', fill='x', pady=5)
-        self.progress_bar_box = ctk.CTkFrame(self.to_right, width=150, fg_color='transparent', height=10)
+        self.progress_bar_box = ctk.CTkFrame(self.to_right,width=150,  fg_color='transparent', height=10)
         self.progress_bar = ctk.CTkProgressBar(self.progress_bar_box,fg_color='gray',mode='indeterminate', variable=self.progress_value_variable,progress_color=self.colors.text_color, corner_radius=2)
-        self.progress_bar.place(x=0)
+        self.progress_bar.place(x=0, relwidth=.9)
         self.progress_bar_box.pack(side='top', fill='x')
         
         self.file_size = ctk.CTkLabel(self.to_right,font=self.font10_ro,text_color=self.colors.secondary_color,height=15, text='Size ---', anchor='w')
         self.file_size.pack(side='top', fill='x', pady=5)
-        self.download_speed = ctk.CTkLabel(self.container,font=self.font12_ro,text_color=self.colors.secondary_color, text='---')
-        self.download_speed.place(y=130, x=15)
-        self.pause_downloading = ctk.CTkButton(self.container, text='pause',command=lambda : self.pause_file_downloading_fn(filename, path), height=40, width=100,hover=False, corner_radius=5, fg_color=self.colors.secondary_color)
+       
+        self.pause_downloading = ctk.CTkButton(self.container, text='pause', font=self.font10_ro,command=lambda : self.pause_file_downloading_fn(filename, path), height=40, width=100,hover=False, corner_radius=5, fg_color=self.colors.secondary_color)
         self.pause_downloading.pack(side='bottom', pady=10)
         
 
 
-        self.my_canvas.create_oval(5, 5 ,75, 75,width=7, outline='gray')
-        self.my_canvas.create_arc(5,5, 75, 75, start=90, extent=-320, width=7, outline=self.colors.text_color, style=ctk.ARC)
-        self.my_canvas.create_text(40, 40, text='90%', fill=self.colors.secondary_color,font=CTkFont(weight='bold', family='Helvetica', size=14))
+       
         
         self.title_bar.bind("<ButtonPress-1>", self.start_drag)
         self.title_bar.bind("<B1-Motion>", self.do_drag)

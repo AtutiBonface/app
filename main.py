@@ -510,7 +510,7 @@ class MyApp(ctk.CTk):
 
        
         actionsForDisplayedFiles(self)
-        
+
 
         self.filter_all_downloads()
 
