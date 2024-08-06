@@ -222,22 +222,29 @@ class Progressor(ctk.CTkToplevel):
 
         self.middle_box.place(relwidth=1, rely=.5,relx=.5, anchor='center')
         
-        self.speed_and_percentage = ctk.CTkFrame(self.middle_box, height=70, width=70, corner_radius=5, fg_color='gray')
-        self.percentage = ctk.CTkLabel(self.speed_and_percentage, text='---',anchor='s', fg_color='transparent' , font=CTkFont(family='Helvetica', weight='bold', size=14), text_color=self.colors.text_color)
-        self.percentage.pack()
-        self.download_speed = ctk.CTkLabel(self.speed_and_percentage,anchor='n',font=CTkFont(family='Helvetica', weight='bold', size=10),text_color=self.colors.text_color,fg_color='transparent', text='---', )
-        self.download_speed.pack( pady=5)
-        self.speed_and_percentage.pack(side='left', padx=10)
+        self.speed_and_percentage = ctk.CTkFrame(self.middle_box, height=50, width=50, corner_radius=10, fg_color='gray')
+        self.percentage = ctk.CTkLabel(self.speed_and_percentage, text='---', fg_color='transparent' , font=CTkFont(family='Helvetica', weight='bold', size=12), text_color=self.colors.text_color)
+        self.percentage.pack(expand=True)
+       
+        self.speed_and_percentage.pack(side='left', padx=20)
         self.speed_and_percentage.pack_propagate(False)
+
+        
         
        
         self.to_right = ctk.CTkFrame(self.middle_box, fg_color='transparent')
         self.to_right.pack(fill='x', expand=True)
-        self.size_downloaded = ctk.CTkLabel(self.to_right,font=self.font10_ro,height=15,text_color=self.colors.secondary_color, text='Downloaded ---', anchor='w')
-        self.size_downloaded.pack(side='top', fill='x', pady=5)
+        self.at_top = ctk.CTkFrame(self.to_right, fg_color='transparent', height=20)
+        self.size_downloaded = ctk.CTkLabel(self.at_top,font=self.font10_ro,height=15,text_color=self.colors.secondary_color, text='Downloaded ---', anchor='w')
+        self.size_downloaded.pack(side='left', fill='x', pady=5)
+        self.download_speed = ctk.CTkLabel(self.at_top,font=CTkFont(family='Helvetica', weight='bold', size=10),text_color=self.colors.secondary_color,fg_color='transparent', text='---', )
+        self.download_speed.pack(side='right', padx=70)
+        self.at_top.pack(fill='x', side='top', expand=True, pady=3)
+        self.at_top.pack_propagate(False)
+
         self.progress_bar_box = ctk.CTkFrame(self.to_right,width=150,  fg_color='transparent', height=10)
         self.progress_bar = ctk.CTkProgressBar(self.progress_bar_box,fg_color='gray',mode='indeterminate', variable=self.progress_value_variable,progress_color=self.colors.text_color, corner_radius=2)
-        self.progress_bar.place(x=0, relwidth=.9)
+        self.progress_bar.place(x=0, relwidth=.8)
         self.progress_bar_box.pack(side='top', fill='x')
         
         self.file_size = ctk.CTkLabel(self.to_right,font=self.font10_ro,text_color=self.colors.secondary_color,height=15, text='Size ---', anchor='w')

@@ -514,6 +514,9 @@ class MyApp(ctk.CTk):
 
         self.filter_all_downloads()
 
+
+        
+
     def show_more(self, event):
         if not self.more_actions:
             self.more_actions = More(self)
