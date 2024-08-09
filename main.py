@@ -363,7 +363,38 @@ class MyApp(ctk.CTk):
                 asyncio.run_coroutine_threadsafe(self.xdm_class.resume_downloads_fn(filename_with_path,  details['url'], self.downloaded_chuck), self.xdm_class.loop)
         
         
-        
+    def update_filename(self, old_name, new_name):
+       
+
+        pathless_old_name = os.path.basename(old_name)
+        pathless_new_name = os.path.basename(new_name)
+
+        if pathless_old_name in self.xengine_downloads:
+            value = self.xengine_downloads.pop(pathless_old_name)
+
+            self.xengine_downloads[pathless_new_name] = value
+                
+                
+        if pathless_old_name in self.file_widgets:
+            value = self.file_widgets.pop(pathless_old_name) 
+
+            self.file_widgets[pathless_new_name] = value
+
+            file_widget = self.file_widgets[pathless_new_name]
+
+            if file_widget.winfo_exists():
+                file_widget.update_filename(new_name)
+
+        if pathless_old_name in self.progress_toplevels:
+            value = self.progress_toplevels.pop(pathless_old_name)
+
+            self.progress_toplevels[pathless_new_name] = value
+
+            progressor = self.progress_toplevels[pathless_new_name]
+
+            if progressor.winfo_exists():
+                progressor.update_filename(new_name)
+
 
 
     def __init__(self):

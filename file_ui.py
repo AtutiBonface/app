@@ -11,7 +11,12 @@ class File(ctk.CTkFrame):
         self.file_name.configure(fg_color=self.colors.secondary_color, text_color='gray')
         self.file_download_date.configure(fg_color=self.colors.secondary_color, text_color='gray')
 
-
+    def update_filename(self,new_filename):
+        filename = os.path.basename(new_filename)
+        self.alter_details = (filename, self.f_path, self.f_status)
+        self.file_type.configure(image=self.ui_methods.return_file_type(filename))
+        self.file_name.configure(text=self.return_short_filename(filename))
+        
     def propagate_file_btn(self, event):
 
         parent = self.parent
@@ -77,6 +82,11 @@ class File(ctk.CTkFrame):
         self.ui_methods = OtherMethods()
 
         self.appended_files = []
+
+        self.f_path = path
+        self.f_status = status
+
+        
 
         self.alter_details = (filename, path, status)
 

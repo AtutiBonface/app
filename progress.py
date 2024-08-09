@@ -91,6 +91,15 @@ class Progressor(ctk.CTkToplevel):
     def self_minimize(self):
         self.withdraw()
 
+    def update_filename(self, new_name):
+        print(new_name)
+        try:
+            filename = os.path.basename(new_name)
+            self.f_name = filename
+            self.filename.configure(text=self.return_short_filename(filename))
+        except Exception as e:
+            pass
+
     def update_progressor_ui(self, filename,size,downloaded, path, status, speed):
         try:
             if status == 'failed!':

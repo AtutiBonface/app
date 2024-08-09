@@ -31,8 +31,21 @@ def get_all_data():
     all_downloads = cursor.fetchall()    
 
 
+    
+
+
     conn3.close()
     return all_downloads
+
+def update_filename(old_name, new_name):
+    old_name = os.path.basename(old_name)
+    new_name = os.path.basename(new_name)
+
+    conn = sqlite3.connect(location)
+    cursor = conn.cursor()
+    cursor.execute(''' UPDATE downloads SET filename = ?  WHERE filename = ?  ''', (new_name, old_name))
+    conn.commit()
+    conn.close()
 
 def get_incomplete_downloads():
     conn = sqlite3.connect(location)
