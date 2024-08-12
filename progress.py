@@ -155,7 +155,7 @@ class Progressor(ctk.CTkToplevel):
         height = self.winfo_screenheight()
         half_w = int((width/2))
         half_h = int((height/2))
-        self.geometry(f'+{half_w}+{half_h}')
+        self.geometry(f'400x220+{half_w}+{half_h}')
 
         self.other_methods = OtherMethods()
        

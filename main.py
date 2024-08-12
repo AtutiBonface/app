@@ -12,6 +12,7 @@ from file_ui import File
 from app_utils import OtherMethods
 import database, queue
 import tkinter as tk
+from multi_file_window import MultipleFilePickerWindow
 class MyApp(ctk.CTk):
     ctk.set_appearance_mode('System')
     ctk.set_default_color_theme('blue')
@@ -32,6 +33,7 @@ class MyApp(ctk.CTk):
             pass
 
     def openUrlPopup(self, url , filename):
+        
         link_box = LinkBox(self, self.xdm_class)
         link_box.update_idletasks()
         link_box.link_text.set(url)
@@ -129,6 +131,7 @@ class MyApp(ctk.CTk):
 
     def open_link_box(self):
         LinkBox(self, self.xdm_class)
+        
 
     
 
@@ -419,6 +422,8 @@ class MyApp(ctk.CTk):
 
         self.xengine_downloads = {}
         self.load_downloads_from_db()
+
+
         
         window_width = 800
         window_height = 500
@@ -438,7 +443,7 @@ class MyApp(ctk.CTk):
         self.geometry(f'{window_width}x{window_height}+{half_w}+{half_h}')
 
         self.minsize(800,500)
-        self.resizable(False, False)
+        self.maxsize(900, 550)
         self.iconbitmap(self.other_methods.resource_path('xe-logos/main.ico'))
         self.title('BlackJuice')
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)
@@ -540,13 +545,29 @@ class MyApp(ctk.CTk):
         self.xdm_class = TaskManager(self)
 
        
-        actionsForDisplayedFiles(self)
-
-
         self.filter_all_downloads()
 
 
+        actionsForDisplayedFiles(self)
+
+
         
+
+        self.center_window()
+
+
+    def center_window(self):
+        self.update_idletasks()
+        self.update()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        
+        x = (screen_width // 2) - (800 // 2)
+        y = (screen_height // 2) - (500 // 2)
+
+        self.geometry(f'{800}x{500}+{x}+{y}')
 
     def show_more(self, event):
         if not self.more_actions:

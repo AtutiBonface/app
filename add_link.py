@@ -27,11 +27,11 @@ class LinkBox(ctk.CTkToplevel):
         height = self.winfo_screenheight()
         half_w = int((width/2))
         half_h = int((height/2))
+
+        self.geometry('400x220')
         
         self.geometry(f'+{half_w}+{half_h}')
 
-        self.update()
-        self.update_idletasks()
         self.dropdown_is_open = False
 
         
@@ -45,7 +45,7 @@ class LinkBox(ctk.CTkToplevel):
         self.save_at_variable = ctk.StringVar()
         self.save_at_variable.set(self.default_download_path)
 
-        self.enter_link_box = ctk.CTkFrame(self, height=220, width=400, fg_color=self.colors.utils_color, corner_radius=5, bg_color='transparent')
+        self.enter_link_box = ctk.CTkFrame(self, height=220, width=400,fg_color=self.colors.utils_color, corner_radius=5, bg_color='transparent')
         self.font2 =CTkFont(weight='bold', family='Helvetica', size=9)
         self.font =CTkFont(weight='bold', family='Helvetica', size=11)
         self.address_label = ctk.CTkLabel(self.enter_link_box,text_color=self.colors.text_color,  font=self.font,text='Address').place(y=63, x=10)

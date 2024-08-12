@@ -48,8 +48,8 @@ class Images():
         self.open = CTkImage(Image.open(self.resource_path('images/open.png')),  size=(20,20))
         self.delete = CTkImage(Image.open(self.resource_path('images/trash.png')),  size=(20,20))
         self.more = CTkImage(Image.open(self.resource_path('images/more.png')),  size=(20,20))
-        self.link = CTkImage(Image.open(self.resource_path('images/link.png')),  size=(15,15))
-
+        self.link = CTkImage(Image.open(self.resource_path('images/link.png')),  size=(15,15)) 
+        self.checked = CTkImage(Image.open(self.resource_path('images/checked_enabled.png')),  size=(15,15))
 
         self.close_image = CTkImage(Image.open(self.resource_path('images/close.png')),  size=(15,15))
         self.minimize_image = CTkImage(Image.open(self.resource_path('images/minimize.png')),  size=(15,15))
