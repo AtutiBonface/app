@@ -14,7 +14,7 @@ class FileManager:
 
     def validate_filename(self, filename, selected_path):
        
-        path = Settings(self.task_manager.parent.content_container).xengine_download_path_global## the path stored in config file
+        path = Settings(self.task_manager.parent.content_area).xengine_download_path_global## the path stored in config file
         if selected_path:
             path = selected_path
         try:

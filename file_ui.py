@@ -19,7 +19,7 @@ class File(ctk.CTkFrame):
         
     def propagate_file_btn(self, event):
 
-        parent = self.parent
+        parent = self.app
         if parent.previously_clicked_file is None:
             parent.previously_clicked_file = None
         if parent.previously_clicked_file and parent.details_of_file_clicked:
@@ -56,13 +56,7 @@ class File(ctk.CTkFrame):
         self.file_size.configure(text=self.ui_methods.return_filesize_in_correct_units(size))
         self.file_download_date.configure(text=date)
 
-        if status in ('completed.', '100.0%'):
-            self.download_status.configure(text_color='green')
-
-        elif status == 'failed!':
-            self.download_status.configure(text_color='red')
-        else:
-            self.download_status.configure(text_color= self.colors.text_color)
+        
             
 
     def return_short_filename(self, filename):
@@ -72,10 +66,13 @@ class File(ctk.CTkFrame):
             filename = f'{name[:20]}...{name[-22:]}{exten}'
         return filename
 
-    def __init__(self, parent, filename, size, status, date, path) -> None:
-        super().__init__(parent.downloading_list, fg_color=parent.colors.secondary_color,height=40,corner_radius=5, cursor='hand2')
+    def __init__(self, parent,app, filename, size, status, date, path) -> None:
+        super().__init__(parent, fg_color=app.colors.secondary_color,height=40,corner_radius=5, cursor='hand2')
         self.task_name = ''
+        if 'failed' in status.lower():  # Convert status to lowercase for case-insensitive comparison
+            status = 'failed!'
         self.parent = parent
+        self.app = app
         self.colors = Colors()
         self.file_id = os.path.basename(filename)
 
@@ -96,14 +93,14 @@ class File(ctk.CTkFrame):
         self.file_type = ctk.CTkLabel(self, text='', image=self.ui_methods.return_file_type(filename), fg_color='transparent')
         self.file_type.pack(side='left', padx=10)
 
-        self.file_name = ctk.CTkLabel(self, text_color='gray',text=self.return_short_filename(filename), font=self.parent.font11,fg_color='transparent', anchor='w')
+        self.file_name = ctk.CTkLabel(self, text_color='gray',text=self.return_short_filename(filename), font=self.app.font11,fg_color='transparent', anchor='w')
         self.file_name.pack(side='left', fill='x', expand=True, padx=10, pady=1)
        
-        self.file_size = ctk.CTkLabel(self,text=self.ui_methods.return_filesize_in_correct_units(size),anchor='w',text_color='gray',font=self.parent.font12, fg_color='transparent', width=60)
+        self.file_size = ctk.CTkLabel(self,text=self.ui_methods.return_filesize_in_correct_units(size),anchor='w',text_color='gray',font=self.app.font11_bold, fg_color='transparent', width=60)
         self.file_size.pack(side='right',  padx=5, pady=5)
-        self.file_download_date = ctk.CTkLabel(self,anchor='w',text_color='gray',text=date,font=self.parent.font12, width=60,fg_color='transparent')
+        self.file_download_date = ctk.CTkLabel(self,anchor='w',text_color='gray',text=date,font=self.app.font11_bold, width=60,fg_color='transparent')
         self.file_download_date.pack(side='right', padx=5, pady=5)
-        self.download_status = ctk.CTkLabel(self,text_color='gray',anchor='w', text=status, width=70, font=self.parent.font12)
+        self.download_status = ctk.CTkLabel(self,text_color='gray',anchor='w', text=status, width=70, font=self.app.font11_bold)
         self.download_status.pack(side='right')
 
 

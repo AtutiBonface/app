@@ -2,6 +2,7 @@ import customtkinter as ctk
 from tkinter import filedialog
 from app_utils import Colors, Images
 from customtkinter import CTkFont
+import asyncio, time
 
 class FileAddedWidget(ctk.CTkFrame):
     def __init__(self, master, file_name, file_url, file_size, **kwargs):
@@ -37,8 +38,12 @@ class FileAddedWidget(ctk.CTkFrame):
             self.checkbox.grid_remove()
 
 class MultipleFilePickerWindow(ctk.CTkToplevel):
-    def self_close(self):        
+    def self_close(self):   
+        self.parent.multi_file_picker_window = None     
         self.destroy()
+
+    def self_minimize(self):
+        self.withdraw()
 
     def start_drag(self, event):
         self.x_offset = event.x
@@ -49,15 +54,18 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         y = self.winfo_pointery() - self.y_offset
         self.geometry(f"+{x}+{y}")
 
-    def __init__(self,master):
+    def __init__(self,master, xdm_instance):
         super().__init__(master, fg_color='#232428')
        
         self.geometry("600x470")
+        self.xdm_instance = xdm_instance
         self.update_idletasks()
         master_x = master.winfo_rootx()
         master_y = master.winfo_rooty()
         master_width = master.winfo_width()
         master_height = master.winfo_height()
+
+        self.parent = master
         
         window_x = master_x + (master_width // 2) - (600 // 2)
         window_y = master_y + (master_height // 2) - (470 // 2)
@@ -81,25 +89,15 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         
         self.title_bar = ctk.CTkFrame(self, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
+        self.minimize = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=self.self_minimize, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.minimize_image )
+        self.minimize.place(x=560, y=5,anchor='ne' )
         self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=self.self_close, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
         self.close.place(x=595, y=5,anchor='ne' )
         self.title_bar.bind("<ButtonPress-1>", self.start_drag)
         self.title_bar.bind("<B1-Motion>", self.do_drag)
 
 
-        self.files = [
-            {"name": "Example Video 1.mp4", "url": "https://example.com/video1.mp4", "size": "250 MB"},
-            {"name": "Cool Music.mp3", "url": "https://example.com/music.mp3", "size": "10 MB"},
-            {"name": "Important Document.pdf", "url": "https://example.com/document.pdf", "size": "5 MB"},
-            {"name": "Funny Meme.jpg", "url": "https://example.com/meme.jpg", "size": "1 MB"},
-            {"name": "Tutorial Video.mp4", "url": "https://example.com/tutorial.mp4", "size": "500 MB"},
-            {"name": "Important Document.pdf", "url": "https://example.com/document.pdf", "size": "5 MB"},
-            {"name": "Funny Meme.jpg", "url": "https://example.com/meme.jpg", "size": "1 MB"},
-            {"name": "Tutorial Video.mp4", "url": "https://example.com/tutorial.mp4", "size": "500 MB"},
-            {"name": "Important Document.pdf", "url": "https://example.com/document.pdf", "size": "5 MB"},
-            {"name": "Funny Meme.jpg", "url": "https://example.com/meme.jpg", "size": "1 MB"},
-            {"name": "Tutorial Video.mp4", "url": "https://example.com/tutorial.mp4", "size": "500 MB"},
-        ]
+        
 
         self.selection_mode = False
 
@@ -121,8 +119,8 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         # Populate files
 
         self.file_widgets = []
-        for file in self.files:
-            fw = FileAddedWidget(self.files_frame, file["name"], file["url"], file["size"])
+        for file in self.parent.files_to_be_downloaded:
+            fw = FileAddedWidget(self.files_frame, file["name"], file["link"], 0)
             fw.pack(fill="x", pady=5)
             self.file_widgets.append(fw)
 
@@ -143,7 +141,7 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         file_path = filedialog.askopenfilename()
         if file_path:
             new_file = {"name": file_path.split("/")[-1], "url": "file://" + file_path, "size": "Unknown"}
-            self.files.append(new_file)
+            self.parent.files_to_be_downloaded.append(new_file)
             fw = FileAddedWidget(self.files_frame, new_file["name"], new_file["url"], new_file["size"])
             fw.pack(fill="x", pady=5)
             self.file_widgets.append(fw)
@@ -169,14 +167,22 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
             if widget.checkbox_var.get():
                 widget.destroy()
                 self.file_widgets.remove(widget)
-        self.files = [file for file, widget in zip(self.files, self.file_widgets) if not widget.checkbox_var.get()]
+        self.parent.files_to_be_downloaded = [file for file, widget in zip(self.parent.files_to_be_downloaded, self.file_widgets) if not widget.checkbox_var.get()]
 
     def download_all(self):
         if self.selection_mode:
-            selected_files = [file for file, widget in zip(self.files, self.file_widgets) if widget.checkbox_var.get()]
-            print("Downloading selected files:", selected_files)
+            selected_files = [file for file, widget in zip(self.parent.files_to_be_downloaded, self.file_widgets) if widget.checkbox_var.get()]
+            for file in selected_files:
+                asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((file['link'], file['name'], None)),self.xdm_instance.loop)
+                time.sleep(1)
+            selected_files = []
         else:
-            print("Downloading all files:", self.files)
+            for file in self.parent.files_to_be_downloaded:
+                asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((file['link'], file['name'], None)),self.xdm_instance.loop)
+                time.sleep(1)
 
+            self.parent.files_to_be_downloaded = []
+
+        self.self_close()
     
 

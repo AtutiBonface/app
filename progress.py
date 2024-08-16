@@ -26,7 +26,8 @@ class Progressor(ctk.CTkToplevel):
 
         self.destroy()
         
-    def download_failed(self):
+    def download_failed(self, status):
+        error_message = status.split(":", 1)[1].strip()
         for child in self.container.winfo_children():
             child.destroy()
         
@@ -35,7 +36,7 @@ class Progressor(ctk.CTkToplevel):
         self.close = ctk.CTkButton(self.container,text='',corner_radius=2,command=self.self_close, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
         self.close.place(x=395, y=5,anchor='ne' )
 
-        self.message = ctk.CTkLabel(self.container, text='Failed to download! \n Server returned bad response!', font=self.font12_ro, text_color=self.colors.secondary_color)
+        self.message = ctk.CTkLabel(self.container, text=f'Failed to download! \n {error_message}',wraplength=350, font=self.font12_ro, text_color=self.colors.secondary_color)
         self.message.place(relx=.5, rely=.5, anchor='center')
 
 
@@ -102,9 +103,9 @@ class Progressor(ctk.CTkToplevel):
 
     def update_progressor_ui(self, filename,size,downloaded, path, status, speed):
         try:
-            if status == 'failed!':
-                self.download_failed()
-            elif status == 'completed.':
+            if  'failed' in status:
+                self.download_failed(status)
+            elif 'completed' in status:
                 self.download_complete(path, filename)
             else:                
                 progress_value = self.return_progress_value(size, downloaded) 

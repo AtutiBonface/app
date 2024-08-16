@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['main.py', 'xdm.py', 'settings.py', 'progress.py', 'app_utils.py','add_link.py', 'about.py', 'database.py', 'file_ui.py', 'file_actions.py'],
+    ['main.py', 'xdm.py', 'settings.py', 'main_application.py', 'progress_manager.py', 'file_manager.py', 'network_manager.py','multi_file_window.py' ,'progress.py', 'app_utils.py','add_link.py', 'about.py', 'database.py', 'file_ui.py', 'file_actions.py'],
     pathex=['xe-logos', 'images'],
     binaries=[],
     datas=[
@@ -39,4 +39,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=['xe-logos\\main.ico'],
+    onefile=False
 )

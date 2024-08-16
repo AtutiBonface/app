@@ -218,7 +218,7 @@ class NetworkManager:
                         retry_delay = min(retry_delay * 2, 256)
 
             except aiohttp.ContentTypeError as e:
-                print('ContentTypeError at segment ', seg_no)
+                
                 await asyncio.sleep(retry_delay)
                 retry_delay = min(retry_delay * 2, 256)
 

@@ -3,24 +3,26 @@ from app_utils import Colors, Images
 import customtkinter as ctk
 import subprocess, os, platform
 
-class actionsForDisplayedFiles():
+class actionsForDisplayedFiles(ctk.CTkFrame):
     
 
-    def __init__(self, parent):
-        self.parent = parent
+    def __init__(self, master, app):
+        super().__init__(master, height=50, fg_color=app.colors.primary_color,bg_color='transparent', corner_radius=5)
+        self.parent = master
+        self.app = app
         self.colors = Colors()
+        self.xe_images =Images()
         self.font11 = CTkFont(weight='bold', family='Helvetica', size=11)
         self.font17 = CTkFont(weight='bold', family='Helvetica', size=17)
         self.font12 = CTkFont(weight='bold', family='Helvetica', size=12, slant='italic') 
 
-        self.container = ctk.CTkFrame(parent.content_container, height=50, fg_color=self.colors.primary_color,bg_color='transparent', corner_radius=5)
-        self.actions_label = ctk.CTkLabel(self.container, text=" ",  fg_color='transparent', height=20,width=70, font=self.font11, text_color=self.colors.text_color)
+        self.actions_label = ctk.CTkLabel(self, text=" ",  fg_color='transparent', height=20,width=70, font=self.font11, text_color=self.colors.text_color)
         self.actions_label.place(x=20, rely=.5 , anchor='w')
-        self.more_actions = ctk.CTkButton(self.container, hover=False,width=30, fg_color='transparent',cursor='hand2' ,text='', image=parent.xe_images.more)
+        self.more_actions = ctk.CTkButton(self, hover=False,width=30, fg_color='transparent',cursor='hand2' ,text='', image=self.xe_images.more)
         self.more_actions.place(relx=1, rely=.5, anchor='e')
-        self.actions = ctk.CTkFrame(self.container, fg_color=self.colors.primary_color, bg_color='transparent')
+        self.actions = ctk.CTkFrame(self, fg_color=self.colors.primary_color, bg_color='transparent')
 
-        self.xe_images =Images()
+        
         self.open = ctk.CTkButton(self.actions, text='',command=lambda state='Open':self.perform_file_actions(state, self.open), image=self.xe_images.open, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
         self.delete = ctk.CTkButton(self.actions, text='',command=lambda state='Delete':self.perform_file_actions(state, self.delete), image=self.xe_images.delete, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
         self.pause = ctk.CTkButton(self.actions, text='',command=lambda state='Pause':self.perform_file_actions(state, self.pause), image=self.xe_images.pause, width=30,hover=False, cursor='hand2',height=30, fg_color=self.colors.secondary_color)
@@ -36,8 +38,7 @@ class actionsForDisplayedFiles():
         self.restart.pack(side='left', padx=10, pady=10)
     
         self.actions.place(rely=.5, relx=.5, anchor='center')
-        self.container.pack(side='bottom', fill='x', padx=5, pady=2)
-        self.container.pack_propagate(False)
+        
         self.open.bind('<Enter>', lambda event , state='Open':self.on_actions_enter(event, state))
         self.delete.bind('<Enter>', lambda event , state='Delete':self.on_actions_enter(event, state))
         self.pause.bind('<Enter>', lambda event , state='Pause':self.on_actions_enter(event, state))
@@ -45,7 +46,7 @@ class actionsForDisplayedFiles():
         self.restart.bind('<Enter>', lambda event , state='Restart':self.on_actions_enter(event, state))
         #self.stop.bind('<Enter>', lambda event , state='Stop':self.on_actions_enter(event, state))
 
-        self.more_actions.bind('<Enter>', parent.show_more)
+        #self.more_actions.bind('<Enter>', parent.show_more)
 
         self.open.bind('<Leave>', lambda event:self.on_actions_leave(event, self.open))
         self.delete.bind('<Leave>', lambda event:self.on_actions_leave(event, self.delete))
@@ -59,12 +60,12 @@ class actionsForDisplayedFiles():
         window.destroy()
 
     def delete_file_from_storage_temp_file_or_both(self,window):
-        f_name , path, status = self.parent.details_of_file_clicked 
+        f_name , path, status = self.app.details_of_file_clicked 
 
         file_to_delete = os.path.join(path, f_name)
         if self.check_value.get() == 1:
             try:
-                self.parent.delete_details_or_make_changes(f_name)
+                self.app.delete_details_or_make_changes(f_name)
             except Exception as e: 
                 pass
             if os.path.exists(file_to_delete):
@@ -75,7 +76,7 @@ class actionsForDisplayedFiles():
 
         else:
             try:
-                self.parent.delete_details_or_make_changes(f_name)
+                self.app.delete_details_or_make_changes(f_name)
             except Exception as e: 
                 pass
 
@@ -143,8 +144,8 @@ class actionsForDisplayedFiles():
 
 
     def perform_file_actions(self, state,me):
-        if self.parent.details_of_file_clicked:
-            f_name , path, status = self.parent.details_of_file_clicked 
+        if self.app.details_of_file_clicked:
+            f_name , path, status = self.app.details_of_file_clicked 
 
 
             path_and_file = os.path.join(path, f_name)
@@ -166,10 +167,10 @@ class actionsForDisplayedFiles():
                 self.show_delete_file_popup(self.parent)
 
             elif state == 'Pause':
-                self.parent.pause_downloading_file(path_and_file)
+                self.app.pause_downloading_file(path_and_file)
 
             elif state == 'Resume':
-                self.parent.resume_paused_file(path_and_file)
+                self.app.resume_paused_file(path_and_file)
 
             
             me.configure(fg_color = self.colors.utils_color)
