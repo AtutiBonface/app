@@ -275,7 +275,7 @@ class MainApplication(ctk.CTk):
     def add_new_file_widget(self, filename, status, size, date):       
 
         new_widget = File(self.file_list,self, filename, size, status, date, self.xengine_downloads[filename]['path'])
-        new_widget.pack(fill='x')
+        new_widget.pack(fill='x', side='bottom')
         self.file_widgets[filename] = new_widget
   
     
@@ -440,11 +440,11 @@ class TopBar(ctk.CTkFrame):
 
     def create_widgets(self, app):
 
-        self.add_link = ctk.CTkButton(self,image=app.xe_images.link,command=self.open_link_box, text='New',hover=False,cursor='hand2',font=app.font11_bold,fg_color=app.colors.secondary_color,  width=50).pack(padx=10, side='left')
+        self.add_link = ctk.CTkButton(self,image=app.xe_images.link,command=self.open_link_box, text='New',hover=False,cursor='hand2',font=app.font11_bold,fg_color=app.colors.secondary_color,  width=60).pack(padx=10, side='left')
         self.segmented_btns = ctk.CTkFrame(self,width=150,  fg_color="transparent", corner_radius=5)
         
-        self.all_down = ctk.CTkButton(self.segmented_btns,command=self.filter_all_downloads, font=app.font11_bold,corner_radius=5,text='Active',width=50, height=30, hover=False,fg_color=app.colors.secondary_color)
-        self.downloading = ctk.CTkButton(self.segmented_btns,command=self.filter_complete_downloads, font=app.font11_bold,corner_radius=5,text='Complete',width=60, height=30, hover=False,fg_color=app.colors.secondary_color)
+        self.all_down = ctk.CTkButton(self.segmented_btns,command=self.filter_all_downloads, font=app.font11_bold,corner_radius=5,text='Active',width=80, height=30, hover=False,fg_color=app.colors.secondary_color)
+        self.downloading = ctk.CTkButton(self.segmented_btns,command=self.filter_complete_downloads, font=app.font11_bold,corner_radius=5,text='Complete',width=80, height=30, hover=False,fg_color=app.colors.secondary_color)
         
         self.all_down.pack(padx=5, pady=5,side='left')
         self.downloading.pack(padx=5, pady=5,side='left')

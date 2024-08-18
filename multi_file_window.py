@@ -1,8 +1,10 @@
+from typing import Tuple
 import customtkinter as ctk
 from tkinter import filedialog
 from app_utils import Colors, Images
 from customtkinter import CTkFont
-import asyncio, time
+import asyncio, time,re, os
+from urllib.parse import urlparse
 
 class FileAddedWidget(ctk.CTkFrame):
     def __init__(self, master, file_name, file_url, file_size, **kwargs):
@@ -120,7 +122,7 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
 
         self.file_widgets = []
         for file in self.parent.files_to_be_downloaded:
-            fw = FileAddedWidget(self.files_frame, file["name"], file["link"], 0)
+            fw = FileAddedWidget(self.files_frame, file["name"], file["link"], file["size"])
             fw.pack(fill="x", pady=5)
             self.file_widgets.append(fw)
 
@@ -129,7 +131,7 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         button_frame.pack(fill="x", padx=10, pady=10)
 
         # Buttons
-        ctk.CTkButton(button_frame, text="Add File", command=self.add_file, hover=False,cursor='hand2',fg_color=self.colors.utils_color,corner_radius=5, font=self.buttons_font, text_color="black").pack(side="left", padx=5)
+        ctk.CTkButton(button_frame, text="Add File", command=self.open_addfile_window, hover=False,cursor='hand2',fg_color=self.colors.utils_color,corner_radius=5, font=self.buttons_font, text_color="black").pack(side="left", padx=5)
         
         self.remove_button = ctk.CTkButton(button_frame, text="Remove Selected", command=self.remove_selected, hover=False,cursor='hand2',fg_color=self.colors.utils_color,corner_radius=5, font=self.buttons_font, text_color="black")
         self.remove_button.pack(side="left", padx=5)
@@ -137,16 +139,15 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         self.download_button = ctk.CTkButton(button_frame, text="Download All", command=self.download_all, hover=False,cursor='hand2',fg_color=self.colors.utils_color,corner_radius=5, font=self.buttons_font, text_color="black")
         self.download_button.pack(side="left", padx=5)
 
-    def add_file(self):
-        file_path = filedialog.askopenfilename()
-        if file_path:
-            new_file = {"name": file_path.split("/")[-1], "url": "file://" + file_path, "size": "Unknown"}
-            self.parent.files_to_be_downloaded.append(new_file)
-            fw = FileAddedWidget(self.files_frame, new_file["name"], new_file["url"], new_file["size"])
-            fw.pack(fill="x", pady=5)
-            self.file_widgets.append(fw)
-            if self.selection_mode:
-                fw.toggle_checkbox(True)
+    def add_file(self, filename, url, size='unknown'):      
+        fw = FileAddedWidget(self.files_frame, filename, url, size)
+        fw.pack(fill="x", pady=5)
+        self.file_widgets.append(fw)
+        self.parent.files_to_be_downloaded.append({'link' : url, 'name' : filename, 'size': size})
+        if self.selection_mode:
+            fw.toggle_checkbox(True)
+    def open_addfile_window(self):
+        AddFile(self)
 
     def toggle_selection_mode(self):
         self.selection_mode = not self.selection_mode
@@ -184,5 +185,132 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
             self.parent.files_to_be_downloaded = []
 
         self.self_close()
+
+
+class AddFile(ctk.CTkToplevel):
+    def __init__(self, master):
+        super().__init__(master, fg_color=master.colors.utils_color )
+        self.attributes('-topmost', True)
+        width = self.winfo_screenwidth()
+        height = self.winfo_screenheight()
+        half_w = int((width/2))
+        half_h = int((height/2))
+        self.geometry("380x200")
+        self.geometry(f'+{half_w}+{half_h}')
+        self.colors = Colors()
+        self.master = master
+        self.xe_images = Images()
+        self.font11_bold = CTkFont(family="Helvetica", size=11, weight="bold")
+
+        self.filename_text = ctk.StringVar()
+        self.link_text = ctk.StringVar()
+        self.overrideredirect(True)
+        self.title_bar = ctk.CTkFrame(self, height=30, fg_color=self.colors.text_color, corner_radius=1)
+        self.title_bar.pack(fill='x')
+        self.logo = ctk.CTkLabel(self.title_bar,text='', width=25, cursor='hand2',fg_color='transparent',  height=25, image=self.xe_images.sub_logo )
+        self.logo.place(x=5, y=2.5,anchor='nw' )
+        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=lambda: self.self_close(False), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
+        self.close.place(x=375, y=5,anchor='ne' )
+       
+
+        self.error_message_label = ctk.CTkLabel(self ,font=self.font11_bold,text='error')
+        self.error_message_label.pack(pady=2)
+        
+        # Entry boxes for link and filename
+        self.link_box = ctk.CTkFrame(self, height=40, width=380, fg_color='transparent')
+        self.link_label = ctk.CTkLabel(self.link_box,font=self.font11_bold, text="Address", text_color=self.colors.text_color)
+        self.link_label.pack(pady=5, padx=12, side='left')
+
+        
+        self.link_entry = ctk.CTkEntry(self.link_box, textvariable=self.link_text,font=self.font11_bold,corner_radius=3,border_width=0,width=280)
+        self.link_entry.pack(pady=5, side='left')
+        self.link_box.pack()
+        
+        self.filename_box = ctk.CTkFrame(self, height=40, width=380, fg_color='transparent')
+        self.filename_label = ctk.CTkLabel(self.filename_box,font=self.font11_bold, text="Filename", text_color=self.colors.text_color)
+        self.filename_label.pack(pady=5, padx=10, side='left')
+        
+        self.filename_entry = ctk.CTkEntry(self.filename_box,font=self.font11_bold,textvariable=self.filename_text, corner_radius=3,border_width=0,width=280)
+        self.filename_entry.pack(pady=5,  side='left')
+        self.filename_box.pack()
+
+
+        self.filename_box.pack_propagate(False)
+        self.link_box.pack_propagate(False)
+
+        self.link_entry.bind('<KeyRelease>', self.getInputValue)
+        
+        # Submit Button
+        self.submit_button = ctk.CTkButton(self, font=self.font11_bold, text="Submit",width=100,hover=False, height=40, corner_radius=5, fg_color=self.colors.secondary_color, command=self.submit_file)
+        self.submit_button.pack(pady=10)
     
+    
+        
+    def sanitize_filename(self, filename):
+    # Remove any invalid characters for filenames on most operating systems
+        return re.sub(r'[\\/*?:"<>|]', "", filename)
+
+    def submit_file(self):
+        link = self.link_text.get()
+        filename = self.filename_text.get() 
+
+       
+        if not urlparse(link).scheme:
+            link = f'http://{link}'
+
+        if not urlparse(link).netloc:
+            self.error_message_label.configure(text='Insert correct address!', text_color='brown')
+
+
+        
+        else:
+            url_parsed = urlparse(link)
+
+            if '.' in link in link:
+                
+                initial_filename = self.filename_text.get()
+                name, extension = os.path.splitext(initial_filename)
+
+                
+                if not name:
+                    self.error_message_label.configure(text=f'No file name!', text_color='brown')
+                 
+                else:
+                    name = self.sanitize_filename(name)# removes \\/*?:"<>| which are invalid characters
+
+                    filename_and_path = name + extension
+                    
+                    filename = os.path.basename(filename_and_path)
+
+                    
+
+                    
+                    self.master.add_file(filename, link)
+                    self.destroy()
+
+        
+        # Close the add file window
+        
+
+    def self_close(self, failed = True):        
+        self.destroy()
+
+    def getInputValue(self, event):        
+        
+        link = self.link_text.get()
+        filename = self.filename_text.get() 
+
+       
+        if not urlparse(link).scheme:
+            link = f'http://{link}'
+
+        url_parsed = urlparse(link)
+
+        if os.path.basename(url_parsed.path):
+            filename = os.path.basename(url_parsed.path)
+
+            self.filename_text.set(filename)
+        else:
+            custom_name = link.split('//')[1].split('.')[0]
+            self.filename_text.set(custom_name)
 
