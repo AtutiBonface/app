@@ -158,6 +158,8 @@ class TaskManager():
                                         m3u8_tasks.append(self.network_manager.download_m3u8_segment(session, url,filename, seg_no, self.headers, size))
 
                             await asyncio.gather(*m3u8_tasks)
+
+
                             await self.file_manager.combine_segments(filename, link, size, len(segments_urls))
 
                             async with self.lock:
@@ -165,7 +167,7 @@ class TaskManager():
                                     del self.size_downloaded_dict[filename]
 
                         else:## if it is not a .m3u8 file
-                            size = int(resp.headers['Content-Length'])
+                            size = int(resp.headers.get('Content-Length', 0))
                             content_type = resp.headers.get('Content-Type', '')                            
 
                             pursed_url = urlparse(link)
@@ -197,6 +199,7 @@ class TaskManager():
                                     await asyncio.sleep(self.config.CONCURRENCY_DELAY)
 
                                 await asyncio.gather(*tasks)
+
                                 await self.file_manager.combine_segments(filename,link,size, num_segments)
 
                                 async with self.lock:
@@ -257,22 +260,7 @@ class TaskManager():
 
                 
 
-    async def _handle_segments_downloads_ui(self,filename, link, total_size):
-        async with self.lock:
-            if filename in self.size_downloaded_dict:
-                total_downloaded, start_time = self.size_downloaded_dict[filename]
-                unit_time = time.time() - start_time
-                if total_downloaded > 0 and unit_time > 1:
-                    down_in_mbs = total_downloaded / (1024 * 1024)
-                    speed = down_in_mbs / unit_time
-                    new_speed = round(speed, 3)
-                    speed_str = self.other_methods.returnSpeed(new_speed)
-                    percentage = round((total_downloaded / total_size) * 100, 0)
-
-                    await self.progress_manager.update_file_details_on_storage_during_download(
-                        filename, link, total_size, total_downloaded, f'{percentage}%', speed_str, time.strftime(r'%Y-%m-%d')
-                    )
-
+    
 
 
     async def pause_downloads_fn(self, filename, size, link ,downloaded):

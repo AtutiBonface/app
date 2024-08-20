@@ -175,12 +175,12 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
             selected_files = [file for file, widget in zip(self.parent.files_to_be_downloaded, self.file_widgets) if widget.checkbox_var.get()]
             for file in selected_files:
                 asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((file['link'], file['name'], None)),self.xdm_instance.loop)
-                time.sleep(1)
+                
             selected_files = []
         else:
             for file in self.parent.files_to_be_downloaded:
                 asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((file['link'], file['name'], None)),self.xdm_instance.loop)
-                time.sleep(1)
+                
 
             self.parent.files_to_be_downloaded = []
 
@@ -213,7 +213,7 @@ class AddFile(ctk.CTkToplevel):
         self.close.place(x=375, y=5,anchor='ne' )
        
 
-        self.error_message_label = ctk.CTkLabel(self ,font=self.font11_bold,text='error')
+        self.error_message_label = ctk.CTkLabel(self ,font=self.font11_bold, text='')
         self.error_message_label.pack(pady=2)
         
         # Entry boxes for link and filename

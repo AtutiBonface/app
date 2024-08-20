@@ -80,9 +80,7 @@ class FileManager:
         size = int(resp.headers.get('Content-Length', 0)) + initial_chuck
         mode = 'ab' if initial_chuck > 0 else 'wb'
 
-        
-
-     
+    
         async with aiofiles.open(filename, mode) as f:
             start_time = time.time()
             speed = 0

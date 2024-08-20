@@ -64,19 +64,19 @@ class Progressor(ctk.CTkToplevel):
         self.location_vari.set(path)
 
         self.filename_box = ctk.CTkFrame(self.container, fg_color='transparent', height=30)
-        self.filename_title = ctk.CTkLabel(self.filename_box, text='Filename',font=self.font12_ro, width=80)
-        self.filename_title.pack(side='left')
-        self.filename_name = ctk.CTkEntry(self.filename_box,state='disabled',font=self.font10_ro,border_width=0,corner_radius=3,width=240 ,textvariable=self.filename_vari)
+        self.filename_title = ctk.CTkLabel(self.filename_box, text='Filename',font=self.font12_ro, width=60)
+        self.filename_title.pack(side='left', padx=2)
+        self.filename_name = ctk.CTkEntry(self.filename_box,state='disabled',font=self.font8_ro,border_width=0,corner_radius=3,width=350 ,textvariable=self.filename_vari)
         self.filename_name.pack(side='left', fill='x')
        
         self.location_box = ctk.CTkFrame(self.container, fg_color='transparent', height=30)
-        self.location_title = ctk.CTkLabel(self.location_box, text='Location',font=self.font12_ro, width=80)
-        self.location_title.pack(side='left')
-        self.location_name = ctk.CTkEntry(self.location_box,state='disabled',font=self.font10_ro, border_width=0,corner_radius=3,width=240 ,textvariable=self.location_vari)
+        self.location_title = ctk.CTkLabel(self.location_box, text='Location',font=self.font12_ro, width=60)
+        self.location_title.pack(side='left', padx=2)
+        self.location_name = ctk.CTkEntry(self.location_box,state='disabled',font=self.font8_ro, border_width=0,corner_radius=3,width=350 ,textvariable=self.location_vari)
         self.location_name.pack(side='left', fill='x')
 
-        self.filename_box.pack(fill='x', pady=10)
-        self.location_box.pack(fill='x',pady=10)
+        self.filename_box.pack(fill='x', pady=10, padx=5)
+        self.location_box.pack(fill='x',pady=10, padx=5)
 
 
         self.okay_btn = ctk.CTkButton(self.container,font=self.font12_ro, text='Open Folder',command=lambda :self.open_folder(self.location_vari.get()), height=40, width=100, corner_radius=5, hover=False, fg_color=self.colors.secondary_color)
@@ -168,6 +168,7 @@ class Progressor(ctk.CTkToplevel):
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)
         self.font12_ro = CTkFont(weight='bold', family='Helvetica', size=12) 
         self.font10_ro = CTkFont(weight='bold', family='Helvetica', size=10) 
+        self.font8_ro = CTkFont(weight='bold', family='Helvetica', size=8) 
 
         self.progress_value_variable = ctk.IntVar()
         self.progress_value_variable.set(0)

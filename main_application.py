@@ -238,8 +238,9 @@ class MainApplication(ctk.CTk):
 
                         self.after(0, progressor.update_progressor_ui, name,size,downloaded, path, status, speed)
 
-                    else:                        
-                        del self.progress_toplevels[name]
+                    else:  
+                        if name in   self.progress_toplevels:                    
+                            del self.progress_toplevels[name]
 
             
                 except tk.TclError as e:
