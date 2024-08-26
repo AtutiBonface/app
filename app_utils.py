@@ -2,7 +2,7 @@ from PIL import Image
 from customtkinter import CTkImage, CTkFont
 import customtkinter as ctk
 from pathlib import Path
-import os, sys
+import os, sys, logging
 from urllib.parse import urljoin, urlparse, urlunparse 
 
 class Images():
@@ -85,45 +85,45 @@ class Colors():
         self.utils_color ="#48D1CC"
 
         
-class ConfigFilesHandler():
-
+class ConfigFilesHandler:
+    
     def __init__(self) -> None:
-        # writing config file to BlackJuice folder at home folder
-
-        self.path_to_config_file = f"{Path().home()}/.blackjuice/config.txt"
         
+        # Define the path to the config file
+        self.path_to_config_file = Path.home() / ".blackjuice" / "config.txt"
+
+        # Settings configuration content
+    def create_config_file(self):
         self.settings_config = [
-        "### Settings configuration for Blackjuice ### \n",
-        "\n",
-        "*Note* Do not write or edit on this file because your Blackjuice Downloader will be faulty! Very faulty!\n",
-        "\n",
-        "defaut_download_path <x:e> C:/Users/Bonface/Downloads/Blackjuice \n",
-        "max_concurrent_downloads <x:e> 100 \n",
-        "auto_resume_download <x:e> false \n",
-        "overide_file <x:e> false\n",
-        "show_progress_window <x:e> true\n",
-        "show_download_complete_window <x:e> true \n",
-        "\n",
-        "extensions_link <x:e> https://blackjuice.imaginekenya.site/xe-extensions\n",
-        "VERSION <x:e> blackjuice 1.0.1 \n"
+            "### Settings configuration for Blackjuice ### \n",
+            "\n",
+            "*Note* Do not write or edit this file because your Blackjuice Downloader will be faulty! Very faulty!\n",
+            "\n",
+            "defaut_download_path <x:e> C:/Users/Bonface/Downloads/Blackjuice \n",
+            "max_concurrent_downloads <x:e> 5 \n",
+            "auto_resume_download <x:e> false \n",
+            "overide_file <x:e> false\n",
+            "show_progress_window <x:e> true \n",
+            "show_download_complete_window <x:e> true \n",
+            "\n",
+            "extensions_link <x:e> https://blackjuice.imaginekenya.site/xe-extensions\n",
+            "VERSION <x:e> blackjuice 2.0 \n"
         ]
 
-        xengine_config_path = f"{Path().home()}/.blackjuice"
-        file = 'config.txt'
+        try:
+          
+            self.path_to_config_file.parent.mkdir(parents=True, exist_ok=True)
 
-        try:           
-            os.makedirs(xengine_config_path)
             
+            with self.path_to_config_file.open('w') as f:
+                f.writelines(self.settings_config)
 
-            with open(f"{xengine_config_path}/{file}", 'w') as f:
-                for line in self.settings_config:
-                    f.write(line)
-
-        except FileExistsError:
-            pass
         except Exception as e:
-            pass
+            logging.basicConfig(level=logging.INFO)
+            self.logger = logging.getLogger(__name__)
 
+            self.logger.error("An error occurred: {e}")
+           
 
 
 class OtherMethods():

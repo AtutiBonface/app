@@ -107,26 +107,16 @@ class Progressor(ctk.CTkToplevel):
                 self.download_failed(status)
             elif 'completed' in status:
                 self.download_complete(path, filename)
-            else:                
+            elif self.progress_bar.winfo_exists():                
                 progress_value = self.return_progress_value(size, downloaded) 
-                   
-
-                if self.progress_bar.winfo_exists():
-                    self.progress_bar.set(progress_value)
-                else:
-                    pass
-                
-
+                self.progress_bar.set(progress_value)
                 n_downloaded = self.other_methods.return_filesize_in_correct_units(downloaded)
-                n_size = self.other_methods.return_filesize_in_correct_units(size)
-
-                if self.file_size.winfo_exists() and self.size_downloaded.winfo_exists() and self.download_speed.winfo_exists():
-                    self.file_size.configure(text=f'Size {n_size}')
-                    self.size_downloaded.configure(text=f'Downloaded {n_downloaded}')
-                    self.download_speed.configure(text=speed)
-                    self.percentage.configure(text=status)
-                else:
-                    pass
+                n_size = self.other_methods.return_filesize_in_correct_units(size)                
+                self.file_size.configure(text=f'Size {n_size}')
+                self.size_downloaded.configure(text=f'Downloaded {n_downloaded}')
+                self.download_speed.configure(text=speed)
+                self.percentage.configure(text=status)
+                
         except Exception as e:
             pass
     

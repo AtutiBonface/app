@@ -9,6 +9,7 @@ from pathlib import Path
 
 class Settings(ctk.CTkFrame):
     def return_setting_value(self, setting):
+        
         path_to_config = ConfigFilesHandler().path_to_config_file
 
         if os.path.exists(path_to_config):        
@@ -19,7 +20,7 @@ class Settings(ctk.CTkFrame):
 
                         return new_line
         else:
-            ConfigFilesHandler()
+            ConfigFilesHandler().create_config_file()
             with open(path_to_config, 'r') as f:
                 for line in f.readlines():
                     if line.startswith(setting):
@@ -115,7 +116,7 @@ class Settings(ctk.CTkFrame):
         self.overide_file = ctk.CTkSwitch(self.other_s, command=lambda setting ='overide_file':self.change_settings_state(setting, self.overide_fi_exis.get()),onvalue='true', offvalue='false', variable=self.overide_fi_exis, fg_color=self.colors.text_color, progress_color=self.colors.utils_color, text='Overide existing file',text_color='gray', font=self.font11_bold)
         self.overide_file.pack(fill='x', pady=5)
         
-        self.progress_window = ctk.CTkSwitch(self.other_s, command=lambda setting ='show_progress_window':self.change_settings_state(setting, self.proges_w.get()),onvalue='true', offvalue='false', variable=self.proges_w, fg_color=self.colors.text_color, progress_color=self.colors.utils_color, text='Show download progress window',text_color='gray', font=self.font11_bold)
+        self.progress_window = ctk.CTkSwitch(self.other_s, command=lambda setting ='show_progress_window':self.change_settings_state(setting, self.progress_w.get()),onvalue='true', offvalue='false', variable=self.progress_w, fg_color=self.colors.text_color, progress_color=self.colors.utils_color, text='Show download progress window',text_color='gray', font=self.font11_bold)
         self.progress_window.pack(fill='x', pady=5)
         self.download_complete = ctk.CTkSwitch(self.other_s, command=lambda setting ='show_download_complete_window':self.change_settings_state(setting, self.download_c_w.get()),onvalue='true', offvalue='false', variable=self.download_c_w,fg_color=self.colors.text_color, progress_color=self.colors.utils_color, text='Show download complete dialog',text_color='gray', font=self.font11_bold)
         self.download_complete.pack(fill='x', pady=5)
@@ -167,7 +168,7 @@ class Settings(ctk.CTkFrame):
     
         super().__init__(parent) 
         self.colors = Colors()
-        self.proges_w = ctk.StringVar()
+        self.progress_w = ctk.StringVar()
         self.download_c_w = ctk.StringVar()
         self.auto_resume_downl = ctk.StringVar()
         self.overide_fi_exis = ctk.StringVar()
@@ -180,7 +181,7 @@ class Settings(ctk.CTkFrame):
         self.overide_fi_exis.set(f'{self.return_setting_value('overide_file')}')
         self.auto_resume_downl.set(f'{self.return_setting_value('auto_resume_download')}')
         self.download_c_w.set(f'{self.return_setting_value('show_download_complete_window')}')
-        self.proges_w.set(f'{self.return_setting_value('show_progress_window')}')
+        self.progress_w.set(f'{self.return_setting_value('show_progress_window')}')
         self.access_download_path.set(f'{self.return_setting_value('defaut_download_path')}')
 
         self.xengine_download_path_global = f'{self.return_setting_value('defaut_download_path')}'
@@ -208,15 +209,7 @@ class Settings(ctk.CTkFrame):
 
         self.open_general_settings()
 
-        
-
-        
-        
-        
-
-        
-        
-        
+   
 
     def copy_to_clipboard(self, link):
         self.copy_link.configure(fg_color=self.colors.primary_color, text='copied')

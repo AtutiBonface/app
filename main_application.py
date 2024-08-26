@@ -17,6 +17,7 @@ from multi_file_window import MultipleFilePickerWindow
 class MainApplication(ctk.CTk):
     def __init__(self):
         super().__init__()
+        database.initiate_database()        
         self.setup_data()
         self.setup_window()
         self.setup_styles()
@@ -24,6 +25,7 @@ class MainApplication(ctk.CTk):
         self.setup_layout()
         self.bind_events()
         self.start_background_tasks()
+        
 
     def setup_window(self):
         window_width = 800
@@ -73,6 +75,7 @@ class MainApplication(ctk.CTk):
         self.files_to_be_downloaded = []   
         self.filter_page = 'all'
         self.progress_toplevels = {} 
+        
 
     def create_widgets(self):   
         self.create_app_container()    
@@ -115,8 +118,19 @@ class MainApplication(ctk.CTk):
         
 
     # Content area related methods
-    def create_content_area(self):
+    def create_content_area(self):       
         self.content_area = ContentArea(self.app_container, self)
+        self.settings_frame = Settings(self.content_area)
+
+        self.is_opening_progress_window_allowed = self.settings_frame.return_setting_value('show_progress_window')
+
+        self.is_opening_download_complete_window_allowed = self.settings_frame.return_setting_value('show_download_complete_window')
+
+       
+
+        
+
+        
         
 
     # Top bar related methods
@@ -125,6 +139,9 @@ class MainApplication(ctk.CTk):
         
     def create_file_list_order_labels(self):
         self.file_list_order = FileListOrderLabel(self.content_area, self)
+
+
+    
        
 
     # File list related methods
@@ -144,9 +161,12 @@ class MainApplication(ctk.CTk):
                     data = json.loads(message) 
                                  
                     count = int(data['count'])
+                    digit = 1
                     if count > 1:
-                        self.files_to_be_downloaded = data['files']                       
-                        self.after(0, self.open_multi_file_picker_window)
+                        self.files_to_be_downloaded = data['files'] 
+                        self.after(0, lambda: self.open_multi_file_picker_window(data['files']))
+                                                                  
+                        
                     else:
                         url = ''
                         filename = ''            
@@ -155,6 +175,7 @@ class MainApplication(ctk.CTk):
                             filename = file['name']                      
 
                         self.after(0, lambda : self.openUrlPopup(url =url, filename=filename))
+                    
                 else:
                     print("No message")
         except Exception as e:
@@ -198,13 +219,20 @@ class MainApplication(ctk.CTk):
         
     def open_progress_window(self, filename, address, status, size, downloaded, path):
 
-        self.progress_toplevels[filename] = Progressor(self)
+        if self.is_opening_progress_window_allowed.strip() == 'true':
+            self.progress_toplevels[filename] = Progressor(self)
 
-        self.progress_toplevels[filename].start(filename, address, status, size, downloaded, path)
-        if  self.progress_toplevels[filename].progress_bar.winfo_exists():
-            self.progress_toplevels[filename].progress_bar.start()
-        else:
-           pass
+            self.progress_toplevels[filename].start(filename, address, status, size, downloaded, path)
+            if  self.progress_toplevels[filename].progress_bar.winfo_exists():
+                self.progress_toplevels[filename].progress_bar.start()
+            else:
+                pass
+        elif 'true' in self.is_opening_download_complete_window_allowed.split():
+            print("The window is no allowed ")
+            self.progress_toplevels[filename] = Progressor(self)
+            self.progress_toplevels[filename].withdraw()
+
+       
      
 
     def update_download(self, filename, status, size, downloaded ,date, speed):
@@ -221,22 +249,20 @@ class MainApplication(ctk.CTk):
             updateDict['downloaded'] = downloaded
             self.update_queue.put((name, updateDict['status'], size, downloaded ,date))
 
-            if name in self.progress_toplevels:
-                
+            if name in self.progress_toplevels :
+                #self.is_opening_download_complete_window_allowed.split() == 'true'
+                #self.is_opening_progress_window_allowed.strip() == 'true'
                 try:
                     progressor = self.progress_toplevels[name]
                     if  progressor.winfo_exists():
-                        if progressor.progress_bar.winfo_exists():
+                        if hasattr(progressor, 'progress_bar') and progressor.progress_bar.winfo_exists():
                             progressor.progress_bar.stop()
                             progressor.progress_bar.configure(mode='determinate')                            
                     
-                        if  'failed' in status or 'completed' in status:
-                            
+                        if  'failed' in status or 'completed' in status:                            
                             if progressor.state() == 'withdrawn':
-                                progressor.deiconify()
-                           
-                            progressor.lift()  
-
+                                progressor.deiconify()                           
+                            progressor.lift() 
                         self.after(0, progressor.update_progressor_ui, name,size,downloaded, path, status, speed)
 
                     else:  
@@ -246,11 +272,17 @@ class MainApplication(ctk.CTk):
             
                 except tk.TclError as e:
                     del self.progress_toplevels[name]
+            elif name in self.progress_toplevels and self.progress_toplevels[name].winfo_exists():
+                self.progress_toplevels[name].destroy()
+                del self.progress_toplevels[name]
+
             if name in self.file_widgets and self.file_widgets[name].winfo_exists():
                 if 'completed' in status:
-                    time.sleep(2)
+                    pass
+                    time.sleep(2)                    
                     self.file_widgets[name].destroy()
                     del self.file_widgets[name]
+                    
 
             
 
@@ -348,12 +380,16 @@ class MainApplication(ctk.CTk):
                     if self.progress_toplevels[name].winfo_exists():
                         self.progress_toplevels[name].destroy()
                     del self.progress_toplevels[name]
+                if self.is_opening_progress_window_allowed.strip() == 'true':
+                    self.progress_toplevels[name] = Progressor(self)                
+                    self.progress_toplevels[name].start(name, details['url'], 'resuming...',details['filesize'] ,self.downloaded_chuck, details['path'])
+                    if  self.progress_toplevels[name].progress_bar.winfo_exists():
+                            self.progress_toplevels[name].progress_bar.start()
+                            self.progress_toplevels[name].progress_bar.configure(mode='indeterminate')
+                elif 'true' in self.is_opening_download_complete_window_allowed:
+                    self.progress_toplevels[name] = Progressor(self)   
+                    self.progress_toplevels[name].withdraw()
 
-                self.progress_toplevels[name] = Progressor(self)                
-                self.progress_toplevels[name].start(name, details['url'], 'resuming...',details['filesize'] ,self.downloaded_chuck, details['path'])
-                if  self.progress_toplevels[name].progress_bar.winfo_exists():
-                        self.progress_toplevels[name].progress_bar.start()
-                        self.progress_toplevels[name].progress_bar.configure(mode='indeterminate')
                     
 
                 asyncio.run_coroutine_threadsafe(self.xdm_class.resume_downloads_fn(filename_with_path,  details['url'], self.downloaded_chuck), self.xdm_class.loop)
@@ -393,8 +429,28 @@ class MainApplication(ctk.CTk):
     def return_all_downloads(self):
         return self.xengine_downloads
     
-    def open_multi_file_picker_window(self): 
-        MultipleFilePickerWindow(self, self.xdm_class)
+    
+
+    def open_multi_file_picker_window(self, files):
+        if self.multi_file_picker_window is None or not self.multi_file_picker_window.winfo_exists():
+            self.after(100, lambda : self._create_multi_file_picker_window(files))
+            print("The is NO multi file window here")
+        else:
+            print("The is a multi file window here")
+            self.multi_file_picker_window.appendFiles(files)
+            if self.multi_file_picker_window.wm_state() == 'withdrawn':
+                self.multi_file_picker_window.deiconify()
+            self.multi_file_picker_window.lift()
+            self.multi_file_picker_window.focus_force()
+
+    def _create_multi_file_picker_window(self, files):
+        try:
+            self.multi_file_picker_window = MultipleFilePickerWindow(self, self.xdm_class, files)
+            self.multi_file_picker_window.update_idletasks()
+            self.multi_file_picker_window.update()
+        except Exception as e:
+            print(f"Error creating MultipleFilePickerWindow: {e}")
+            self.multi_file_picker_window = None
 
     def openUrlPopup(self, url , filename):        
         link_box = LinkBox(self, self.xdm_class)
@@ -402,15 +458,9 @@ class MainApplication(ctk.CTk):
         link_box.link_text.set(url)
         link_box.filename_text.set(filename)
 
-    def delete_details_or_make_changes(self, filename):
-        
-        database.delete_individual_file(filename)## delete from database
-        
-        
+    def delete_details_or_make_changes(self, filename):        
+        database.delete_individual_file(filename)## delete from database       
         self.remove_individual_file_widget(filename) ## destroy widget
-
-        
-        
     def remove_individual_file_widget(self, filename):
         
         
@@ -500,7 +550,20 @@ class Sidebar(ctk.CTkFrame):
     def __init__(self, master, app):
         super().__init__(master, width=200, fg_color=app.colors.primary_color, corner_radius=5, bg_color=app.colors.secondary_color)
         self.app = app
+
+        self.xe_images = Images()
+
+        self.video_d = self.xe_images.video_d
+        self.document_d = self.xe_images.document_d
+        self.music_d = self.xe_images.music_d
+        self.program_d = self.xe_images.program_d
+        self.zip_d = self.xe_images.zip_d
+        self.homeImg = self.xe_images.homeImg
+        self.aboutImg = self.xe_images.aboutImg
+        self.settingsImg = self.xe_images.settingsImg
+       
         self.create_widgets(app)
+
 
 
     def create_widgets(self, app):       
@@ -508,15 +571,15 @@ class Sidebar(ctk.CTkFrame):
        
         self.home_btn = ctk.CTkButton(self, command=self.open_home_page, corner_radius=5,font=app.font11_bold, width=120,height=30, text='Home', hover=False,fg_color=app.colors.utils_color)
         self.filter_files_box = ctk.CTkFrame(self, height=300, width=130, fg_color='transparent')
-        self.video_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Videos',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=app.xe_images.video_d, compound='left')
+        self.video_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Videos',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=self.video_d, compound='left')
         self.video_files.pack(fill='x',  pady=2)
-        self.music_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Music',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=app.xe_images.music_d, compound='left')
+        self.music_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Music',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=self.music_d, compound='left')
         self.music_files.pack(fill='x',  pady=2)
-        self.document_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Document',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=app.xe_images.document_d, compound='left')
+        self.document_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Document',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=self.document_d, compound='left')
         self.document_files.pack(fill='x',  pady=2)
-        self.zip_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Compressed',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=app.xe_images.zip_d, compound='left')
+        self.zip_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Compressed',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=self.zip_d, compound='left')
         self.zip_files.pack(fill='x',  pady=2)
-        self.application_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Application',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=app.xe_images.program_d, compound='left')
+        self.application_files = ctk.CTkLabel(self.filter_files_box,text=f'{' '}Application',anchor='w', font=app.font10_bold,text_color=app.colors.text_color,fg_color='transparent', image=self.program_d, compound='left')
         self.application_files.pack(fill='x',  pady=2)
         self.filter_files_box.place(x=60, y=90)
         self.filter_files_box.pack_propagate(False)
@@ -530,9 +593,9 @@ class Sidebar(ctk.CTkFrame):
         self.side_bar_icon_btns = ctk.CTkFrame(self,fg_color=app.colors.secondary_color, width=50, corner_radius=5)
         self.side_bar_icon_btns.pack_propagate(False)
         self.icon_btn_bottom = ctk.CTkFrame(self.side_bar_icon_btns, height=80,width=50, fg_color=app.colors.secondary_color)
-        self.home_icon_btn = ctk.CTkButton(self.side_bar_icon_btns, command= self.open_home_page, width=30,height=30, text='', hover_color=app.colors.secondary_color,fg_color=app.colors.secondary_color,image=app.xe_images.homeImg)
-        self.about_icon_btn = ctk.CTkButton(self.icon_btn_bottom, command= self.open_about_page, width=30,height=30, text='', hover_color=app.colors.secondary_color,fg_color=app.colors.secondary_color,image=app.xe_images.aboutImg)
-        self.settings_icon_btn = ctk.CTkButton(self.icon_btn_bottom, command= self.open_settings_page, width=30,height=30, text='', hover_color=app.colors.secondary_color,fg_color=app.colors.secondary_color,image=app.xe_images.settingsImg)
+        self.home_icon_btn = ctk.CTkButton(self.side_bar_icon_btns, command= self.open_home_page, width=30,height=30, text='', hover_color=app.colors.secondary_color,fg_color=app.colors.secondary_color,image=self.homeImg)
+        self.about_icon_btn = ctk.CTkButton(self.icon_btn_bottom, command= self.open_about_page, width=30,height=30, text='', hover_color=app.colors.secondary_color,fg_color=app.colors.secondary_color,image=self.aboutImg)
+        self.settings_icon_btn = ctk.CTkButton(self.icon_btn_bottom, command= self.open_settings_page, width=30,height=30, text='', hover_color=app.colors.secondary_color,fg_color=app.colors.secondary_color,image=self.settingsImg)
         self.home_icon_btn.place(x=5, y=45)
         self.about_icon_btn.pack(pady=5)
         self.settings_icon_btn.pack(pady=5)

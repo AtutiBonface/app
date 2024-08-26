@@ -56,7 +56,7 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         y = self.winfo_pointery() - self.y_offset
         self.geometry(f"+{x}+{y}")
 
-    def __init__(self,master, xdm_instance):
+    def __init__(self,master, xdm_instance, files):
         super().__init__(master, fg_color='#232428')
        
         self.geometry("600x470")
@@ -79,7 +79,11 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         self.update()
         self.update_idletasks()
 
+        self.files = files
+
         self.xe_images = Images()
+        self.minimize_image = self.xe_images.minimize_image
+        self.close_image = self.xe_images.close_image
         self.colors = Colors()
         self.configure(fg_color=self.colors.utils_color)
         self.overrideredirect(True)
@@ -91,9 +95,9 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         
         self.title_bar = ctk.CTkFrame(self, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
-        self.minimize = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=self.self_minimize, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.minimize_image )
+        self.minimize = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=self.self_minimize, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.minimize_image )
         self.minimize.place(x=560, y=5,anchor='ne' )
-        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=self.self_close, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
+        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=self.self_close, width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.close_image )
         self.close.place(x=595, y=5,anchor='ne' )
         self.title_bar.bind("<ButtonPress-1>", self.start_drag)
         self.title_bar.bind("<B1-Motion>", self.do_drag)
@@ -121,7 +125,7 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         # Populate files
 
         self.file_widgets = []
-        for file in self.parent.files_to_be_downloaded:
+        for file in self.files:
             fw = FileAddedWidget(self.files_frame, file["name"], file["link"], file["size"])
             fw.pack(fill="x", pady=5)
             self.file_widgets.append(fw)
@@ -139,11 +143,19 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
         self.download_button = ctk.CTkButton(button_frame, text="Download All", command=self.download_all, hover=False,cursor='hand2',fg_color=self.colors.utils_color,corner_radius=5, font=self.buttons_font, text_color="black")
         self.download_button.pack(side="left", padx=5)
 
+    def appendFiles(self, files):
+        existing_links = {file['link'] for file in self.files}
+        for file in files:
+            if file["link"] not in existing_links:
+                self.add_file(file["name"], file["link"], file["size"])
+                existing_links.add(file["link"])
+
+
     def add_file(self, filename, url, size='unknown'):      
         fw = FileAddedWidget(self.files_frame, filename, url, size)
         fw.pack(fill="x", pady=5)
         self.file_widgets.append(fw)
-        self.parent.files_to_be_downloaded.append({'link' : url, 'name' : filename, 'size': size})
+        self.files.append({'link' : url, 'name' : filename, 'size': size})
         if self.selection_mode:
             fw.toggle_checkbox(True)
     def open_addfile_window(self):
@@ -168,21 +180,21 @@ class MultipleFilePickerWindow(ctk.CTkToplevel):
             if widget.checkbox_var.get():
                 widget.destroy()
                 self.file_widgets.remove(widget)
-        self.parent.files_to_be_downloaded = [file for file, widget in zip(self.parent.files_to_be_downloaded, self.file_widgets) if not widget.checkbox_var.get()]
+        self.files = [file for file, widget in zip(self.files, self.file_widgets) if not widget.checkbox_var.get()]
 
     def download_all(self):
         if self.selection_mode:
-            selected_files = [file for file, widget in zip(self.parent.files_to_be_downloaded, self.file_widgets) if widget.checkbox_var.get()]
+            selected_files = [file for file, widget in zip(self.files, self.file_widgets) if widget.checkbox_var.get()]
             for file in selected_files:
                 asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((file['link'], file['name'], None)),self.xdm_instance.loop)
                 
             selected_files = []
         else:
-            for file in self.parent.files_to_be_downloaded:
+            for file in self.files:
                 asyncio.run_coroutine_threadsafe(self.xdm_instance.addQueue((file['link'], file['name'], None)),self.xdm_instance.loop)
                 
 
-            self.parent.files_to_be_downloaded = []
+            self.files = []
 
         self.self_close()
 
@@ -200,6 +212,8 @@ class AddFile(ctk.CTkToplevel):
         self.colors = Colors()
         self.master = master
         self.xe_images = Images()
+        self.sub_logo = self.xe_images.sub_logo
+        self.close_image = self.xe_images.close_image
         self.font11_bold = CTkFont(family="Helvetica", size=11, weight="bold")
 
         self.filename_text = ctk.StringVar()
@@ -207,9 +221,9 @@ class AddFile(ctk.CTkToplevel):
         self.overrideredirect(True)
         self.title_bar = ctk.CTkFrame(self, height=30, fg_color=self.colors.text_color, corner_radius=1)
         self.title_bar.pack(fill='x')
-        self.logo = ctk.CTkLabel(self.title_bar,text='', width=25, cursor='hand2',fg_color='transparent',  height=25, image=self.xe_images.sub_logo )
+        self.logo = ctk.CTkLabel(self.title_bar,text='', width=25, cursor='hand2',fg_color='transparent',  height=25, image=self.sub_logo )
         self.logo.place(x=5, y=2.5,anchor='nw' )
-        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=lambda: self.self_close(False), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.xe_images.close_image )
+        self.close = ctk.CTkButton(self.title_bar,text='',corner_radius=2,command=lambda: self.self_close(False), width=20,hover=False, cursor='hand2',fg_color=self.colors.secondary_color,  height=20, image=self.close_image )
         self.close.place(x=375, y=5,anchor='ne' )
        
 
