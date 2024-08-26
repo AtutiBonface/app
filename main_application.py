@@ -141,7 +141,8 @@ class MainApplication(ctk.CTk):
         try:
             async for message in websocket:
                 if message:
-                    data = json.loads(message)                   
+                    data = json.loads(message) 
+                                 
                     count = int(data['count'])
                     if count > 1:
                         self.files_to_be_downloaded = data['files']                       

@@ -132,6 +132,7 @@ class TaskManager():
             
             try:
                 async with session.get(link) as resp:
+                   
                     if resp.status in (200, 206):                      
 
                         m3u8_extension_in_link = self.other_methods.get_m3u8_in_link(link)
@@ -206,8 +207,9 @@ class TaskManager():
                                     if filename in self.size_downloaded_dict:
                                         del self.size_downloaded_dict[filename]  
                             else:
+                               
                                 await self.file_manager._handle_download(resp, filename, link, downloaded_chunk)
-                        
+                               
                     else:
                         error_message = f"failed! : Unexpected status {resp.status}"
 

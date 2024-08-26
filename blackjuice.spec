@@ -39,5 +39,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     icon=['xe-logos\\main.ico'],
-    onefile=False
+    
 )
