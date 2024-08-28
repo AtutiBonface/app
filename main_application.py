@@ -447,7 +447,6 @@ class MainApplication(ctk.CTk):
         try:
             self.multi_file_picker_window = MultipleFilePickerWindow(self, self.xdm_class, files)
             self.multi_file_picker_window.update_idletasks()
-            self.multi_file_picker_window.update()
         except Exception as e:
             print(f"Error creating MultipleFilePickerWindow: {e}")
             self.multi_file_picker_window = None

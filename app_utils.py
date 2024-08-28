@@ -106,7 +106,7 @@ class ConfigFilesHandler:
             "show_progress_window <x:e> true \n",
             "show_download_complete_window <x:e> true \n",
             "\n",
-            "extensions_link <x:e> https://blackjuice.imaginekenya.site/xe-extensions\n",
+            "extensions_link <x:e> https://blackjuice.imaginekenya.site/addons\n",
             "VERSION <x:e> blackjuice 2.0 \n"
         ]
 
