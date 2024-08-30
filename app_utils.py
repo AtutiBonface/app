@@ -59,6 +59,9 @@ class Images():
         self.huge_logo = CTkImage(Image.open(self.resource_path('xe-logos/xe-128.png')),  size=(100,100))
 
 
+        self.logo = Image.open(self.resource_path('xe-logos/xe-128.png'))
+
+
 class DownloadingIndicatorBox():
     def __init__(self, parent):
         self.font14 = CTkFont(weight='bold', family='Helvetica', size=14)
@@ -86,23 +89,20 @@ class Colors():
 
         
 class ConfigFilesHandler:
-    
     def __init__(self) -> None:
-        
         # Define the path to the config file
         self.path_to_config_file = Path.home() / ".blackjuice" / "config.txt"
 
-        # Settings configuration content
     def create_config_file(self):
         self.settings_config = [
             "### Settings configuration for Blackjuice ### \n",
             "\n",
             "*Note* Do not write or edit this file because your Blackjuice Downloader will be faulty! Very faulty!\n",
             "\n",
-            "defaut_download_path <x:e> C:/Users/Bonface/Downloads/Blackjuice \n",
+            "default_download_path <x:e> C:/Users/Bonface/Downloads/Blackjuice \n",
             "max_concurrent_downloads <x:e> 5 \n",
             "auto_resume_download <x:e> false \n",
-            "overide_file <x:e> false\n",
+            "override_file <x:e> false\n",
             "show_progress_window <x:e> true \n",
             "show_download_complete_window <x:e> true \n",
             "\n",
@@ -111,20 +111,23 @@ class ConfigFilesHandler:
         ]
 
         try:
-          
-            self.path_to_config_file.parent.mkdir(parents=True, exist_ok=True)
+           
+            if not self.path_to_config_file.parent.exists():
+                self.path_to_config_file.parent.mkdir(parents=True, exist_ok=True)
 
+            # Check if the config file already exists
+            if not self.path_to_config_file.exists():
+                # Write the settings to the config file if it doesn't exist
+                with self.path_to_config_file.open('w') as f:
+                    f.writelines(self.settings_config)
             
-            with self.path_to_config_file.open('w') as f:
-                f.writelines(self.settings_config)
 
         except Exception as e:
+            # Configure logging
             logging.basicConfig(level=logging.INFO)
-            self.logger = logging.getLogger(__name__)
-
-            self.logger.error("An error occurred: {e}")
-           
-
+            logger = logging.getLogger(__name__)
+            # Log the exception
+            logger.error(f"An error occurred: {e}")
 
 class OtherMethods():
 

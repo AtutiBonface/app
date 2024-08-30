@@ -1,10 +1,13 @@
 import sqlite3, os
 from pathlib import Path
-path_to_data_base = f'{Path().home()}/.blackjuice'
+from app_utils import ConfigFilesHandler
+
+path_to_data_base = Path().home() / '.blackjuice'
 
 location = os.path.join(path_to_data_base, 'xe-blackjuice.db')
 
-def initiate_database():
+def initiate_database():   
+    ConfigFilesHandler().create_config_file() 
     conn = sqlite3.connect(location)
     cursor = conn.cursor()
 

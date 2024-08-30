@@ -37,9 +37,7 @@ class MainApplication(ctk.CTk):
         half_w = int((screen_width / 2) - (window_width / 2))
         half_h = int((screen_height / 2) - (window_height / 2))
         self.geometry(f'{window_width}x{window_height}+{half_w}+{half_h}')
-        self.minsize(800,500)
-        self.maxsize(900, 550)
-        print(self.other_methods.resource_path('xe-logos/main.ico'))
+        self.minsize(800,500)       
         self.iconbitmap(self.other_methods.resource_path('xe-logos/main.ico'))
         self.title('BlackJuice')
 

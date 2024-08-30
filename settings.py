@@ -163,7 +163,7 @@ class Settings(ctk.CTkFrame):
         self.link.bind('<Button-1>', self.open_link)
        
     def open_link(self, event):
-        webbrowser.open_new(r'https://blackjuce.imaginekenya.site/xe-extensions')
+        webbrowser.open_new(r'https://blackjuice.imaginekenya.site/addons')
     def __init__(self, parent):
     
         super().__init__(parent) 
