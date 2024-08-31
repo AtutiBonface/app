@@ -93,13 +93,15 @@ class ConfigFilesHandler:
         # Define the path to the config file
         self.path_to_config_file = Path.home() / ".blackjuice" / "config.txt"
 
+        self.defaut_download_path = Path.home() / "Downloads" / "blackjuice"
+
     def create_config_file(self):
         self.settings_config = [
             "### Settings configuration for Blackjuice ### \n",
             "\n",
             "*Note* Do not write or edit this file because your Blackjuice Downloader will be faulty! Very faulty!\n",
             "\n",
-            "default_download_path <x:e> C:/Users/Bonface/Downloads/Blackjuice \n",
+            f"default_download_path <x:e> {self.defaut_download_path} \n",
             "max_concurrent_downloads <x:e> 5 \n",
             "auto_resume_download <x:e> false \n",
             "override_file <x:e> false\n",

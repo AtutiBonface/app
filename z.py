@@ -33,7 +33,9 @@ class MainApplication(ctk.CTk):
             pystray.MenuItem("Exit", self.exit_app)
         )
         self.icon = pystray.Icon("app_name", image, "My CustomTkinter App", menu)
+        self.icon.on_activate = self._show_window
         self.icon.run_detached()
+        
 
     def show_window(self, icon, item):
         self.after(0, self._show_window)
@@ -62,3 +64,4 @@ if __name__ == "__main__":
     ctk.set_default_color_theme('blue')
     app = MainApplication()
     app.run()
+    

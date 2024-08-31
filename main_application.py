@@ -13,12 +13,13 @@ from app_utils import OtherMethods
 import database, queue,time
 import tkinter as tk
 from multi_file_window import MultipleFilePickerWindow
-
+import pystray
 class MainApplication(ctk.CTk):
     def __init__(self):
         super().__init__()
         database.initiate_database()        
         self.setup_data()
+        self.setup_tray_icon()
         self.setup_window()
         self.setup_styles()
         self.create_widgets()
@@ -73,6 +74,7 @@ class MainApplication(ctk.CTk):
         self.files_to_be_downloaded = []   
         self.filter_page = 'all'
         self.progress_toplevels = {} 
+        self.stray_icon = None
         
 
     def create_widgets(self):   
@@ -100,8 +102,34 @@ class MainApplication(ctk.CTk):
         self.bottom_bar.pack( fill='x', padx=5, pady=2)
         self.bottom_bar.pack_propagate(False)
        
-        
+    def get_logo_image(self):
+        logo = Images().logo
+        return logo
+    def withdraw_window(self):
+        self.withdraw()
+        if sys.platform.startswith('linux'):
+            self.stray_icon.update_menu()
+    def setup_tray_icon(self):
+        image = self.get_logo_image()
+        menu = pystray.Menu(
+            pystray.MenuItem("Open App",  self.show_app_window),
+            pystray.MenuItem("Exit App", self.exit_app)
+        )
+        self.stray_icon = pystray.Icon("app_name", image, "Blackjuice Downloader",menu)
+        self.stray_icon.run_detached()
 
+    def show_app_window(self, icon, item):
+        print(item)
+        self.after(0, self._show_app_window)
+    def _show_app_window(self):
+        self.deiconify()
+        self.lift()
+        self.focus_force()
+        self.update()
+
+    def exit_app(self):
+        self.stray_icon.stop()
+        self.quit()
     def bind_events(self):
         # Event binding code here
         pass

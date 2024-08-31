@@ -14,11 +14,13 @@ class Settings(ctk.CTkFrame):
 
         if os.path.exists(path_to_config):        
             with open(path_to_config, 'r') as f:
-                for line in f.readlines():
+                for line in f.readlines():                   
                     if line.startswith(setting):
-                        new_line = str(line.split('<x:e>')[1].strip())
+                        
+                        new_line = str(line.split('<x:e>')[1].split(';')[0].strip())
 
                         return new_line
+                    
         else:
             ConfigFilesHandler().create_config_file()
             with open(path_to_config, 'r') as f:
@@ -113,7 +115,7 @@ class Settings(ctk.CTkFrame):
         self.resume_downloading.pack(fill='x', pady=5)
 
 
-        self.overide_file = ctk.CTkSwitch(self.other_s, command=lambda setting ='overide_file':self.change_settings_state(setting, self.overide_fi_exis.get()),onvalue='true', offvalue='false', variable=self.overide_fi_exis, fg_color=self.colors.text_color, progress_color=self.colors.utils_color, text='Overide existing file',text_color='gray', font=self.font11_bold)
+        self.overide_file = ctk.CTkSwitch(self.other_s, command=lambda setting ='override_file':self.change_settings_state(setting, self.overide_fi_exis.get()),onvalue='true', offvalue='false', variable=self.overide_fi_exis, fg_color=self.colors.text_color, progress_color=self.colors.utils_color, text='Overide existing file',text_color='gray', font=self.font11_bold)
         self.overide_file.pack(fill='x', pady=5)
         
         self.progress_window = ctk.CTkSwitch(self.other_s, command=lambda setting ='show_progress_window':self.change_settings_state(setting, self.progress_w.get()),onvalue='true', offvalue='false', variable=self.progress_w, fg_color=self.colors.text_color, progress_color=self.colors.utils_color, text='Show download progress window',text_color='gray', font=self.font11_bold)
@@ -178,13 +180,15 @@ class Settings(ctk.CTkFrame):
         self.VERSION = f'{self.return_setting_value('VERSION')}'
         
         self.max_value_selected.set(f'{self.return_setting_value('max_concurrent_downloads')}')
-        self.overide_fi_exis.set(f'{self.return_setting_value('overide_file')}')
+        self.overide_fi_exis.set(f'{self.return_setting_value('override_file')}')
         self.auto_resume_downl.set(f'{self.return_setting_value('auto_resume_download')}')
         self.download_c_w.set(f'{self.return_setting_value('show_download_complete_window')}')
         self.progress_w.set(f'{self.return_setting_value('show_progress_window')}')
-        self.access_download_path.set(f'{self.return_setting_value('defaut_download_path')}')
+        self.access_download_path.set(f'{self.return_setting_value('default_download_path')}')
 
-        self.xengine_download_path_global = f'{self.return_setting_value('defaut_download_path')}'
+        print('The value of path is', self.access_download_path.get())
+
+        self.xengine_download_path_global = f'{self.return_setting_value('default_download_path')}'
         
 
         

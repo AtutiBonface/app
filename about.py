@@ -20,7 +20,7 @@ class About(ctk.CTkFrame):
 
         self.logo_label = ctk.CTkLabel(self.outer_container, text='', image=self.xe_images.huge_logo)
         self.logo_label.pack()
-        self.app_name = ctk.CTkLabel(self.outer_container,text_color='gray',font=self.title_font, text='BlackJuice Download Manager v1.5.1')
+        self.app_name = ctk.CTkLabel(self.outer_container,text_color='gray',font=self.title_font, text='BlackJuice Download Manager v2.0')
         self.app_name.pack()
         self.app_domain = ctk.CTkLabel(self.outer_container,font=self.link_font,cursor='hand2', text_color=self.colors.utils_color, text='https://blackjuice.imaginekenya.site')
         self.app_domain.pack()
